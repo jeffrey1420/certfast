@@ -2,7 +2,9 @@
 
 **From Role**: [role-name]  
 **To Role**: [recommended-next-role]  
-**Task Completed**: [task-id]  
+**Track**: [strategy/design/tech]  
+**Task ID**: [task-id]  
+**Task Type**: [Quick/Standard/Deep]  
 **Completed At**: [timestamp]
 
 ---
@@ -21,6 +23,20 @@
 
 ---
 
+## 📊 Self-Evaluation
+
+**Confidence Score**: [1-5]
+
+**Rationale**:
+[Why this score? Be honest about limitations]
+
+**Known Limitations**:
+- [What could be improved]
+- [What was rushed]
+- [What needs validation]
+
+---
+
 ## ❓ Open Questions
 
 1. [Question that needs resolution]
@@ -28,17 +44,20 @@
 
 ---
 
-## 📝 Notes for Next Agent
+## 📝 Context Updates
 
-[Context, warnings, suggestions]
+[If CONTEXT.md needs updating, specify what]
 
 ---
 
 ## 🎯 Recommended Next Task
 
 **Role**: [role-name]  
+**Track**: [strategy/design/tech]  
 **Task**: [brief description]  
-**Rationale**: [why this role and task next]
+**Type**: [Quick/Standard/Deep]  
+**Rationale**: [why this role and task next]  
+**Dependencies**: [what this task depends on]
 
 ---
 
@@ -46,3 +65,23 @@
 
 - `/path/to/file1` - [description]
 - `/path/to/file2` - [description]
+
+---
+
+## Quality Gates Checklist (Self-Verified)
+
+- [ ] Completeness: All deliverables present
+- [ ] Template Compliance: Follows role template
+- [ ] Content Quality: Meets word count minimum
+- [ ] No Placeholders: No TODOs remaining
+- [ ] Cross-References: All links work
+- [ ] Language: All English
+- [ ] **Self-Evaluation**: Honest rating provided
+
+---
+
+## Git Commit
+
+**Message**: `[track/role]: [task description]`
+
+**Hash**: [commit hash after push]
