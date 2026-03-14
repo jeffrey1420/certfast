@@ -10,7 +10,7 @@
 **Task ID**: TEC-003
 **Type**: Deep (60 min)
 **Assigned Role**: `api-designer`
-**Status**: ACTIVE - ASSIGN THIS TASK
+**Status**: ACTIVE - EXECUTE NOW
 **Depends on**: TEC-002 ✅
 
 ### Description
