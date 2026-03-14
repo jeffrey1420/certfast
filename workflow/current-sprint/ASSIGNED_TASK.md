@@ -56,8 +56,17 @@ Review these, extract the best insights, and create a superior consolidated docu
 
 `/work/certfast/project/vision/product-vision.md`
 
----
+## Git Push Required (MANDATORY)
+
+After completing the task, you MUST push to GitHub:
+1. `cd /work/certfast`
+2. `git add -A`
+3. `git commit -m "product-strategist: [brief description of what you did]"`
+   - Example: `"product-strategist: consolidated product vision with competitive analysis"`
+4. `git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffrey1420/certfast.git main`
+
+**Format STRICT: `[role]: [task description]`**
 
 ## Next Task (To Be Assigned)
 
-After completing this task, leave a handoff note recommending the next role and task based on what would be most valuable.
+After completing this task AND pushing to GitHub, leave a handoff note recommending the next role and task based on what would be most valuable.

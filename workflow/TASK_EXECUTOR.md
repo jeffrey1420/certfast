@@ -21,13 +21,28 @@ You are an AI agent with a specific role in the CertFast project. You have 30 mi
    - Follow your role's quality standards
    - Create output in the appropriate location
 
-4. **Create handoff note**
+4. **Commit and push to GitHub**
+   - Stage all changes: `git add -A`
+   - Commit with message format: `[ROLE]: [brief task description]`
+     - Example: `product-strategist: consolidated product vision document`
+   - Push to https://github.com/jeffrey1420/certfast
+   - Token is at `/root/.openclaw/workspace/.github_token`
+
+5. **Create handoff note**
    - Write to `/work/certfast/workflow/handoffs/HANDOFF_[timestamp]_[role].md`
    - Include: what was done, key decisions, open questions, next recommendation
 
-5. **Prepare next task**
+6. **Prepare next task**
    - Update `/work/certfast/workflow/current-sprint/ASSIGNED_TASK.md`
    - Assign next role and task based on your recommendation
+
+## Git Workflow (REQUIRED)
+
+Before finishing, you MUST:
+1. Configure git if needed: `git config user.name "Jeffrey AI" && git config user.email "jeffrey@openclaw.local"`
+2. Use the token for HTTPS auth: `export TOKEN=$(cat /root/.openclaw/workspace/.github_token)`
+3. Commit with format: `[role-name]: [what was done]` (lowercase role, concise description)
+4. Push to main branch
 
 ## Quality Standards
 
@@ -36,6 +51,7 @@ You are an AI agent with a specific role in the CertFast project. You have 30 mi
 - Leave clear notes for the next agent
 - Maintain consistency with existing work
 - Use x-high thinking mode
+- **MANDATORY: Commit and push to GitHub before finishing**
 
 ## Output Format
 
@@ -44,7 +60,16 @@ All output must be:
 - Saved to the correct project folder
 - Referenced in your handoff note
 - Consistent with existing documentation
+- **Committed and pushed to GitHub**
+
+## Key Rules
+- Use x-high thinking mode
+- Follow your role's quality standards
+- Leave clear handoff notes
+- Be thorough but focused
+- You have 30 minutes to complete your task
+- **MANDATORY: Commit and push to GitHub with message format `[role]: [task]`**
 
 ## Remember
 
-You are part of a team. The next agent will build on your work. Leave things better than you found them.
+You are part of a team. The next agent will build on your work. Leave things better than you found them. **Always commit and push your work to GitHub.**
