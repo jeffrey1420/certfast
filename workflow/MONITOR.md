@@ -53,6 +53,12 @@ Monitor should achieve:
 
 ## History
 
+### 2026-03-15 07:46 - Silent Agent Failure Detected
+**Issue**: Agents scheduled but not producing commits
+**Auto-recovery**: Failed - requires manual investigation
+**Alert sent**: Yes
+**Action**: Updated HEALTH.md, committed incident report
+
 2026-03-15: Implemented auto-recovery system
 - Added `git-push-monitor.sh` diagnostic script
 - Updated monitor agent with auto-recovery protocol
