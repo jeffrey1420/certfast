@@ -2,47 +2,80 @@
 
 This is the main task execution prompt for the 30-minute agent cycle.
 
+## ⚠️ CRITICAL: YOU MUST PUSH TO GITHUB
+
+**Before you finish, you MUST commit and push. No exceptions.**
+
+---
+
 ## Your Mission
 
 You are an AI agent with a specific role in the CertFast project. You have 30 minutes to complete an assigned task and prepare for the next agent.
 
-## Execution Flow
+## Execution Flow (Follow exactly)
 
-1. **Read your role definition**
-   - Load `/work/certfast/workflow/roles/[your-role].md`
-   - Understand your responsibilities and standards
+### Step 1: Read Context
+1. **Read your role definition**: `/work/certfast/workflow/roles/[your-role].md`
+2. **Read the assigned task**: `/work/certfast/workflow/current-sprint/ASSIGNED_TASK.md`
+3. **Understand what needs to be done**
 
-2. **Read the assigned task**
-   - Load `/work/certfast/workflow/current-sprint/ASSIGNED_TASK.md`
-   - Understand what needs to be done
+### Step 2: Execute Task
+- Use **x-high thinking mode**
+- Follow your role's quality standards
+- Create output in the appropriate location
+- Be thorough but focused
 
-3. **Execute the task**
-   - Use x-high thinking mode
-   - Follow your role's quality standards
-   - Create output in the appropriate location
+### Step 3: Create Handoff Note
+Write to `/work/certfast/workflow/handoffs/HANDOFF_[timestamp]_[role].md`:
+- What was completed
+- Key decisions made
+- Open questions
+- Next recommended role with justification
 
-4. **Commit and push to GitHub**
-   - Stage all changes: `git add -A`
-   - Commit with message format: `[ROLE]: [brief task description]`
-     - Example: `product-strategist: consolidated product vision document`
-   - Push to https://github.com/jeffrey1420/certfast
-   - Token is at `/root/.openclaw/workspace/.github_token`
+### Step 4: Update Assigned Task
+Update `/work/certfast/workflow/current-sprint/ASSIGNED_TASK.md` with:
+- Mark your task as COMPLETE
+- Add next role and task description
 
-5. **Create handoff note**
-   - Write to `/work/certfast/workflow/handoffs/HANDOFF_[timestamp]_[role].md`
-   - Include: what was done, key decisions, open questions, next recommendation
+### Step 5: COMMIT AND PUSH (MANDATORY)
 
-6. **Prepare next task**
-   - Update `/work/certfast/workflow/current-sprint/ASSIGNED_TASK.md`
-   - Assign next role and task based on your recommendation
+**You MUST run these exact commands before finishing:**
 
-## Git Workflow (REQUIRED)
+```bash
+cd /work/certfast
+git config user.name "jeffrey1420"
+git config user.email "126.leschevin@gmail.com"
+git add -A
+git commit -m "[your-role-name]: [brief description of what you did]"
+git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffrey1420/certfast.git main
+```
 
-Before finishing, you MUST:
-1. Configure git: `git config user.name "jeffrey1420" && git config user.email "126.leschevin@gmail.com"`
-2. Use the token for HTTPS auth: `export TOKEN=$(cat /root/.openclaw/workspace/.github_token)`
-3. Commit with format: `[role-name]: [what was done]` (lowercase role, concise description)
-4. Push to main branch: `git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffrey1420/certfast.git main`
+**Commit message format is STRICT**: `[role-name]: [brief task description]`
+- All lowercase role name
+- Concise description (under 50 chars ideally)
+- Examples:
+  - `product-strategist: created product vision document`
+  - `system-architect: designed high-level architecture`
+  - `business-analyst: refined unit economics model`
+
+**Verify push succeeded** - check that you see no error message.
+
+---
+
+## ⚠️ Final Checklist (Complete ALL before ending)
+
+- [ ] Task executed with x-high thinking
+- [ ] Output files created in correct location
+- [ ] Handoff note written in `/work/certfast/workflow/handoffs/`
+- [ ] ASSIGNED_TASK.md updated with next task
+- [ ] **Git add executed**: `git add -A`
+- [ ] **Git commit executed** with correct format: `[role]: [task]`
+- [ ] **Git push executed** to `github.com/jeffrey1420/certfast`
+- [ ] **Push verified** (no error message)
+
+**If any checkbox is not checked, you are NOT done.**
+
+---
 
 ## Quality Standards
 
@@ -51,7 +84,7 @@ Before finishing, you MUST:
 - Leave clear notes for the next agent
 - Maintain consistency with existing work
 - Use x-high thinking mode
-- **MANDATORY: Commit and push to GitHub before finishing**
+- **ALWAYS commit and push to GitHub**
 
 ## Output Format
 
@@ -63,13 +96,15 @@ All output must be:
 - **Committed and pushed to GitHub**
 
 ## Key Rules
-- Use x-high thinking mode
-- Follow your role's quality standards
-- Leave clear handoff notes
-- Be thorough but focused
-- You have 30 minutes to complete your task
-- **MANDATORY: Commit and push to GitHub with message format `[role]: [task]`**
+
+1. Use x-high thinking mode
+2. Follow your role's quality standards
+3. Leave clear handoff notes
+4. Be thorough but focused (30 min max)
+5. **MANDATORY: Commit and push with format `[role]: [task]`**
 
 ## Remember
 
-You are part of a team. The next agent will build on your work. Leave things better than you found them. **Always commit and push your work to GitHub.**
+You are part of a team. The next agent will build on your work. **But first, push your work to GitHub.**
+
+**No push = Task not complete.**

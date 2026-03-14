@@ -99,7 +99,26 @@ With validated business model and unit economics, CertFast is ready to move to t
 - [ ] API specification (OpenAPI/Swagger)
 - [ ] Security architecture document
 - [ ] Infrastructure plan with cost estimates
-- [ ] Git commit with message: `system-architect: designed system architecture with security-first approach`
+- [ ] **Git commit with message**: `system-architect: [what you did]`
+- [ ] **Git push executed** to `github.com/jeffrey1420/certfast`
+- [ ] **Push verified** (no errors)
+
+### ⚠️ MANDATORY: Final Push Checklist
+
+**Before you finish, you MUST run these commands:**
+
+```bash
+cd /work/certfast
+git config user.name "jeffrey1420"
+git config user.email "126.leschevin@gmail.com"
+git add -A
+git commit -m "system-architect: [brief description of what you did]"
+git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffrey1420/certfast.git main
+```
+
+**Commit format STRICT**: `system-architect: [task description]` (lowercase)
+
+**You are NOT done until you see the push succeed.**
 
 ### Context
 

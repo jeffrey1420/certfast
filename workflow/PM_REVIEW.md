@@ -69,11 +69,19 @@ Before finishing, you MUST push to GitHub:
 3. First task assigned in `/work/certfast/workflow/current-sprint/ASSIGNED_TASK.md`
 4. Archive of completed sprint
 5. **Git commit and push with message: `project-manager: [sprint summary]`**
+6. **Push verified** (no errors)
 
-## Quality Standards
+## ⚠️ CRITICAL: Final Push Checklist
 
-- Dashboard is accurate and up-to-date
-- Sprint has clear theme and goals
-- Tasks are balanced and realistic
-- Handoff between sprints is clear
-- **MANDATORY: Commit and push to GitHub**
+**Before you finish, you MUST run:**
+
+```bash
+cd /work/certfast
+git config user.name "jeffrey1420"
+git config user.email "126.leschevin@gmail.com"
+git add -A
+git commit -m "project-manager: [brief sprint summary]"
+git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffrey1420/certfast.git main
+```
+
+**You are NOT done until the push succeeds.**
