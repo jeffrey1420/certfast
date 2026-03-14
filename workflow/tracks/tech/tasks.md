@@ -8,39 +8,39 @@
 ## Active Task (CURRENT)
 
 **Task ID**: TEC-003
-**Type**: Deep (60 min)
+**Type**: Standard (30 min) - *Reduced from Deep due to API rate limits*
 **Assigned Role**: `api-designer`
 **Status**: ACTIVE - EXECUTE NOW
 **Depends on**: TEC-002 ✅
 
 ### Description
-API Specification Refinement
+API Specification Refinement (Core Endpoints Only)
 
-The database schema is complete. Design REST/GraphQL API endpoints:
-1. Map endpoints to database schema
-2. Define request/response schemas
-3. Document authentication and authorization
-4. Create API versioning strategy
+The database schema is complete. Design REST/GraphQL API endpoints for core resources:
+1. Map endpoints to database schema (focus on main entities: users, orgs, assessments, controls)
+2. Define request/response schemas for core endpoints
+3. Document authentication (JWT/OAuth2)
+4. List remaining endpoints as backlog (don't implement all)
 
 ### Input
 - Database migrations: `/work/certfast/architecture/migrations/`
 - Existing spec: `/work/certfast/architecture/api-specification.yaml`
 
 ### Output
-- Updated `/work/certfast/architecture/api-specification.yaml`
-- API documentation
-- Endpoint mapping to database tables
+- Updated `/work/certfast/architecture/api-specification.yaml` (core endpoints only)
+- API documentation for core resources
+- Backlog list of remaining endpoints
 
 ### Quality Gates
-- [ ] Completeness: All CRUD endpoints defined
-- [ ] Template Compliance: OpenAPI 3.0 valid
-- [ ] Word Count: Min 1500 words
-- [ ] No Placeholders: No TODOs
+- [ ] Core endpoints defined (users, orgs, assessments, controls)
+- [ ] OpenAPI 3.0 valid
+- [ ] Word Count: Min 800 words
+- [ ] No Placeholders in core section
 - [ ] English Only
 - [ ] Auto-Evaluation: Confidence 1-5
 
 ### Git Commit
-Format: `tech/api-designer: refined API specification with complete endpoint mapping`
+Format: `tech/api-designer: refined core API specification`
 
 ---
 

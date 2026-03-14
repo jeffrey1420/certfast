@@ -66,32 +66,44 @@
 ## Active Task (CURRENT) - ASSIGN THIS TASK
 
 **Task ID**: DSG-005
-**Type**: Deep (60 min)
+**Type**: Standard (30 min) - *Reduced from Deep due to API rate limits*
 **Assigned Role**: `ui-designer`
 **Status**: ACTIVE - EXECUTE NOW
 **Priority**: High
 **Depends on**: DSG-003 ✅, DSG-004 ✅
 
 ### Description
-Wireframes - Core Flows
+Wireframes - Core Flows (Desktop Only)
 
-Create low-fidelity wireframes for the core user flows: trial onboarding, dashboard, compliance achievement journey, and settings. Focus on layout, information hierarchy, and key interactions.
+Create low-fidelity wireframes for 2-3 core screens:
+1. Trial onboarding flow (landing → signup → first value)
+2. Main dashboard (key metrics, progress, actions)
+3. Assessment detail view (evidence upload, status)
+
+Focus on layout, information hierarchy, and key interactions. Skip mobile for now.
 
 ### Deliverables
-- [ ] Wireframes for trial onboarding flow
-- [ ] Wireframes for main dashboard
-- [ ] Wireframes for compliance achievement journey
-- [ ] Wireframes for settings and configuration
-- [ ] Navigation structure diagram
-- [ ] Mobile responsive considerations
+- [ ] Wireframe for trial onboarding flow
+- [ ] Wireframe for main dashboard
+- [ ] Wireframe for assessment detail view
+- [ ] Navigation structure diagram (simplified)
 
 ### Context
 - User flows: `/work/certfast/design/flows/user-flows.md`
 - Design tokens: `/work/certfast/design/system/tokens.md`
-- Research insights: `/work/certfast/design/research/`
 
 ### Output Location
-- `/work/certfast/design/wireframes/`
+- `/work/certfast/design/wireframes/core-flows.md`
+
+### Quality Gates
+- [ ] 3 core wireframes created
+- [ ] Uses design tokens
+- [ ] Word Count: Min 800 words (including annotations)
+- [ ] ASCII/text-based wireframes acceptable
+- [ ] English Only
+
+### Git Commit
+Format: `design/ui-designer: created wireframes for core flows`
 
 ---
 
