@@ -23,6 +23,28 @@
 
 ## Completed Tasks
 
+### DSG-004: Design System Tokens ✅
+**Role**: ui-designer  
+**Type**: Deep (60 min)  
+**Status**: ✅ COMPLETE  
+**Quality Score**: 4/5  
+**Commit**: `design/ui-designer: created comprehensive design system tokens`  
+**Deliverables**:
+- `/work/certfast/design/system/tokens.md` - Complete design token system (~2,400 words)
+  - Color tokens (brand, semantic, functional, tier colors)
+  - Typography tokens (font families, sizes, weights, presets)
+  - Spacing tokens (base scale, semantic, layout)
+  - Sizing tokens (icons, avatars, inputs, buttons)
+  - Border radius tokens
+  - Shadow and elevation tokens
+  - Border tokens
+  - Z-index tokens
+  - Transition tokens
+  - Breakpoint tokens
+  - Component-specific tokens
+  - Dark mode overrides
+  - Implementation examples (CSS, Tailwind, Figma)
+
 ### DSG-003: User Flow Mapping ✅
 **Role**: ux-researcher  
 **Type**: Standard (30 min)  
@@ -43,31 +65,33 @@
 
 ## Active Task (CURRENT) - ASSIGN THIS TASK
 
-**Task ID**: DSG-004
+**Task ID**: DSG-005
 **Type**: Deep (60 min)
 **Assigned Role**: `ui-designer`
 **Status**: ACTIVE - EXECUTE NOW
 **Priority**: High
-**Depends on**: DSG-001 ✅, DSG-003 ✅
+**Depends on**: DSG-003 ✅, DSG-004 ✅
 
 ### Description
-Design System Tokens
+Wireframes - Core Flows
 
-Create the foundational design system tokens for CertFast including colors, typography, spacing, and component primitives.
+Create low-fidelity wireframes for the core user flows: trial onboarding, dashboard, compliance achievement journey, and settings. Focus on layout, information hierarchy, and key interactions.
 
 ### Deliverables
-- [ ] Color tokens (brand, semantic, functional)
-- [ ] Typography scale and font stack
-- [ ] Spacing and sizing tokens
-- [ ] Shadow and elevation tokens
-- [ ] Border and radius tokens
+- [ ] Wireframes for trial onboarding flow
+- [ ] Wireframes for main dashboard
+- [ ] Wireframes for compliance achievement journey
+- [ ] Wireframes for settings and configuration
+- [ ] Navigation structure diagram
+- [ ] Mobile responsive considerations
 
 ### Context
-- Brand identity: `/work/certfast/design/brand/`
 - User flows: `/work/certfast/design/flows/user-flows.md`
+- Design tokens: `/work/certfast/design/system/tokens.md`
+- Research insights: `/work/certfast/design/research/`
 
 ### Output Location
-- `/work/certfast/design/system/tokens.md`
+- `/work/certfast/design/wireframes/`
 
 ---
 
@@ -84,15 +108,10 @@ Create the foundational design system tokens for CertFast including colors, typo
 
 ## Backlog
 
-### DSG-005: Wireframes - Core Flows
-- **Role**: ui-designer
-- **Type**: Deep (60 min)
-- **Depends on**: DSG-003
-
 ### DSG-006: High-Fidelity Mockups
 - **Role**: ui-designer
 - **Type**: Deep (60 min)
-- **Depends on**: DSG-004, DSG-005
+- **Depends on**: DSG-004 ✅, DSG-005
 
 ### DSG-007: Prototype & Interaction Design
 - **Role**: ui-designer
@@ -104,5 +123,5 @@ Create the foundational design system tokens for CertFast including colors, typo
 ## Track Status
 | Metric | Value |
 |--------|-------|
-| Tasks Complete | 1/5 |
+| Tasks Complete | 4/7 |
 | Quality Average | 4.0/5 |
