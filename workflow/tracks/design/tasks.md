@@ -21,12 +21,12 @@
 
 ---
 
-## Active Task (CURRENT)
+## Active Task (CURRENT) - ASSIGN THIS TASK
 
 **Task ID**: DSG-003
 **Type**: Standard (30 min)
 **Assigned Role**: `ux-researcher`
-**Status**: READY FOR ASSIGNMENT
+**Status**: ACTIVE - EXECUTE NOW
 **Priority**: High
 **Depends on**: DSG-002 ✅
 
