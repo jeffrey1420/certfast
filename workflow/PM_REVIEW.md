@@ -36,6 +36,7 @@ You are the Project Manager AI. Every 6 hours, you review the team's work and or
 
 6. **Commit and push to GitHub**
    - `cd /work/certfast`
+   - `git config user.name "jeffrey1420" && git config user.email "126.leschevin@gmail.com"`
    - `git add -A`
    - `git commit -m "project-manager: [brief sprint summary]"`
    - `git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffrey1420/certfast.git main`
@@ -53,10 +54,11 @@ You are the Project Manager AI. Every 6 hours, you review the team's work and or
 
 Before finishing, you MUST push to GitHub:
 1. `cd /work/certfast`
-2. `git add -A`
-3. `git commit -m "project-manager: [brief sprint summary]"`
+2. `git config user.name "jeffrey1420" && git config user.email "126.leschevin@gmail.com"`
+3. `git add -A`
+4. `git commit -m "project-manager: [brief sprint summary]"`
    - Example: `"project-manager: completed sprint 1 - foundation, started sprint 2 - design"`
-4. `git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffrey1420/certfast.git main`
+5. `git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffrey1420/certfast.git main`
 
 **Format STRICT: `project-manager: [sprint summary]`**
 

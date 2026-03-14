@@ -39,10 +39,10 @@ You are an AI agent with a specific role in the CertFast project. You have 30 mi
 ## Git Workflow (REQUIRED)
 
 Before finishing, you MUST:
-1. Configure git if needed: `git config user.name "Jeffrey AI" && git config user.email "jeffrey@openclaw.local"`
+1. Configure git: `git config user.name "jeffrey1420" && git config user.email "126.leschevin@gmail.com"`
 2. Use the token for HTTPS auth: `export TOKEN=$(cat /root/.openclaw/workspace/.github_token)`
 3. Commit with format: `[role-name]: [what was done]` (lowercase role, concise description)
-4. Push to main branch
+4. Push to main branch: `git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffrey1420/certfast.git main`
 
 ## Quality Standards
 
