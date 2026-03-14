@@ -5,54 +5,48 @@
 
 ---
 
+## Completed Tasks
+
+### DSG-002: UX Research & Personas ✅
+**Role**: ux-researcher  
+**Type**: Deep (60 min)  
+**Status**: ✅ COMPLETE  
+**Quality Score**: 4/5  
+**Commit**: `design/ux-researcher: completed user personas and journey maps`  
+**Deliverables**:
+- `/work/certfast/design/research/synthesis.md` - Research synthesis (~6,600 words)
+- `/work/certfast/design/research/personas.md` - 4 detailed personas (~7,800 words)
+- `/work/certfast/design/research/journey-maps.md` - Journey maps for key workflows (~6,400 words)
+- `/work/certfast/design/research/insights.md` - Insights & recommendations (~6,700 words)
+
+---
+
 ## Active Task (CURRENT)
 
-**Task ID**: DSG-002
-**Type**: Deep (60 min)
+**Task ID**: DSG-003
+**Type**: Standard (30 min)
 **Assigned Role**: `ux-researcher`
-**Status**: ACTIVE - ASSIGN THIS TASK
+**Status**: READY FOR ASSIGNMENT
 **Priority**: High
-**Depends on**: DSG-001 ✅
+**Depends on**: DSG-002 ✅
 
 ### Description
-UX Research & Personas
+User Flow Mapping
 
-Conduct comprehensive UX research and develop detailed user personas for CertFast:
-- User research synthesis
-- 4 detailed personas based on product vision
-- Journey maps for key workflows
-- Research-backed insights and recommendations
+Create detailed user flow diagrams for core CertFast workflows based on personas and journey maps.
 
 ### Deliverables
-- [ ] Research synthesis document
-- [ ] 4 detailed personas with demographics and psychographics
-- [ ] Journey maps for primary workflows
-- [ ] Insights and recommendations report
-
-### Quality Gates
-- [ ] Completeness: All deliverables present
-- [ ] Template Compliance: Follows UX research standards
-- [ ] Word Count: Min 1500 words
-- [ ] Data-Driven: Based on product vision and market research
-- [ ] Actionable: Clear implications for design
-- [ ] English Only: All content in English
-- [ ] Auto-Evaluation: Confidence rating 1-5
-
-### Review Required
-YES - Deep task requires Reviewer
+- [ ] User flow diagrams for key workflows
+- [ ] Decision points and branching logic
+- [ ] Error state handling flows
+- [ ] Cross-functional team flows
 
 ### Context
-- Product Vision: `/work/certfast/project/vision/product-vision.md`
-- Brand Guidelines: `/work/certfast/design/brand/guidelines.md`
-- Target: Technical founders, B2B SaaS
+- Personas: `/work/certfast/design/research/personas.md`
+- Journey Maps: `/work/certfast/design/research/journey-maps.md`
 
-### Output Locations
-- `/work/certfast/design/research/personas.md`
-- `/work/certfast/design/research/journey-maps.md`
-- `/work/certfast/design/research/insights.md`
-
-### Git Commit
-Format: `design/ux-researcher: completed user personas and journey maps`
+### Output Location
+- `/work/certfast/design/flows/`
 
 ---
 
