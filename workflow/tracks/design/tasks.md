@@ -21,32 +21,53 @@
 
 ---
 
+## Completed Tasks
+
+### DSG-003: User Flow Mapping ✅
+**Role**: ux-researcher  
+**Type**: Standard (30 min)  
+**Status**: ✅ COMPLETE  
+**Quality Score**: 4/5  
+**Commit**: `design/ux-researcher: created user flow diagrams`  
+**Deliverables**:
+- `/work/certfast/design/flows/user-flows.md` - Comprehensive user flows (~1,500 words)
+  - Flow 1: Trial Onboarding - First Value
+  - Flow 2: Compliance Achievement (90-Day Journey)
+  - Flow 3: Non-Technical Founder Journey
+  - Flow 4: Continuous Compliance
+  - Flow 5: Cross-Functional Team Coordination
+  - Decision points and branching logic tables
+  - Error state handling summary
+
+---
+
 ## Active Task (CURRENT) - ASSIGN THIS TASK
 
-**Task ID**: DSG-003
-**Type**: Standard (30 min)
-**Assigned Role**: `ux-researcher`
+**Task ID**: DSG-004
+**Type**: Deep (60 min)
+**Assigned Role**: `ui-designer`
 **Status**: ACTIVE - EXECUTE NOW
 **Priority**: High
-**Depends on**: DSG-002 ✅
+**Depends on**: DSG-001 ✅, DSG-003 ✅
 
 ### Description
-User Flow Mapping
+Design System Tokens
 
-Create detailed user flow diagrams for core CertFast workflows based on personas and journey maps.
+Create the foundational design system tokens for CertFast including colors, typography, spacing, and component primitives.
 
 ### Deliverables
-- [ ] User flow diagrams for key workflows
-- [ ] Decision points and branching logic
-- [ ] Error state handling flows
-- [ ] Cross-functional team flows
+- [ ] Color tokens (brand, semantic, functional)
+- [ ] Typography scale and font stack
+- [ ] Spacing and sizing tokens
+- [ ] Shadow and elevation tokens
+- [ ] Border and radius tokens
 
 ### Context
-- Personas: `/work/certfast/design/research/personas.md`
-- Journey Maps: `/work/certfast/design/research/journey-maps.md`
+- Brand identity: `/work/certfast/design/brand/`
+- User flows: `/work/certfast/design/flows/user-flows.md`
 
 ### Output Location
-- `/work/certfast/design/flows/`
+- `/work/certfast/design/system/tokens.md`
 
 ---
 
@@ -63,20 +84,20 @@ Create detailed user flow diagrams for core CertFast workflows based on personas
 
 ## Backlog
 
-### DSG-003: User Flow Mapping
-- **Role**: ux-researcher
-- **Type**: Standard (30 min)
-- **Depends on**: DSG-002
-
-### DSG-004: Design System Tokens
-- **Role**: ui-designer
-- **Type**: Deep (60 min)
-- **Depends on**: DSG-001
-
 ### DSG-005: Wireframes - Core Flows
 - **Role**: ui-designer
 - **Type**: Deep (60 min)
 - **Depends on**: DSG-003
+
+### DSG-006: High-Fidelity Mockups
+- **Role**: ui-designer
+- **Type**: Deep (60 min)
+- **Depends on**: DSG-004, DSG-005
+
+### DSG-007: Prototype & Interaction Design
+- **Role**: ui-designer
+- **Type**: Standard (30 min)
+- **Depends on**: DSG-006
 
 ---
 
