@@ -2,84 +2,236 @@ openapi: 3.0.3
 info:
   title: CertFast API
   description: |
-    CertFast Compliance Automation Platform API
-    
+    # CertFast Compliance Automation Platform API
+
     This API provides programmatic access to CertFast's compliance automation 
     features including framework management, evidence collection, policy 
     management, and audit workflows.
-    
+
     ## Authentication
-    All API requests require authentication using an API key in the 
-    `Authorization` header:
+
+    CertFast API supports two authentication methods:
+
+    ### 1. Bearer Token (User Sessions)
+    For user-facing operations, use the access token obtained from the login endpoint:
     ```
-    Authorization: Bearer {api_key}
+    Authorization: Bearer {access_token}
     ```
-    
+
+    ### 2. API Key (Service-to-Service)
+    For automated integrations and service accounts:
+    ```
+    Authorization: Bearer cf_live_{api_key}
+    ```
+
     ## Rate Limiting
-    Rate limits are tier-based:
-    - Lite: 100 requests/hour
-    - Starter: 500 requests/hour
-    - Pro: 2,000 requests/hour
-    - Enterprise: 10,000 requests/hour
-    
+
+    Rate limits are tier-based and enforced per authentication method:
+
+    | Tier | Requests/Hour | Burst |
+    |------|---------------|-------|
+    | Lite | 100 | 10 |
+    | Starter | 500 | 50 |
+    | Pro | 2,000 | 200 |
+    | Enterprise | 10,000 | 1,000 |
+
     Rate limit headers are included in all responses:
-    - `X-RateLimit-Limit`: Maximum requests allowed
-    - `X-RateLimit-Remaining`: Remaining requests in window
+    - `X-RateLimit-Limit`: Maximum requests allowed per hour
+    - `X-RateLimit-Remaining`: Remaining requests in current window
     - `X-RateLimit-Reset`: Unix timestamp when limit resets
-    
+    - `X-RateLimit-Retry-After`: Seconds until retry (on 429 only)
+
     ## Pagination
-    List endpoints use cursor-based pagination:
-    - `limit`: Number of items per page (max 100)
-    - `cursor`: Opaque cursor for next page
-    
+
+    List endpoints use cursor-based pagination for consistent performance:
+
+    ```
+    GET /tenants/{tenantId}/users?limit=20&cursor=eyJpZCI6IjEyMyJ9
+    ```
+
+    Response includes pagination metadata:
+    ```json
+    {
+      "data": [...],
+      "pagination": {
+        "next_cursor": "eyJpZCI6IjQ1NiJ9",
+        "has_more": true
+      }
+    }
+    ```
+
+    ## Error Handling
+
+    All errors follow RFC 7807 Problem Details format:
+
+    ```json
+    {
+      "error": {
+        "code": "insufficient_tier",
+        "message": "This feature requires Pro tier or higher",
+        "details": {
+          "current_tier": "starter",
+          "required_tier": "pro",
+          "upgrade_url": "https://app.certfast.eu/settings/billing"
+        }
+      }
+    }
+    ```
+
+    Common error codes:
+    - `invalid_request` - 400 - Malformed request
+    - `unauthorized` - 401 - Authentication required or failed
+    - `forbidden` - 403 - Insufficient permissions
+    - `not_found` - 404 - Resource doesn't exist
+    - `rate_limited` - 429 - Rate limit exceeded
+    - `conflict` - 409 - Resource conflict (e.g., duplicate email)
+    - `insufficient_tier` - 403 - Feature not available on current tier
+    - `validation_error` - 422 - Request validation failed
+
+    ## API Versioning
+
+    CertFast API uses URL versioning. The current version is `v1`.
+
+    ```
+    https://api.certfast.eu/v1/...
+    ```
+
+    Breaking changes will result in a new version (v2, etc.). Non-breaking 
+    changes (new fields, new endpoints) are added to the current version.
+
+    The `X-API-Version` header is included in all responses.
+
+    ## Idempotency
+
+    POST requests support idempotency via the `Idempotency-Key` header:
+
+    ```
+    Idempotency-Key: {uuid}
+    ```
+
+    Keys are valid for 24 hours. Duplicate requests with the same key return 
+    the original response without side effects.
+
+    ## Webhooks
+
+    Configure webhooks to receive real-time event notifications. See the 
+    Webhooks section for configuration and event types.
+
+    ## Data Residency
+
+    CertFast operates in EU regions for GDPR compliance. All data is stored 
+    in `eu-west-1` (Ireland) or `eu-central-1` (Frankfurt) based on tenant 
+    configuration.
+
+    ## Support
+
+    - Documentation: https://docs.certfast.eu
+    - Support: api-support@certfast.eu
+    - Status: https://status.certfast.eu
+
   version: 1.0.0
   contact:
     name: CertFast API Support
     email: api-support@certfast.eu
+    url: https://docs.certfast.eu
   license:
     name: Proprietary
     url: https://certfast.eu/terms
 
 servers:
   - url: https://api.certfast.eu/v1
-    description: Production
+    description: Production (EU)
   - url: https://api.staging.certfast.eu/v1
     description: Staging
 
 security:
-  - ApiKeyAuth: []
+  - BearerAuth: []
 
 tags:
   - name: Authentication
-    description: User authentication and session management
+    description: User authentication, session management, and password reset
+  - name: API Keys
+    description: Service-to-service authentication management
   - name: Tenants
-    description: Tenant/organization management
+    description: Tenant/organization management and subscription details
   - name: Users
-    description: User management within tenants
+    description: User management, invitations, and RBAC within tenants
   - name: Frameworks
-    description: Compliance framework definitions
+    description: Compliance framework definitions (SOC 2, ISO 27001, GDPR, etc.)
   - name: Controls
-    description: Security control implementations
+    description: Security control definitions and implementations
   - name: Assessments
-    description: Compliance assessment workflows
+    description: Compliance assessment workflows and progress tracking
   - name: Evidence
-    description: Evidence file management
+    description: Evidence file upload, management, and linking to controls
   - name: Policies
-    description: Policy document management
+    description: Policy document management with version control
   - name: Integrations
-    description: Third-party service integrations
+    description: Third-party service integrations for automated evidence collection
   - name: Webhooks
-    description: Webhook configuration and management
+    description: Outgoing webhook configuration and delivery logs
   - name: Reports
-    description: Compliance reporting
+    description: Compliance reporting and audit package generation
+  - name: Audit Logs
+    description: Security audit logs and activity tracking
 
 paths:
-  # Authentication
+  # ============================================================================
+  # AUTHENTICATION
+  # ============================================================================
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register new tenant and admin user
+      description: |
+        Creates a new tenant with the specified tier and registers the first 
+        admin user. This endpoint does not require authentication.
+        
+        After registration, the user will receive a verification email.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              starter:
+                summary: Starter tier registration
+                value:
+                  tenant_name: "Acme Corp"
+                  tenant_slug: "acme-corp"
+                  billing_email: "billing@acme.com"
+                  admin_email: "admin@acme.com"
+                  admin_password: "SecurePass123!"
+                  admin_first_name: "John"
+                  admin_last_name: "Doe"
+                  tier_code: "starter"
+                  company_size: "15-50"
+                  industry: "SaaS"
+      responses:
+        '201':
+          description: Tenant and admin user created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '409':
+          description: Conflict - slug or email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /auth/login:
     post:
       tags: [Authentication]
       summary: User login
-      description: Authenticate with email and password
+      description: |
+        Authenticate with email and password. Returns access and refresh tokens.
+        
+        If MFA is enabled for the user, the response will indicate MFA is 
+        required and provide a temporary token to complete MFA verification.
       security: []
       requestBody:
         required: true
@@ -92,12 +244,16 @@ paths:
                 email:
                   type: string
                   format: email
+                  example: "admin@acme.com"
                 password:
                   type: string
                   format: password
+                  minLength: 8
+                  example: "SecurePass123!"
                 mfa_code:
                   type: string
-                  description: Required if MFA is enabled
+                  pattern: '^[0-9]{6}$'
+                  description: Required if MFA is enabled for the account
       responses:
         '200':
           description: Login successful
@@ -105,13 +261,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
+              examples:
+                success:
+                  summary: Successful login
+                  value:
+                    access_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    refresh_token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    expires_in: 3600
+                    token_type: "Bearer"
+                    user:
+                      id: "550e8400-e29b-41d4-a716-446655440000"
+                      email: "admin@acme.com"
+                      first_name: "John"
+                      last_name: "Doe"
+                      role: "owner"
+                      tenant_id: "550e8400-e29b-41d4-a716-446655440001"
+                    tenant:
+                      id: "550e8400-e29b-41d4-a716-446655440001"
+                      name: "Acme Corp"
+                      slug: "acme-corp"
+                      tier_code: "starter"
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '423':
+          description: Account locked due to too many failed attempts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /auth/logout:
     post:
       tags: [Authentication]
       summary: User logout
+      description: Revokes the current access token and ends the session.
       responses:
         '204':
           description: Logout successful
@@ -120,6 +303,9 @@ paths:
     post:
       tags: [Authentication]
       summary: Refresh access token
+      description: |
+        Obtain a new access token using a refresh token. Refresh tokens are 
+        valid for 30 days. Use this endpoint when the access token expires.
       requestBody:
         required: true
         content:
@@ -130,19 +316,290 @@ paths:
               properties:
                 refresh_token:
                   type: string
+                  description: Refresh token from login response
       responses:
         '200':
-          description: Token refreshed
+          description: Token refreshed successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
-  # Tenants
+  /auth/mfa/setup:
+    post:
+      tags: [Authentication]
+      summary: Setup MFA for current user
+      description: |
+        Initiates MFA setup by generating a TOTP secret and QR code. 
+        Requires verification of the first code to complete setup.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                method:
+                  type: string
+                  enum: [totp]
+                  default: totp
+      responses:
+        '200':
+          description: MFA setup initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secret:
+                    type: string
+                    description: TOTP secret (display once)
+                  qr_code_url:
+                    type: string
+                    description: QR code URL for authenticator apps
+                  backup_codes:
+                    type: array
+                    items:
+                      type: string
+                    description: One-time backup codes
+
+  /auth/mfa/verify:
+    post:
+      tags: [Authentication]
+      summary: Verify MFA code and complete setup
+      description: Verifies the first MFA code to complete setup.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+                  pattern: '^[0-9]{6}$'
+      responses:
+        '200':
+          description: MFA enabled successfully
+        '400':
+          description: Invalid verification code
+
+  /auth/mfa/disable:
+    post:
+      tags: [Authentication]
+      summary: Disable MFA
+      description: |
+        Disables MFA for the current user. Requires password confirmation 
+        for security.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+                  format: password
+      responses:
+        '204':
+          description: MFA disabled
+        '401':
+          description: Invalid password
+
+  /auth/password/forgot:
+    post:
+      tags: [Authentication]
+      summary: Request password reset
+      description: |
+        Sends a password reset email to the user. Always returns 204 even 
+        if email doesn't exist (security measure).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '204':
+          description: Password reset email sent (if account exists)
+
+  /auth/password/reset:
+    post:
+      tags: [Authentication]
+      summary: Reset password with token
+      description: Completes password reset using token from email.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, new_password]
+              properties:
+                token:
+                  type: string
+                new_password:
+                  type: string
+                  format: password
+                  minLength: 12
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Invalid or expired token
+
+  # ============================================================================
+  # API KEYS
+  # ============================================================================
+  /tenants/{tenantId}/api-keys:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [API Keys]
+      summary: List API keys
+      description: |
+        Lists all API keys for the tenant. Key values are not returned 
+        (they are only shown once at creation).
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: List of API keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedApiKeys'
+
+    post:
+      tags: [API Keys]
+      summary: Create API key
+      description: |
+        Creates a new API key for service-to-service authentication. 
+        The key value is only returned once in the response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '201':
+          description: API key created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyWithSecret'
+
+  /tenants/{tenantId}/api-keys/{keyId}:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: keyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [API Keys]
+      summary: Get API key details
+      responses:
+        '200':
+          description: API key details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [API Keys]
+      summary: Update API key
+      description: Update name, description, or scopes. Cannot update key value.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateApiKeyRequest'
+      responses:
+        '200':
+          description: API key updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+
+    delete:
+      tags: [API Keys]
+      summary: Revoke API key
+      description: Permanently revokes an API key. This action cannot be undone.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '204':
+          description: API key revoked
+
+  # ============================================================================
+  # TENANTS
+  # ============================================================================
   /tenants:
     get:
       tags: [Tenants]
-      summary: List tenants (for platform admins)
+      summary: List all tenants (platform admin only)
+      description: |
+        Lists all tenants on the platform. Requires platform admin privileges.
       parameters:
         - name: limit
           in: query
@@ -159,6 +616,11 @@ paths:
           schema:
             type: string
             enum: [active, suspended, cancelled]
+        - name: tier_id
+          in: query
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: List of tenants
@@ -166,25 +628,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PaginatedTenants'
-
-    post:
-      tags: [Tenants]
-      summary: Create tenant
-      description: Register a new organization/tenant
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateTenantRequest'
-      responses:
-        '201':
-          description: Tenant created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Tenant'
 
   /tenants/{tenantId}:
     parameters:
@@ -198,19 +641,23 @@ paths:
     get:
       tags: [Tenants]
       summary: Get tenant details
+      description: Get full details for the specified tenant.
       responses:
         '200':
           description: Tenant details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Tenant'
+                $ref: '#/components/schemas/TenantDetail'
         '404':
           $ref: '#/components/responses/NotFound'
 
     patch:
       tags: [Tenants]
       summary: Update tenant
+      description: |
+        Update tenant settings. Only owners and admins can update tenant 
+        information. Tier changes require billing permissions.
       requestBody:
         required: true
         content:
@@ -224,6 +671,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tenant'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
   /tenants/{tenantId}/subscription:
     parameters:
@@ -237,15 +686,42 @@ paths:
     get:
       tags: [Tenants]
       summary: Get subscription details
+      description: |
+        Get current subscription details including usage against tier limits.
       responses:
         '200':
           description: Subscription details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Subscription'
+                $ref: '#/components/schemas/SubscriptionDetail'
 
-  # Users
+  /tenants/{tenantId}/usage:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Tenants]
+      summary: Get usage statistics
+      description: |
+        Get detailed usage statistics including current counts against 
+        tier limits, storage usage, and API request counts.
+      responses:
+        '200':
+          description: Usage statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageStatistics'
+
+  # ============================================================================
+  # USERS
+  # ============================================================================
   /tenants/{tenantId}/users:
     parameters:
       - name: tenantId
@@ -258,12 +734,15 @@ paths:
     get:
       tags: [Users]
       summary: List users
+      description: |
+        List all users in the tenant with filtering and pagination.
       parameters:
         - name: limit
           in: query
           schema:
             type: integer
             default: 20
+            maximum: 100
         - name: cursor
           in: query
           schema:
@@ -278,6 +757,11 @@ paths:
           schema:
             type: string
             enum: [active, pending, suspended, inactive]
+        - name: search
+          in: query
+          schema:
+            type: string
+            description: Search by name or email
       responses:
         '200':
           description: List of users
@@ -289,6 +773,9 @@ paths:
     post:
       tags: [Users]
       summary: Invite user
+      description: |
+        Invite a new user to the tenant. Sends an invitation email with 
+        a link to set up their account. Requires admin or owner role.
       requestBody:
         required: true
         content:
@@ -302,6 +789,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+        '409':
+          description: User with this email already exists in tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Tier limit reached (max users exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /tenants/{tenantId}/users/{userId}:
     parameters:
@@ -327,11 +826,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
     patch:
       tags: [Users]
       summary: Update user
+      description: |
+        Update user profile or role. Users can update their own profile. 
+        Only admins/owners can update roles or other users' profiles.
       requestBody:
         required: true
         content:
@@ -341,15 +845,95 @@ paths:
       responses:
         '200':
           description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
 
     delete:
       tags: [Users]
-      summary: Remove user
+      description: |
+        Remove user from tenant. Cannot remove the last owner. 
+        User's evidence and audit trail is preserved.
       responses:
         '204':
           description: User removed
+        '403':
+          description: Cannot remove last owner
 
-  # Frameworks
+  /tenants/{tenantId}/users/{userId}/resend-invitation:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    post:
+      tags: [Users]
+      summary: Resend invitation email
+      description: Resends the invitation email to a pending user.
+      responses:
+        '204':
+          description: Invitation resent
+
+  /tenants/{tenantId}/users/{userId}/activity:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Audit Logs]
+      summary: Get user activity log
+      description: |
+        Get security activity log for a specific user (login, password 
+        changes, etc.). Requires admin or auditor role.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 500
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: activity_type
+          in: query
+          schema:
+            type: string
+            enum: [login, logout, password_change, mfa_enabled, mfa_disabled, 
+                   api_key_created, api_key_revoked, invitation_accepted, 
+                   account_locked, account_unlocked, suspicious_activity]
+      responses:
+        '200':
+          description: User activity log
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedActivityLog'
+
+  # ============================================================================
+  # FRAMEWORKS
+  # ============================================================================
   /tenants/{tenantId}/frameworks:
     parameters:
       - name: tenantId
@@ -362,17 +946,25 @@ paths:
     get:
       tags: [Frameworks]
       summary: List frameworks
+      description: |
+        List all available frameworks including system frameworks and 
+        any custom frameworks created by the tenant.
       parameters:
         - name: include_system
           in: query
           schema:
             type: boolean
             default: true
+          description: Include system frameworks
         - name: category
           in: query
           schema:
             type: string
-            enum: [security, privacy, availability, processing_integrity, confidentiality]
+            enum: [security, privacy, availability, processing_integrity, confidentiality, resilience]
+        - name: jurisdiction
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: List of frameworks
@@ -389,6 +981,9 @@ paths:
     post:
       tags: [Frameworks]
       summary: Create custom framework
+      description: |
+        Create a custom compliance framework. Requires Pro tier or higher.
+        Custom frameworks are private to the creating tenant.
       requestBody:
         required: true
         content:
@@ -398,6 +993,12 @@ paths:
       responses:
         '201':
           description: Framework created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Framework'
+        '403':
+          description: Custom frameworks require Pro tier
 
   /tenants/{tenantId}/frameworks/{frameworkId}:
     parameters:
@@ -417,15 +1018,55 @@ paths:
     get:
       tags: [Frameworks]
       summary: Get framework details
+      description: |
+        Get framework details including all controls. For system frameworks, 
+        includes the full list of system controls.
       responses:
         '200':
-          description: Framework details with controls
+          description: Framework details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/FrameworkDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
-  # Controls
+    patch:
+      tags: [Frameworks]
+      summary: Update custom framework
+      description: |
+        Update a custom framework. System frameworks cannot be modified.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFrameworkRequest'
+      responses:
+        '200':
+          description: Framework updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Framework'
+        '403':
+          description: Cannot modify system frameworks
+
+    delete:
+      tags: [Frameworks]
+      summary: Delete custom framework
+      description: |
+        Delete a custom framework. Cannot delete if frameworks has active 
+        assessments. System frameworks cannot be deleted.
+      responses:
+        '204':
+          description: Framework deleted
+        '409':
+          description: Framework has active assessments
+
+  # ============================================================================
+  # CONTROLS
+  # ============================================================================
   /tenants/{tenantId}/frameworks/{frameworkId}/controls:
     parameters:
       - name: tenantId
@@ -444,6 +1085,31 @@ paths:
     get:
       tags: [Controls]
       summary: List controls for framework
+      description: List all controls within a framework.
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: risk_level
+          in: query
+          schema:
+            type: string
+            enum: [low, medium, high, critical]
+        - name: can_be_automated
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+        - name: cursor
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: List of controls
@@ -456,8 +1122,92 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Control'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
 
-  # Assessments
+    post:
+      tags: [Controls]
+      summary: Create custom control
+      description: |
+        Create a custom control within a custom framework. Cannot add 
+        controls to system frameworks.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateControlRequest'
+      responses:
+        '201':
+          description: Control created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Control'
+
+  /tenants/{tenantId}/frameworks/{frameworkId}/controls/{controlId}:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: frameworkId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: controlId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Controls]
+      summary: Get control details
+      responses:
+        '200':
+          description: Control details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlDetail'
+
+    patch:
+      tags: [Controls]
+      summary: Update control
+      description: |
+        Update a custom control. System controls cannot be modified 
+        except for automation configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateControlRequest'
+      responses:
+        '200':
+          description: Control updated
+
+    delete:
+      tags: [Controls]
+      summary: Delete control
+      description: |
+        Delete a custom control. Cannot delete if control is referenced 
+        by any assessment.
+      responses:
+        '204':
+          description: Control deleted
+        '409':
+          description: Control is referenced by assessments
+
+  # ============================================================================
+  # ASSESSMENTS
+  # ============================================================================
   /tenants/{tenantId}/assessments:
     parameters:
       - name: tenantId
@@ -470,17 +1220,30 @@ paths:
     get:
       tags: [Assessments]
       summary: List compliance assessments
+      description: |
+        List all compliance assessments for the tenant with filtering 
+        by status and framework.
       parameters:
         - name: status
           in: query
           schema:
             type: string
-            enum: [in_progress, ready_for_review, audit_scheduled, audit_in_progress, compliant, non_compliant]
+            enum: [in_progress, ready_for_review, audit_scheduled, audit_in_progress, compliant, non_compliant, remediation_required]
         - name: framework_id
           in: query
           schema:
             type: string
             format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: List of assessments
@@ -492,6 +1255,9 @@ paths:
     post:
       tags: [Assessments]
       summary: Create assessment
+      description: |
+        Create a new compliance assessment for a framework. Each tenant 
+        can only have one active assessment per framework at a time.
       requestBody:
         required: true
         content:
@@ -501,6 +1267,12 @@ paths:
       responses:
         '201':
           description: Assessment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Assessment'
+        '409':
+          description: Active assessment already exists for this framework
 
   /tenants/{tenantId}/assessments/{assessmentId}:
     parameters:
@@ -520,9 +1292,12 @@ paths:
     get:
       tags: [Assessments]
       summary: Get assessment details
+      description: |
+        Get detailed assessment information including progress statistics 
+        and control implementation status.
       responses:
         '200':
-          description: Assessment with progress
+          description: Assessment details
           content:
             application/json:
               schema:
@@ -531,6 +1306,9 @@ paths:
     patch:
       tags: [Assessments]
       summary: Update assessment
+      description: |
+        Update assessment details, timeline, or status. Status changes 
+        may trigger notifications and webhooks.
       requestBody:
         required: true
         content:
@@ -559,9 +1337,33 @@ paths:
     get:
       tags: [Assessments]
       summary: Get control implementations for assessment
+      description: |
+        Get all control implementations for an assessment with their 
+        current status and evidence links.
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [not_started, in_progress, implemented, tested, compliant, non_compliant, remediated, not_applicable]
+        - name: responsible_user_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 200
+        - name: cursor
+          in: query
+          schema:
+            type: string
       responses:
         '200':
-          description: Control implementations with status
+          description: Control implementations
           content:
             application/json:
               schema:
@@ -571,6 +1373,8 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/ControlImplementation'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
 
   /tenants/{tenantId}/assessments/{assessmentId}/controls/{controlImplementationId}:
     parameters:
@@ -593,9 +1397,23 @@ paths:
           type: string
           format: uuid
     
+    get:
+      tags: [Assessments]
+      summary: Get control implementation details
+      responses:
+        '200':
+          description: Control implementation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ControlImplementationDetail'
+
     patch:
       tags: [Assessments]
       summary: Update control implementation
+      description: |
+        Update control implementation status, assignee, or test schedule.
+        Status transitions may trigger notifications.
       requestBody:
         required: true
         content:
@@ -606,7 +1424,126 @@ paths:
         '200':
           description: Control implementation updated
 
-  # Evidence
+  /tenants/{tenantId}/assessments/{assessmentId}/findings:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: assessmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Assessments]
+      summary: List audit findings
+      description: List all findings for an assessment with filtering.
+      parameters:
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [low, medium, high, critical]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [open, in_progress, resolved, accepted_risk, false_positive]
+        - name: assigned_to
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of findings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFindings'
+
+    post:
+      tags: [Assessments]
+      summary: Create finding
+      description: |
+        Create a new audit finding. Can be used for internal audits or 
+        to record external auditor findings.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFindingRequest'
+      responses:
+        '201':
+          description: Finding created
+
+  /tenants/{tenantId}/assessments/{assessmentId}/findings/{findingId}:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: assessmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: findingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Assessments]
+      summary: Get finding details
+      responses:
+        '200':
+          description: Finding details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindingDetail'
+
+    patch:
+      tags: [Assessments]
+      summary: Update finding
+      description: |
+        Update finding status, assignment, or remediation details. 
+        Resolving a finding requires remediation verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFindingRequest'
+      responses:
+        '200':
+          description: Finding updated
+
+  # ============================================================================
+  # EVIDENCE
+  # ============================================================================
   /tenants/{tenantId}/evidence:
     parameters:
       - name: tenantId
@@ -619,22 +1556,52 @@ paths:
     get:
       tags: [Evidence]
       summary: List evidence files
+      description: |
+        List evidence files with filtering by type, linked controls, 
+        and full-text search.
       parameters:
         - name: evidence_type
           in: query
           schema:
             type: string
-            enum: [policy, procedure, screenshot, log, certificate, audit_report, other]
+            enum: [policy, procedure, screenshot, log, configuration, certificate, audit_report, training_record, vendor_assessment, incident_report, other]
         - name: control_id
           in: query
           schema:
             type: string
             format: uuid
+            description: Filter by linked control implementation
         - name: search
           in: query
           schema:
             type: string
             description: Full-text search on filename and description
+        - name: tags
+          in: query
+          schema:
+            type: string
+            description: Comma-separated tags to filter by
+        - name: uploaded_by
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: include_deleted
+          in: query
+          schema:
+            type: boolean
+            default: false
+            description: Include soft-deleted files (admin only)
       responses:
         '200':
           description: List of evidence files
@@ -646,6 +1613,9 @@ paths:
     post:
       tags: [Evidence]
       summary: Upload evidence
+      description: |
+        Upload an evidence file. Files are stored in S3 with encryption 
+        and integrity verification (SHA-256 hash).
       requestBody:
         required: true
         content:
@@ -657,17 +1627,24 @@ paths:
                 file:
                   type: string
                   format: binary
+                  description: File to upload (max 100MB)
                 evidence_type:
                   type: string
-                  enum: [policy, procedure, screenshot, log, certificate, audit_report, other]
+                  enum: [policy, procedure, screenshot, log, configuration, certificate, audit_report, training_record, vendor_assessment, incident_report, other]
+                  description: Type of evidence
                 description:
                   type: string
+                  maxLength: 2000
                 tags:
                   type: string
                   description: Comma-separated tags
                 control_ids:
                   type: string
-                  description: Comma-separated control IDs to link
+                  description: Comma-separated control implementation IDs to link
+                link_type:
+                  type: string
+                  enum: [supporting, primary, test_result, reference]
+                  default: supporting
       responses:
         '201':
           description: Evidence uploaded
@@ -675,6 +1652,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EvidenceFile'
+        '413':
+          description: File too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Storage limit reached for tier
 
   /tenants/{tenantId}/evidence/{evidenceId}:
     parameters:
@@ -694,20 +1679,49 @@ paths:
     get:
       tags: [Evidence]
       summary: Get evidence details
+      description: |
+        Get evidence file details including metadata, linked controls, 
+        and download URL.
       responses:
         '200':
-          description: Evidence details with download URL
+          description: Evidence details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EvidenceFileDetail'
 
+    patch:
+      tags: [Evidence]
+      summary: Update evidence metadata
+      description: Update description, tags, or linked controls.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEvidenceRequest'
+      responses:
+        '200':
+          description: Evidence updated
+
     delete:
       tags: [Evidence]
       summary: Delete evidence
+      description: |
+        Soft delete an evidence file. Files are retained per the 
+        tenant's retention policy before permanent deletion.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: Reason for deletion (audit trail)
       responses:
         '204':
-          description: Evidence deleted
+          description: Evidence marked for deletion
 
   /tenants/{tenantId}/evidence/{evidenceId}/download:
     parameters:
@@ -727,7 +1741,9 @@ paths:
     get:
       tags: [Evidence]
       summary: Get download URL
-      description: Returns a presigned S3 URL valid for 15 minutes
+      description: |
+        Returns a presigned S3 URL valid for 15 minutes. Use this URL 
+        to download the file directly from S3.
       responses:
         '200':
           description: Download URL
@@ -743,7 +1759,59 @@ paths:
                     type: string
                     format: date-time
 
-  # Policies
+  /tenants/{tenantId}/evidence/{evidenceId}/controls/{controlImplementationId}:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: evidenceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: controlImplementationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    post:
+      tags: [Evidence]
+      summary: Link evidence to control
+      description: |
+        Create a link between an evidence file and a control implementation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                link_type:
+                  type: string
+                  enum: [supporting, primary, test_result, reference]
+                  default: supporting
+                notes:
+                  type: string
+      responses:
+        '201':
+          description: Link created
+
+    delete:
+      tags: [Evidence]
+      summary: Unlink evidence from control
+      responses:
+        '204':
+          description: Link removed
+
+  # ============================================================================
+  # POLICIES
+  # ============================================================================
   /tenants/{tenantId}/policies:
     parameters:
       - name: tenantId
@@ -756,16 +1824,33 @@ paths:
     get:
       tags: [Policies]
       summary: List policies
+      description: List all policies with filtering by category and status.
       parameters:
         - name: category
           in: query
           schema:
             type: string
+            enum: [information_security, privacy, hr, operational, vendor_management, business_continuity, acceptable_use, other]
         - name: status
           in: query
           schema:
             type: string
             enum: [draft, under_review, approved, superseded, archived]
+        - name: owner_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: List of policies
@@ -777,6 +1862,9 @@ paths:
     post:
       tags: [Policies]
       summary: Create policy
+      description: |
+        Create a new policy with initial content. The policy starts 
+        in 'draft' status.
       requestBody:
         required: true
         content:
@@ -786,6 +1874,10 @@ paths:
       responses:
         '201':
           description: Policy created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
 
   /tenants/{tenantId}/policies/{policyId}:
     parameters:
@@ -805,9 +1897,12 @@ paths:
     get:
       tags: [Policies]
       summary: Get policy details
+      description: |
+        Get policy details including current version content and 
+        acknowledgment statistics.
       responses:
         '200':
-          description: Policy with current version
+          description: Policy details
           content:
             application/json:
               schema:
@@ -816,6 +1911,7 @@ paths:
     patch:
       tags: [Policies]
       summary: Update policy metadata
+      description: Update policy metadata (not content). Use versions for content changes.
       requestBody:
         required: true
         content:
@@ -825,6 +1921,14 @@ paths:
       responses:
         '200':
           description: Policy updated
+
+    delete:
+      tags: [Policies]
+      summary: Delete policy
+      description: Soft delete a policy. Cannot delete if referenced by assessments.
+      responses:
+        '204':
+          description: Policy deleted
 
   /tenants/{tenantId}/policies/{policyId}/versions:
     parameters:
@@ -841,9 +1945,29 @@ paths:
           type: string
           format: uuid
     
+    get:
+      tags: [Policies]
+      summary: List policy versions
+      description: List all versions of a policy with approval status.
+      responses:
+        '200':
+          description: List of policy versions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PolicyVersion'
+
     post:
       tags: [Policies]
       summary: Create new policy version
+      description: |
+        Create a new version of the policy. Versions are immutable 
+        once approved. Supports AI-generated content.
       requestBody:
         required: true
         content:
@@ -853,6 +1977,50 @@ paths:
       responses:
         '201':
           description: Policy version created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyVersion'
+
+  /tenants/{tenantId}/policies/{policyId}/versions/{versionId}/approve:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: policyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    post:
+      tags: [Policies]
+      summary: Approve policy version
+      description: |
+        Approve a policy version, making it the current active version. 
+        This action cannot be undone.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Version approved
 
   /tenants/{tenantId}/policies/{policyId}/acknowledge:
     parameters:
@@ -872,12 +2040,63 @@ paths:
     post:
       tags: [Policies]
       summary: Acknowledge policy
-      description: Current user acknowledges the current policy version
+      description: |
+        Current user acknowledges the current policy version. Records 
+        timestamp and IP for compliance audit trail.
       responses:
         '201':
           description: Policy acknowledged
+        '200':
+          description: Already acknowledged (current version)
 
-  # Integrations
+  /tenants/{tenantId}/policies/{policyId}/acknowledgments:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: policyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Policies]
+      summary: Get policy acknowledgments
+      description: |
+        Get list of users who have acknowledged the current policy version. 
+        Requires admin, compliance_officer, or auditor role.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 500
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of acknowledgments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PolicyAcknowledgment'
+
+  # ============================================================================
+  # INTEGRATIONS
+  # ============================================================================
   /tenants/{tenantId}/integrations:
     parameters:
       - name: tenantId
@@ -890,6 +2109,8 @@ paths:
     get:
       tags: [Integrations]
       summary: List integrations
+      description: |
+        List all integrations for the tenant with status and health information.
       parameters:
         - name: provider
           in: query
@@ -899,7 +2120,17 @@ paths:
           in: query
           schema:
             type: string
-            enum: [pending, connected, error, disconnected]
+            enum: [pending, connected, error, disconnected, degraded]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: List of integrations
@@ -911,7 +2142,9 @@ paths:
     post:
       tags: [Integrations]
       summary: Create integration
-      description: Initiates OAuth flow or API key connection
+      description: |
+        Initiates a new integration connection. Returns OAuth URL for 
+        OAuth-based providers, or connects directly for API key providers.
       requestBody:
         required: true
         content:
@@ -920,7 +2153,15 @@ paths:
               $ref: '#/components/schemas/CreateIntegrationRequest'
       responses:
         '201':
-          description: Integration created, OAuth URL returned if applicable
+          description: Integration created
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Integration'
+                  - $ref: '#/components/schemas/IntegrationPendingOAuth'
+        '403':
+          description: Integration limit reached for tier
 
   /tenants/{tenantId}/integrations/{integrationId}:
     parameters:
@@ -946,14 +2187,70 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Integration'
+                $ref: '#/components/schemas/IntegrationDetail'
+
+    patch:
+      tags: [Integrations]
+      summary: Update integration
+      description: Update integration settings and configuration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateIntegrationRequest'
+      responses:
+        '200':
+          description: Integration updated
 
     delete:
       tags: [Integrations]
       summary: Remove integration
+      description: |
+        Permanently removes an integration and all associated automated 
+        evidence collection configurations.
       responses:
         '204':
           description: Integration removed
+
+  /tenants/{tenantId}/integrations/{integrationId}/connect:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: integrationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    post:
+      tags: [Integrations]
+      summary: Complete OAuth connection
+      description: |
+        Complete OAuth flow by providing authorization code from provider.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code:
+                  type: string
+                  description: OAuth authorization code
+      responses:
+        '200':
+          description: Connection successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Integration'
 
   /tenants/{tenantId}/integrations/{integrationId}/sync:
     parameters:
@@ -973,11 +2270,84 @@ paths:
     post:
       tags: [Integrations]
       summary: Trigger manual sync
+      description: |
+        Trigger a manual synchronization with the integrated service. 
+        Rate limited per integration.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sync_type:
+                  type: string
+                  enum: [evidence_collection, user_sync, compliance_check, full]
+                  default: evidence_collection
       responses:
         '202':
           description: Sync job queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sync_id:
+                    type: string
+                    format: uuid
 
-  # Webhooks
+  /tenants/{tenantId}/integrations/{integrationId}/logs:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: integrationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Integrations]
+      summary: Get sync logs
+      description: |
+        Get synchronization logs for the integration with details on 
+        records processed and any errors.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [success, partial, failure, in_progress]
+      responses:
+        '200':
+          description: Sync logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IntegrationSyncLog'
+
+  # ============================================================================
+  # WEBHOOKS
+  # ============================================================================
   /tenants/{tenantId}/webhooks:
     parameters:
       - name: tenantId
@@ -990,6 +2360,16 @@ paths:
     get:
       tags: [Webhooks]
       summary: List webhooks
+      description: List all configured webhooks for the tenant.
+      parameters:
+        - name: is_active
+          in: query
+          schema:
+            type: boolean
+        - name: event
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: List of webhooks
@@ -1001,6 +2381,9 @@ paths:
     post:
       tags: [Webhooks]
       summary: Create webhook
+      description: |
+        Create a new webhook endpoint. A secret will be generated for 
+        HMAC signature verification.
       requestBody:
         required: true
         content:
@@ -1010,6 +2393,10 @@ paths:
       responses:
         '201':
           description: Webhook created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookWithSecret'
 
   /tenants/{tenantId}/webhooks/{webhookId}:
     parameters:
@@ -1032,10 +2419,15 @@ paths:
       responses:
         '200':
           description: Webhook details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookDetail'
 
     patch:
       tags: [Webhooks]
       summary: Update webhook
+      description: Update webhook URL, events, or status.
       requestBody:
         required: true
         content:
@@ -1052,6 +2444,38 @@ paths:
       responses:
         '204':
           description: Webhook deleted
+
+  /tenants/{tenantId}/webhooks/{webhookId}/regenerate-secret:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: webhookId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    post:
+      tags: [Webhooks]
+      summary: Regenerate webhook secret
+      description: |
+        Generate a new webhook secret. The old secret will be invalidated 
+        immediately. Use if secret is compromised.
+      responses:
+        '200':
+          description: New secret generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secret:
+                    type: string
 
   /tenants/{tenantId}/webhooks/{webhookId}/deliveries:
     parameters:
@@ -1071,6 +2495,24 @@ paths:
     get:
       tags: [Webhooks]
       summary: List webhook delivery attempts
+      description: |
+        Get delivery logs for a webhook including request/response details 
+        and retry attempts.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: success
+          in: query
+          schema:
+            type: boolean
       responses:
         '200':
           description: Delivery logs
@@ -1102,11 +2544,38 @@ paths:
     post:
       tags: [Webhooks]
       summary: Send test webhook
+      description: |
+        Send a test webhook event to verify endpoint configuration. 
+        Returns the delivery result including response status.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_type:
+                  type: string
+                  default: "compliance.assessment.created"
       responses:
         '200':
           description: Test delivery result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  response_status:
+                    type: integer
+                  response_time_ms:
+                    type: integer
+                  error_message:
+                    type: string
 
-  # Reports
+  # ============================================================================
+  # REPORTS
+  # ============================================================================
   /tenants/{tenantId}/reports/compliance-status:
     parameters:
       - name: tenantId
@@ -1119,15 +2588,18 @@ paths:
     get:
       tags: [Reports]
       summary: Get overall compliance status
+      description: |
+        Get a summary of compliance status across all frameworks including 
+        open findings and upcoming reviews.
       responses:
         '200':
-          description: Compliance summary across all frameworks
+          description: Compliance status report
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ComplianceStatusReport'
 
-  /tenants/{tenantId}/reports/assessment/{assessmentId}/audit-package:
+  /tenants/{tenantId}/reports/assessments/{assessmentId}/audit-package:
     parameters:
       - name: tenantId
         in: path
@@ -1145,10 +2617,13 @@ paths:
     get:
       tags: [Reports]
       summary: Generate audit package
-      description: Returns a ZIP file containing all evidence and documentation for an audit
+      description: |
+        Generate a complete audit package as a ZIP file containing all 
+        evidence, policies, control implementations, and findings for 
+        an assessment. Returns a presigned URL valid for 24 hours.
       responses:
         '200':
-          description: Audit package URL
+          description: Audit package ready
           content:
             application/json:
               schema:
@@ -1160,17 +2635,191 @@ paths:
                   expires_at:
                     type: string
                     format: date-time
+                  file_size_bytes:
+                    type: integer
+
+  /tenants/{tenantId}/reports/assessments/{assessmentId}/progress:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: assessmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Reports]
+      summary: Get assessment progress report
+      description: |
+        Get detailed progress metrics for an assessment including 
+        control status breakdown and timeline.
+      responses:
+        '200':
+          description: Progress report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  assessment_id:
+                    type: string
+                    format: uuid
+                  framework_name:
+                    type: string
+                  overall_progress:
+                    type: number
+                    format: percentage
+                  status_breakdown:
+                    type: object
+                    properties:
+                      not_started:
+                        type: integer
+                      in_progress:
+                        type: integer
+                      implemented:
+                        type: integer
+                      tested:
+                        type: integer
+                      compliant:
+                        type: integer
+                      non_compliant:
+                        type: integer
+                      not_applicable:
+                        type: integer
+                  timeline:
+                    type: object
+                    properties:
+                      start_date:
+                        type: string
+                        format: date
+                      target_date:
+                        type: string
+                        format: date
+                      days_remaining:
+                        type: integer
+                      is_on_track:
+                        type: boolean
+
+  /tenants/{tenantId}/reports/policy-acknowledgments:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Reports]
+      summary: Get policy acknowledgment report
+      description: |
+        Get a report of policy acknowledgment status across all users 
+        and required policies.
+      responses:
+        '200':
+          description: Policy acknowledgment report
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  policies:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        policy_id:
+                          type: string
+                          format: uuid
+                        policy_title:
+                          type: string
+                        acknowledgment_rate:
+                          type: number
+                          format: percentage
+                        pending_users:
+                          type: integer
+                        total_users:
+                          type: integer
+
+  # ============================================================================
+  # AUDIT LOGS
+  # ============================================================================
+  /tenants/{tenantId}/audit-logs:
+    parameters:
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    
+    get:
+      tags: [Audit Logs]
+      summary: Get tenant audit logs
+      description: |
+        Get security audit logs for the tenant. Requires admin or 
+        auditor role. Supports filtering by activity type and date range.
+      parameters:
+        - name: activity_type
+          in: query
+          schema:
+            type: string
+            enum: [login, logout, password_change, mfa_enabled, mfa_disabled, 
+                   api_key_created, api_key_revoked, invitation_accepted, 
+                   account_locked, account_unlocked, suspicious_activity,
+                   evidence_downloaded, policy_acknowledged, finding_created,
+                   finding_resolved, assessment_status_changed]
+        - name: user_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: start_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 500
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogs'
 
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: Bearer token authentication
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer token from login or API key
 
   schemas:
-    # Common
+    # ============================================================================
+    # COMMON
+    # ============================================================================
     Error:
       type: object
       required: [error]
@@ -1181,10 +2830,13 @@ components:
           properties:
             code:
               type: string
+              example: "insufficient_tier"
             message:
               type: string
+              example: "This feature requires Pro tier or higher"
             details:
               type: object
+              additionalProperties: true
 
     Pagination:
       type: object
@@ -1192,61 +2844,269 @@ components:
         next_cursor:
           type: string
           nullable: true
+          example: "eyJpZCI6IjEyMyJ9"
         has_more:
           type: boolean
+          example: true
 
-    # Auth
-    LoginResponse:
+    # ============================================================================
+    # AUTHENTICATION
+    # ============================================================================
+    RegisterRequest:
       type: object
-      required: [access_token, refresh_token, user, tenant]
+      required: [tenant_name, tenant_slug, billing_email, admin_email, admin_password, admin_first_name, admin_last_name, tier_code]
       properties:
+        tenant_name:
+          type: string
+          maxLength: 255
+          example: "Acme Corporation"
+        tenant_slug:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+          maxLength: 100
+          example: "acme-corp"
+        billing_email:
+          type: string
+          format: email
+          example: "billing@acme.com"
+        admin_email:
+          type: string
+          format: email
+          example: "admin@acme.com"
+        admin_password:
+          type: string
+          format: password
+          minLength: 12
+          example: "SecurePass123!"
+        admin_first_name:
+          type: string
+          maxLength: 100
+          example: "John"
+        admin_last_name:
+          type: string
+          maxLength: 100
+          example: "Doe"
+        tier_code:
+          type: string
+          enum: [lite, starter, pro, enterprise]
+          example: "starter"
+        company_size:
+          type: string
+          enum: ["1-15", "15-50", "50-100", "100+"]
+          example: "15-50"
+        industry:
+          type: string
+          example: "SaaS"
+        timezone:
+          type: string
+          default: "Europe/Paris"
+          example: "Europe/Berlin"
+
+    RegisterResponse:
+      type: object
+      properties:
+        tenant:
+          $ref: '#/components/schemas/Tenant'
+        user:
+          $ref: '#/components/schemas/User'
         access_token:
           type: string
         refresh_token:
           type: string
         expires_in:
           type: integer
+          example: 3600
+
+    LoginResponse:
+      type: object
+      required: [access_token, refresh_token, expires_in, token_type, user, tenant]
+      properties:
+        access_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refresh_token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        expires_in:
+          type: integer
+          example: 3600
+        token_type:
+          type: string
+          example: "Bearer"
         user:
           $ref: '#/components/schemas/User'
         tenant:
           $ref: '#/components/schemas/Tenant'
+        mfa_required:
+          type: boolean
+          description: True if MFA verification is required
 
     TokenResponse:
       type: object
-      required: [access_token, expires_in]
+      required: [access_token, expires_in, token_type]
       properties:
         access_token:
           type: string
         expires_in:
           type: integer
+          example: 3600
+        token_type:
+          type: string
+          example: "Bearer"
 
-    # Tenant
-    Tenant:
+    # ============================================================================
+    # API KEYS
+    # ============================================================================
+    ApiKey:
       type: object
-      required: [id, name, slug, status, tier_id, created_at]
+      required: [id, name, key_prefix, scopes, is_active, created_at]
       properties:
         id:
           type: string
           format: uuid
         name:
           type: string
+          example: "Production API Key"
+        description:
+          type: string
+        key_prefix:
+          type: string
+          example: "cf_live_"
+        scopes:
+          type: array
+          items:
+            type: string
+          example: ["evidence:read", "evidence:write", "assessments:read"]
+        rate_limit_override:
+          type: integer
+          nullable: true
+        is_active:
+          type: boolean
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+        usage_count:
+          type: integer
+          example: 15420
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+          format: uuid
+
+    ApiKeyWithSecret:
+      allOf:
+        - $ref: '#/components/schemas/ApiKey'
+        - type: object
+          properties:
+            key:
+              type: string
+              description: Full API key - only shown once
+              example: "cf_live_abc123xyz789"
+
+    CreateApiKeyRequest:
+      type: object
+      required: [name, scopes]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+            enum: ["evidence:read", "evidence:write", "evidence:delete",
+                   "policies:read", "policies:write",
+                   "assessments:read", "assessments:write",
+                   "users:read", "users:write",
+                   "integrations:read", "integrations:write",
+                   "webhooks:read", "webhooks:write",
+                   "reports:read", "audit_logs:read"]
+        expires_at:
+          type: string
+          format: date-time
+
+    UpdateApiKeyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        is_active:
+          type: boolean
+
+    PaginatedApiKeys:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKey'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ============================================================================
+    # TENANTS
+    # ============================================================================
+    Tenant:
+      type: object
+      required: [id, name, slug, status, tier_id, tier_name, data_region, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Acme Corporation"
         slug:
           type: string
+          example: "acme-corp"
         status:
           type: string
           enum: [active, suspended, cancelled]
         tier_id:
           type: string
           format: uuid
+        tier_name:
+          type: string
+          enum: [Lite, Starter, Pro, Enterprise]
+        tier_code:
+          type: string
+          enum: [lite, starter, pro, enterprise]
         billing_email:
+          type: string
+          format: email
+        technical_contact_email:
           type: string
           format: email
         company_size:
           type: string
+          enum: ["1-15", "15-50", "50-100", "100+"]
         industry:
           type: string
         timezone:
           type: string
+          example: "Europe/Paris"
+        data_region:
+          type: string
+          enum: [eu-west-1, eu-central-1]
+          example: "eu-west-1"
+        gdpr_compliant:
+          type: boolean
+          default: true
         created_at:
           type: string
           format: date-time
@@ -1254,28 +3114,13 @@ components:
           type: string
           format: date-time
 
-    CreateTenantRequest:
-      type: object
-      required: [name, slug, billing_email, admin_email, admin_password]
-      properties:
-        name:
-          type: string
-        slug:
-          type: string
-          pattern: '^[a-z0-9-]+$'
-        billing_email:
-          type: string
-          format: email
-        company_size:
-          type: string
-        industry:
-          type: string
-        admin_email:
-          type: string
-          format: email
-        admin_password:
-          type: string
-          minLength: 12
+    TenantDetail:
+      allOf:
+        - $ref: '#/components/schemas/Tenant'
+        - type: object
+          properties:
+            subscription:
+              $ref: '#/components/schemas/Subscription'
 
     UpdateTenantRequest:
       type: object
@@ -1290,24 +3135,15 @@ components:
           format: email
         company_size:
           type: string
+          enum: ["1-15", "15-50", "50-100", "100+"]
         industry:
           type: string
         timezone:
           type: string
 
-    PaginatedTenants:
-      type: object
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Tenant'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-
     Subscription:
       type: object
-      required: [id, tier_id, status, current_period_ends_at]
+      required: [id, tier_id, tier_name, billing_cycle, status, current_period_ends_at]
       properties:
         id:
           type: string
@@ -1322,17 +3158,101 @@ components:
           enum: [monthly, annual]
         status:
           type: string
+          enum: [trialing, active, past_due, cancelled, expired]
         trial_ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        current_period_started_at:
           type: string
           format: date-time
         current_period_ends_at:
           type: string
           format: date-time
 
-    # User
+    SubscriptionDetail:
+      allOf:
+        - $ref: '#/components/schemas/Subscription'
+        - type: object
+          properties:
+            limits:
+              type: object
+              properties:
+                max_users:
+                  type: integer
+                  nullable: true
+                max_integrations:
+                  type: integer
+                  nullable: true
+                max_frameworks:
+                  type: integer
+                  nullable: true
+                max_evidence_files:
+                  type: integer
+                  nullable: true
+                evidence_retention_days:
+                  type: integer
+                api_requests_per_hour:
+                  type: integer
+            usage:
+              type: object
+              properties:
+                current_user_count:
+                  type: integer
+                current_integration_count:
+                  type: integer
+                current_evidence_count:
+                  type: integer
+                storage_bytes_used:
+                  type: integer
+
+    UsageStatistics:
+      type: object
+      properties:
+        period:
+          type: object
+          properties:
+            start:
+              type: string
+              format: date-time
+            end:
+              type: string
+              format: date-time
+        api_requests:
+          type: object
+          properties:
+            total:
+              type: integer
+            by_endpoint:
+              type: object
+              additionalProperties:
+                type: integer
+        storage:
+          type: object
+          properties:
+            total_bytes:
+              type: integer
+            by_evidence_type:
+              type: object
+              additionalProperties:
+                type: integer
+
+    PaginatedTenants:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tenant'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ============================================================================
+    # USERS
+    # ============================================================================
     User:
       type: object
-      required: [id, tenant_id, email, first_name, last_name, role, status]
+      required: [id, tenant_id, email, first_name, last_name, role, status, created_at]
       properties:
         id:
           type: string
@@ -1353,14 +3273,39 @@ components:
         status:
           type: string
           enum: [active, pending, suspended, inactive]
+        job_title:
+          type: string
+        department:
+          type: string
+        mfa_enabled:
+          type: boolean
         last_login_at:
           type: string
           format: date-time
-        mfa_enabled:
+          nullable: true
+        email_notifications_enabled:
+          type: boolean
+        weekly_digest_enabled:
           type: boolean
         created_at:
           type: string
           format: date-time
+
+    UserDetail:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            pending_acks:
+              type: array
+              items:
+                type: object
+                properties:
+                  policy_id:
+                    type: string
+                    format: uuid
+                  policy_title:
+                    type: string
 
     InviteUserRequest:
       type: object
@@ -1376,6 +3321,10 @@ components:
         role:
           type: string
           enum: [admin, compliance_officer, auditor, member]
+        job_title:
+          type: string
+        department:
+          type: string
 
     UpdateUserRequest:
       type: object
@@ -1386,8 +3335,18 @@ components:
           type: string
         role:
           type: string
+          enum: [owner, admin, compliance_officer, auditor, member]
         status:
           type: string
+          enum: [active, suspended, inactive]
+        job_title:
+          type: string
+        department:
+          type: string
+        email_notifications_enabled:
+          type: boolean
+        weekly_digest_enabled:
+          type: boolean
 
     PaginatedUsers:
       type: object
@@ -1399,45 +3358,52 @@ components:
         pagination:
           $ref: '#/components/schemas/Pagination'
 
-    # Framework
+    # ============================================================================
+    # FRAMEWORKS
+    # ============================================================================
     Framework:
       type: object
-      required: [id, name, code, version, category]
+      required: [id, name, code, version, category, is_system, is_active]
       properties:
         id:
           type: string
           format: uuid
         name:
           type: string
+          example: "SOC 2 Type II"
         code:
           type: string
+          example: "soc2"
         version:
           type: string
+          example: "2017"
         description:
           type: string
         authority:
           type: string
+          example: "AICPA"
         category:
           type: string
+          enum: [security, privacy, availability, processing_integrity, confidentiality, resilience]
+        jurisdiction:
+          type: string
+          example: "US"
+        certification_validity_months:
+          type: integer
+          nullable: true
+        requires_external_audit:
+          type: boolean
         is_system:
           type: boolean
         is_custom:
           type: boolean
+        is_active:
+          type: boolean
         control_count:
           type: integer
-
-    CreateFrameworkRequest:
-      type: object
-      required: [name, code, description]
-      properties:
-        name:
+        created_at:
           type: string
-        code:
-          type: string
-        description:
-          type: string
-        category:
-          type: string
+          format: date-time
 
     FrameworkDetail:
       allOf:
@@ -1449,10 +3415,47 @@ components:
               items:
                 $ref: '#/components/schemas/Control'
 
-    # Control
+    CreateFrameworkRequest:
+      type: object
+      required: [name, code, description, category]
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+          pattern: '^[a-z0-9_-]+$'
+        description:
+          type: string
+        category:
+          type: string
+        authority:
+          type: string
+        jurisdiction:
+          type: string
+        certification_validity_months:
+          type: integer
+        requires_external_audit:
+          type: boolean
+          default: false
+
+    UpdateFrameworkRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        is_active:
+          type: boolean
+
+    # ============================================================================
+    # CONTROLS
+    # ============================================================================
     Control:
       type: object
-      required: [id, framework_id, control_number, title, description]
+      required: [id, framework_id, control_number, title, description, is_active]
       properties:
         id:
           type: string
@@ -1460,6 +3463,53 @@ components:
         framework_id:
           type: string
           format: uuid
+        control_number:
+          type: string
+          example: "CC6.1"
+        title:
+          type: string
+        description:
+          type: string
+        implementation_guidance:
+          type: string
+        testing_procedure:
+          type: string
+        evidence_requirements:
+          type: array
+          items:
+            type: string
+        category:
+          type: string
+          example: "access_control"
+        subcategory:
+          type: string
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+        can_be_automated:
+          type: boolean
+        automation_integration_type:
+          type: string
+          nullable: true
+        is_system:
+          type: boolean
+        is_active:
+          type: boolean
+
+    ControlDetail:
+      allOf:
+        - $ref: '#/components/schemas/Control'
+        - type: object
+          properties:
+            linked_evidence_count:
+              type: integer
+            active_assessment_count:
+              type: integer
+
+    CreateControlRequest:
+      type: object
+      required: [control_number, title, description]
+      properties:
         control_number:
           type: string
         title:
@@ -1475,11 +3525,37 @@ components:
         risk_level:
           type: string
           enum: [low, medium, high, critical]
+        can_be_automated:
+          type: boolean
+          default: false
 
-    # Assessment
+    UpdateControlRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        implementation_guidance:
+          type: string
+        testing_procedure:
+          type: string
+        category:
+          type: string
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+        can_be_automated:
+          type: boolean
+        automation_integration_type:
+          type: string
+
+    # ============================================================================
+    # ASSESSMENTS
+    # ============================================================================
     Assessment:
       type: object
-      required: [id, tenant_id, framework_id, status]
+      required: [id, tenant_id, framework_id, framework_name, status, total_controls, created_at]
       properties:
         id:
           type: string
@@ -1492,12 +3568,18 @@ components:
           format: uuid
         framework_name:
           type: string
+        framework_code:
+          type: string
         status:
           type: string
+          enum: [in_progress, ready_for_review, audit_scheduled, audit_in_progress, compliant, non_compliant, remediation_required]
         target_completion_date:
           type: string
           format: date
         audit_date:
+          type: string
+          format: date
+        certification_issued_at:
           type: string
           format: date
         certification_expires_at:
@@ -1509,8 +3591,42 @@ components:
           type: integer
         compliant_controls:
           type: integer
-        progress_percentage:
+        non_compliant_controls:
           type: integer
+        not_applicable_controls:
+          type: integer
+        compliance_percentage:
+          type: number
+          format: percentage
+        assigned_to:
+          type: string
+          format: uuid
+          nullable: true
+        auditor_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    AssessmentDetail:
+      allOf:
+        - $ref: '#/components/schemas/Assessment'
+        - type: object
+          properties:
+            assigned_user:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                email:
+                  type: string
+            notes:
+              type: string
+            auditor_notes:
+              type: string
 
     CreateAssessmentRequest:
       type: object
@@ -1525,12 +3641,15 @@ components:
         assigned_to:
           type: string
           format: uuid
+        notes:
+          type: string
 
     UpdateAssessmentRequest:
       type: object
       properties:
         status:
           type: string
+          enum: [in_progress, ready_for_review, audit_scheduled, audit_in_progress, compliant, non_compliant, remediation_required]
         target_completion_date:
           type: string
           format: date
@@ -1542,20 +3661,8 @@ components:
           format: uuid
         notes:
           type: string
-
-    AssessmentDetail:
-      allOf:
-        - $ref: '#/components/schemas/Assessment'
-        - type: object
-          properties:
-            control_implementations:
-              type: array
-              items:
-                $ref: '#/components/schemas/ControlImplementation'
-            findings:
-              type: array
-              items:
-                $ref: '#/components/schemas/Finding'
+        auditor_notes:
+          type: string
 
     PaginatedAssessments:
       type: object
@@ -1569,7 +3676,7 @@ components:
 
     ControlImplementation:
       type: object
-      required: [id, control_id, status]
+      required: [id, control_id, control_number, control_title, status]
       properties:
         id:
           type: string
@@ -1583,15 +3690,21 @@ components:
           type: string
         status:
           type: string
+          enum: [not_started, in_progress, implemented, tested, compliant, non_compliant, remediated, not_applicable]
         implementation_description:
           type: string
         responsible_user_id:
           type: string
           format: uuid
+          nullable: true
         responsible_user_name:
           type: string
         test_frequency:
           type: string
+          enum: [daily, weekly, monthly, quarterly, annually]
+        test_method:
+          type: string
+          enum: [automated, manual, hybrid]
         last_tested_at:
           type: string
           format: date-time
@@ -1600,29 +3713,68 @@ components:
           format: date-time
         is_automated:
           type: boolean
+        integration_name:
+          type: string
+          nullable: true
         evidence_count:
           type: integer
+
+    ControlImplementationDetail:
+      allOf:
+        - $ref: '#/components/schemas/ControlImplementation'
+        - type: object
+          properties:
+            implementation_notes:
+              type: string
+            not_applicable_reason:
+              type: string
+            not_applicable_approved_by:
+              type: string
+              format: uuid
+            evidence:
+              type: array
+              items:
+                $ref: '#/components/schemas/EvidenceFile'
+            findings:
+              type: array
+              items:
+                $ref: '#/components/schemas/Finding'
 
     UpdateControlImplementationRequest:
       type: object
       properties:
         status:
           type: string
+          enum: [not_started, in_progress, implemented, tested, compliant, non_compliant, remediated, not_applicable]
         implementation_description:
+          type: string
+        implementation_notes:
           type: string
         responsible_user_id:
           type: string
           format: uuid
         test_frequency:
           type: string
+          enum: [daily, weekly, monthly, quarterly, annually]
+        test_method:
+          type: string
+          enum: [automated, manual, hybrid]
+        not_applicable_reason:
+          type: string
 
+    # ============================================================================
+    # FINDINGS
+    # ============================================================================
     Finding:
       type: object
-      required: [id, severity, title, status]
+      required: [id, severity, title, status, finding_type, created_at]
       properties:
         id:
           type: string
           format: uuid
+        finding_number:
+          type: string
+          example: "F-2024-001"
         severity:
           type: string
           enum: [low, medium, high, critical]
@@ -1632,14 +3784,121 @@ components:
           type: string
         status:
           type: string
+          enum: [open, in_progress, resolved, accepted_risk, false_positive]
+        finding_type:
+          type: string
+          enum: [deficiency, weakness, gap, observation, recommendation]
+        assigned_to:
+          type: string
+          format: uuid
+          nullable: true
         due_date:
           type: string
           format: date
+        created_at:
+          type: string
+          format: date-time
 
-    # Evidence
+    FindingDetail:
+      allOf:
+        - $ref: '#/components/schemas/Finding'
+        - type: object
+          properties:
+            root_cause_analysis:
+              type: string
+            remediation_plan:
+              type: string
+            remediation_steps:
+              type: array
+              items:
+                type: string
+            remediated_at:
+              type: string
+              format: date-time
+            remediated_by:
+              type: string
+              format: uuid
+            remediation_verified_at:
+              type: string
+              format: date-time
+            remediation_verified_by:
+              type: string
+              format: uuid
+            auditor_name:
+              type: string
+            auditor_notes:
+              type: string
+
+    CreateFindingRequest:
+      type: object
+      required: [severity, title, description, finding_type]
+      properties:
+        control_implementation_id:
+          type: string
+          format: uuid
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        title:
+          type: string
+        description:
+          type: string
+        finding_type:
+          type: string
+          enum: [deficiency, weakness, gap, observation, recommendation]
+        assigned_to:
+          type: string
+          format: uuid
+        due_date:
+          type: string
+          format: date
+        root_cause_analysis:
+          type: string
+
+    UpdateFindingRequest:
+      type: object
+      properties:
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [open, in_progress, resolved, accepted_risk, false_positive]
+        assigned_to:
+          type: string
+          format: uuid
+        due_date:
+          type: string
+          format: date
+        root_cause_analysis:
+          type: string
+        remediation_plan:
+          type: string
+        remediation_steps:
+          type: array
+          items:
+            type: string
+
+    PaginatedFindings:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Finding'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ============================================================================
+    # EVIDENCE
+    # ============================================================================
     EvidenceFile:
       type: object
-      required: [id, filename, evidence_type, file_size_bytes, uploaded_by]
+      required: [id, filename, original_filename, file_size_bytes, mime_type, evidence_type, uploaded_by, created_at]
       properties:
         id:
           type: string
@@ -1654,6 +3913,7 @@ components:
           type: string
         evidence_type:
           type: string
+          enum: [policy, procedure, screenshot, log, configuration, certificate, audit_report, training_record, vendor_assessment, incident_report, other]
         description:
           type: string
         tags:
@@ -1667,6 +3927,10 @@ components:
           type: string
         sha256_hash:
           type: string
+          description: SHA-256 hash for integrity verification
+        retention_until_date:
+          type: string
+          format: date
         created_at:
           type: string
           format: date-time
@@ -1681,13 +3945,26 @@ components:
               items:
                 type: object
                 properties:
-                  control_id:
+                  control_implementation_id:
                     type: string
                     format: uuid
                   control_number:
                     type: string
+                  control_title:
+                    type: string
                   link_type:
                     type: string
+                    enum: [supporting, primary, test_result, reference]
+
+    UpdateEvidenceRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
 
     PaginatedEvidence:
       type: object
@@ -1699,10 +3976,12 @@ components:
         pagination:
           $ref: '#/components/schemas/Pagination'
 
-    # Policy
+    # ============================================================================
+    # POLICIES
+    # ============================================================================
     Policy:
       type: object
-      required: [id, title, code, category, status, owner_id]
+      required: [id, title, code, category, status, owner_id, current_version_number, created_at]
       properties:
         id:
           type: string
@@ -1713,8 +3992,10 @@ components:
           type: string
         category:
           type: string
+          enum: [information_security, privacy, hr, operational, vendor_management, business_continuity, acceptable_use, other]
         status:
           type: string
+          enum: [draft, under_review, approved, superseded, archived]
         owner_id:
           type: string
           format: uuid
@@ -1728,10 +4009,38 @@ components:
         next_review_due_at:
           type: string
           format: date-time
+        requires_acknowledgment:
+          type: boolean
+        acknowledgment_frequency_months:
+          type: integer
+          nullable: true
         acknowledgment_count:
           type: integer
         required_acknowledgment_count:
           type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    PolicyDetail:
+      allOf:
+        - $ref: '#/components/schemas/Policy'
+        - type: object
+          properties:
+            current_version:
+              $ref: '#/components/schemas/PolicyVersion'
+            review_history:
+              type: array
+              items:
+                type: object
+                properties:
+                  version_number:
+                    type: integer
+                  approved_at:
+                    type: string
+                    format: date-time
+                  approved_by:
+                    type: string
 
     CreatePolicyRequest:
       type: object
@@ -1743,12 +4052,21 @@ components:
           type: string
         category:
           type: string
+          enum: [information_security, privacy, hr, operational, vendor_management, business_continuity, acceptable_use, other]
         owner_id:
           type: string
           format: uuid
         content:
           type: string
-          description: Initial policy content (markdown)
+          description: Initial policy content in markdown
+        review_frequency_months:
+          type: integer
+          default: 12
+        requires_acknowledgment:
+          type: boolean
+          default: false
+        acknowledgment_frequency_months:
+          type: integer
 
     UpdatePolicyRequest:
       type: object
@@ -1760,26 +4078,62 @@ components:
         owner_id:
           type: string
           format: uuid
+        reviewer_id:
+          type: string
+          format: uuid
         status:
           type: string
+          enum: [draft, under_review, approved, superseded, archived]
+        review_frequency_months:
+          type: integer
+        requires_acknowledgment:
+          type: boolean
 
-    PolicyDetail:
-      allOf:
-        - $ref: '#/components/schemas/Policy'
-        - type: object
-          properties:
-            current_version:
-              type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
-                version_number:
-                  type: integer
-                content_markdown:
-                  type: string
-                content_html:
-                  type: string
+    PolicyVersion:
+      type: object
+      required: [id, version_number, content_markdown, content_html, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        version_number:
+          type: integer
+        change_summary:
+          type: string
+        content_markdown:
+          type: string
+        content_html:
+          type: string
+        ai_generated:
+          type: boolean
+        ai_model_version:
+          type: string
+        created_by:
+          type: string
+          format: uuid
+        created_by_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        reviewed_by:
+          type: string
+          format: uuid
+        reviewed_at:
+          type: string
+          format: date-time
+        approved_by:
+          type: string
+          format: uuid
+        approved_at:
+          type: string
+          format: date-time
+        effective_from:
+          type: string
+          format: date
+        effective_until:
+          type: string
+          format: date
 
     CreatePolicyVersionRequest:
       type: object
@@ -1788,6 +4142,31 @@ components:
         content_markdown:
           type: string
         change_summary:
+          type: string
+        ai_generated:
+          type: boolean
+          default: false
+
+    PolicyAcknowledgment:
+      type: object
+      required: [user_id, policy_version_id, acknowledged_at]
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        user_name:
+          type: string
+        policy_version_id:
+          type: string
+          format: uuid
+        version_number:
+          type: integer
+        acknowledged_at:
+          type: string
+          format: date-time
+        ip_address:
+          type: string
+        user_agent:
           type: string
 
     PaginatedPolicies:
@@ -1800,18 +4179,26 @@ components:
         pagination:
           $ref: '#/components/schemas/Pagination'
 
-    # Integration
+    # ============================================================================
+    # INTEGRATIONS
+    # ============================================================================
     Integration:
       type: object
-      required: [id, provider, status]
+      required: [id, provider, name, status, created_at]
       properties:
         id:
           type: string
           format: uuid
         provider:
           type: string
+          enum: [github, gitlab, bitbucket, aws, azure, gcp, slack, teams, okta, onelogin, jira, linear, datadog, sentry, snyk, crowdstrike, wiz, qualys, pagerduty, opsgenie, sumologic, splunk]
+        name:
+          type: string
+        description:
+          type: string
         status:
           type: string
+          enum: [pending, connected, error, disconnected, degraded]
         last_synced_at:
           type: string
           format: date-time
@@ -1819,20 +4206,106 @@ components:
           type: array
           items:
             type: string
+        health_status:
+          type: string
+          enum: [healthy, warning, critical]
+          nullable: true
+        auto_collect_evidence:
+          type: boolean
         created_at:
           type: string
           format: date-time
 
+    IntegrationDetail:
+      allOf:
+        - $ref: '#/components/schemas/Integration'
+        - type: object
+          properties:
+            webhook_url:
+              type: string
+              format: uri
+            last_error_at:
+              type: string
+              format: date-time
+            last_error_message:
+              type: string
+            error_count:
+              type: integer
+
+    IntegrationPendingOAuth:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending]
+        oauth_url:
+          type: string
+          format: uri
+          description: URL to redirect user for OAuth authorization
+
     CreateIntegrationRequest:
       type: object
-      required: [provider]
+      required: [provider, name]
       properties:
         provider:
           type: string
+          enum: [github, gitlab, bitbucket, aws, azure, gcp, slack, teams, okta, onelogin, jira, linear, datadog, sentry, snyk, crowdstrike, wiz, qualys, pagerduty, opsgenie, sumologic, splunk]
+        name:
+          type: string
+        description:
+          type: string
         api_key:
           type: string
-        oauth_code:
+          description: API key for providers that don't use OAuth
+        auto_collect_evidence:
+          type: boolean
+          default: true
+
+    UpdateIntegrationRequest:
+      type: object
+      properties:
+        name:
           type: string
+        description:
+          type: string
+        auto_collect_evidence:
+          type: boolean
+        api_key:
+          type: string
+
+    IntegrationSyncLog:
+      type: object
+      required: [id, sync_type, status, started_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        sync_type:
+          type: string
+        status:
+          type: string
+          enum: [success, partial, failure, in_progress]
+        records_processed:
+          type: integer
+        records_created:
+          type: integer
+        records_updated:
+          type: integer
+        records_failed:
+          type: integer
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        error_details:
+          type: array
+          items:
+            type: object
 
     PaginatedIntegrations:
       type: object
@@ -1844,10 +4317,12 @@ components:
         pagination:
           $ref: '#/components/schemas/Pagination'
 
-    # Webhook
+    # ============================================================================
+    # WEBHOOKS
+    # ============================================================================
     Webhook:
       type: object
-      required: [id, name, url, events]
+      required: [id, name, url, events, is_active, created_at]
       properties:
         id:
           type: string
@@ -1857,17 +4332,56 @@ components:
         url:
           type: string
           format: uri
+        description:
+          type: string
         events:
           type: array
           items:
             type: string
+            enum: [compliance.assessment.created, compliance.assessment.completed, compliance.assessment.status_changed, evidence.created, evidence.deleted, finding.created, finding.resolved, finding.status_changed, policy.published, policy.version.approved, user.invited, user.activated, integration.connected, integration.error]
         is_active:
           type: boolean
         last_delivered_at:
           type: string
           format: date-time
+        last_delivery_status:
+          type: integer
         failure_count:
           type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    WebhookWithSecret:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            secret:
+              type: string
+              description: Webhook secret for HMAC verification - only shown once
+
+    WebhookDetail:
+      allOf:
+        - $ref: '#/components/schemas/Webhook'
+        - type: object
+          properties:
+            max_retries:
+              type: integer
+            retry_interval_seconds:
+              type: integer
+            total_deliveries:
+              type: integer
+            successful_deliveries:
+              type: integer
+            failed_deliveries:
+              type: integer
+            disabled_at:
+              type: string
+              format: date-time
+            signature_algorithm:
+              type: string
+              enum: [sha256, sha512]
 
     CreateWebhookRequest:
       type: object
@@ -1878,15 +4392,19 @@ components:
         url:
           type: string
           format: uri
+        description:
+          type: string
         events:
           type: array
           items:
             type: string
-            enum: [compliance.assessment.created, compliance.assessment.completed, evidence.created, 
-                   finding.created, finding.resolved, policy.published, user.invited]
-        secret:
-          type: string
-          description: Optional custom secret for HMAC
+            enum: [compliance.assessment.created, compliance.assessment.completed, compliance.assessment.status_changed, evidence.created, evidence.deleted, finding.created, finding.resolved, finding.status_changed, policy.published, policy.version.approved, user.invited, user.activated, integration.connected, integration.error]
+        max_retries:
+          type: integer
+          default: 3
+        retry_interval_seconds:
+          type: integer
+          default: 60
 
     UpdateWebhookRequest:
       type: object
@@ -1895,26 +4413,53 @@ components:
           type: string
         url:
           type: string
+          format: uri
         events:
           type: array
           items:
             type: string
         is_active:
           type: boolean
+        max_retries:
+          type: integer
+        retry_interval_seconds:
+          type: integer
 
     WebhookDelivery:
       type: object
+      required: [id, event_type, attempt_number, success, created_at]
       properties:
         id:
           type: string
           format: uuid
         event_type:
           type: string
+        event_id:
+          type: string
+          format: uuid
         attempt_number:
           type: integer
+        payload_size_bytes:
+          type: integer
+        request_headers:
+          type: object
         response_status:
           type: integer
+          nullable: true
+        response_body:
+          type: string
+        response_time_ms:
+          type: integer
+        success:
+          type: boolean
+        error_message:
+          type: string
+        will_retry:
+          type: boolean
         delivered_at:
+          type: string
+          format: date-time
+        created_at:
           type: string
           format: date-time
 
@@ -1928,10 +4473,15 @@ components:
         pagination:
           $ref: '#/components/schemas/Pagination'
 
-    # Reports
+    # ============================================================================
+    # REPORTS
+    # ============================================================================
     ComplianceStatusReport:
       type: object
       properties:
+        generated_at:
+          type: string
+          format: date-time
         overall_status:
           type: string
           enum: [compliant, non_compliant, in_progress]
@@ -1942,12 +4492,21 @@ components:
             properties:
               framework_id:
                 type: string
+                format: uuid
               framework_name:
                 type: string
+              framework_code:
+                type: string
+              assessment_id:
+                type: string
+                format: uuid
               assessment_status:
                 type: string
               progress_percentage:
-                type: integer
+                type: number
+              certification_expires_at:
+                type: string
+                format: date
               days_until_expiry:
                 type: integer
         open_findings:
@@ -1970,11 +4529,91 @@ components:
             properties:
               type:
                 type: string
+                enum: [policy_review, control_test, certification_renewal]
               name:
                 type: string
               due_date:
                 type: string
                 format: date
+
+    # ============================================================================
+    # AUDIT LOGS
+    # ============================================================================
+    ActivityLog:
+      type: object
+      required: [id, user_id, activity_type, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        user_name:
+          type: string
+        activity_type:
+          type: string
+        details:
+          type: object
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    PaginatedActivityLog:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityLog'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    AuditLog:
+      type: object
+      required: [id, activity_type, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+          nullable: true
+        user_name:
+          type: string
+        activity_type:
+          type: string
+        entity_type:
+          type: string
+        entity_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+        details:
+          type: object
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    PaginatedAuditLogs:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLog'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
 
   responses:
     BadRequest:
@@ -1985,7 +4624,14 @@ components:
             $ref: '#/components/schemas/Error'
 
     Unauthorized:
-      description: Unauthorized
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: Forbidden - insufficient permissions
       content:
         application/json:
           schema:
@@ -2014,6 +4660,9 @@ components:
         X-RateLimit-Reset:
           schema:
             type: integer
+        X-RateLimit-Retry-After:
+          schema:
+            type: integer
 
   examples:
     RateLimitError:
@@ -2025,3 +4674,4 @@ components:
             limit: 100
             remaining: 0
             reset: 1710504000
+            retry_after: 3600
