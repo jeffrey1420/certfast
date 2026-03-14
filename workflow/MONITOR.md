@@ -1,140 +1,59 @@
-# CertFast Workflow Monitor
+# Workflow Monitor Protocol (Auto-Recovery Enabled)
 
-## Surveillance Checklist
+## Purpose
+Detect and automatically recover from workflow blockages.
 
-Run every 30 minutes during active hours:
+## Critical Threshold
+🚨 **Alert if no push in 40 minutes**
 
-### 1. Git Activity Check
+## Auto-Recovery Capabilities
+
+The monitor can now:
+1. **Detect** the exact root cause using `git-push-monitor.sh`
+2. **Auto-fix** common issues:
+   - Unpushed commits → Push them
+   - Uncommitted changes → Commit and push
+   - Git config issues → Fix config
+3. **Alert** only when auto-recovery fails
+
+## Diagnostic Script
+
 ```bash
-cd /work/certfast
-git fetch origin
-git log --oneline -5 origin/main
+/work/certfast/workflow/scripts/git-push-monitor.sh
 ```
 
-**Expected**: New commits every 10-30 minutes with format `[track/role]: [task]`
+Exit codes:
+- 0: All good
+- 1: GitHub API issue (check token/network)
+- 2: No push in 40+ min (action required)
 
-**Red flags**:
-- No commits for >45 minutes
-- Commits without push
-- Failed push attempts
-- Merge conflicts
+## Response Matrix
 
-### 2. Track Status Check
-Review each track's task file:
-- `/work/certfast/workflow/tracks/strategy/tasks.md`
-- `/work/certfast/workflow/tracks/design/tasks.md`
-- `/work/certfast/workflow/tracks/tech/tasks.md`
+| Scenario | Auto-Action | Alert? |
+|----------|-------------|--------|
+| Unpushed commits | Auto-push | No (if success) |
+| Uncommitted changes | Auto-commit + push | No (if success) |
+| No agent activity | Investigate, then alert | Yes |
+| Git config broken | Auto-fix + retry | Only if fails |
+| GitHub API down | Alert immediately | Yes |
 
-**Expected**: Active task assigned, status updated
+## Manual Override
 
-**Red flags**:
-- Task status stuck "IN PROGRESS" for >60 min
-- No handoff created
-- Task not marked complete after commit
-
-### 3. Handoff Quality Check
-Review recent handoffs:
-```
-ls -lt /work/certfast/workflow/handoffs/
-```
-
-**Expected**: Handoff created with each commit, includes self-evaluation
-
-**Red flags**:
-- No handoff for recent commit
-- Missing self-evaluation score
-- No next task recommendation
-
-### 4. CONTEXT.md Updates
-Check if major decisions logged:
-```
-git diff HEAD~5 CONTEXT.md
-```
-
-**Expected**: Major decisions added to decision log
-
-### 5. Quality Metrics
-Track across commits:
-- Average self-evaluation scores
-- Revision frequency
-- Word counts vs targets
-
-**Red flags**:
-- Average score < 3
-- >30% revisions needed
-- Word counts consistently below minimum
-
-## Adaptation Triggers
-
-### If agents don't push:
-1. Check git config (user.name, user.email)
-2. Check token validity
-3. Simplify push command in prompts
-4. Add explicit "PUSH VERIFIED" check
-
-### If agents don't read handoffs:
-1. Make handoff path more prominent in prompts
-2. Add "Read handoff" as explicit first step
-3. Create handoff summary file (auto-generated)
-
-### If quality is low (score < 3):
-1. Increase review frequency
-2. Lower task complexity (Deep → Standard)
-3. Add more detailed templates
-4. Require examples in task descriptions
-
-### If agents conflict on git:
-1. Increase stagger delay (10min → 15min)
-2. Add "git pull" before work
-3. Create branch per track (strategy/, design/, tech/)
-4. PM merges during review
-
-### If tracks desynchronize:
-1. Increase PM frequency (6h → 4h)
-2. Add cross-track dependency checks
-3. Create integration tasks
-4. Daily standup summary
-
-## Emergency Interventions
-
-### Complete Workflow Failure
-If no commits for >2 hours:
-1. Check cron job status
-2. Restart jobs if needed
-3. Simplify workflow (remove tracks, go sequential)
-4. Manual task assignment
-
-### Quality Collapse
-If >50% tasks need revision:
-1. Pause all tracks
-2. Review and fix templates
-3. Re-train with examples
-4. Resume with simplified tasks
-
-### Git Repository Corruption
-If merge conflicts or corruption:
-1. Clone fresh from GitHub
-2. Restore from last good commit
-3. Reset workflow state
-4. Notify user
+If you want to pause auto-recovery and investigate manually:
+1. Create `/work/certfast/workflow/.pause-monitor`
+2. Monitor will skip auto-recovery and just alert
+3. Delete file to resume auto-recovery
 
 ## Success Metrics
 
-**Healthy Workflow**:
-- 3+ commits per hour (across all tracks)
-- Average self-eval score ≥ 3.5
-- <20% revision rate
-- No git conflicts
-- PM reviews on schedule
+Monitor should achieve:
+- >95% of push issues auto-resolved
+- <5% requiring manual intervention
+- Zero data loss (commits always recovered)
 
-**Warning Signs**:
-- 1-2 commits per hour
-- Average score 2.5-3.5
-- 20-40% revision rate
-- Occasional git issues
+## History
 
-**Critical**:
-- <1 commit per hour
-- Average score < 2.5
-- >40% revision rate
-- Frequent git failures
+2026-03-15: Implemented auto-recovery system
+- Added `git-push-monitor.sh` diagnostic script
+- Updated monitor agent with auto-recovery protocol
+- Reduced alert noise by fixing issues automatically
