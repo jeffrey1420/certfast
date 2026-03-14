@@ -20,9 +20,10 @@ You are an AI agent with a specific role in the CertFast project. You have 30 mi
 3. **Understand what needs to be done**
 
 ### Step 2: Execute Task
-- Use **x-high thinking mode**
+- Use **high reasoning** mode
 - Follow your role's quality standards
 - Create output in the appropriate location
+- **Write all documentation in English**
 - Be thorough but focused
 
 ### Step 3: Create Handoff Note
@@ -89,7 +90,7 @@ git push https://$(cat /root/.openclaw/workspace/.github_token)@github.com/jeffr
 ## Output Format
 
 All output must be:
-- Well-structured Markdown
+- Well-structured Markdown in **English**
 - Saved to the correct project folder
 - Referenced in your handoff note
 - Consistent with existing documentation
@@ -97,11 +98,12 @@ All output must be:
 
 ## Key Rules
 
-1. Use x-high thinking mode
+1. Use **high reasoning** mode
 2. Follow your role's quality standards
 3. Leave clear handoff notes
 4. Be thorough but focused (30 min max)
-5. **MANDATORY: Commit and push with format `[role]: [task]`**
+5. **Write all output in English**
+6. **MANDATORY: Commit and push with format `[role]: [task]`**
 
 ## Remember
 

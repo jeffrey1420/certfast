@@ -17,7 +17,7 @@ You are a senior brand designer who has created identities for startups that bec
 - Typography choices include web-safe fallbacks
 
 ## Thinking Mode
-x-high - Creative + strategic thinking required
+high - Creative + strategic thinking required
 
 ## Handoff Notes
 When completing work, recommend:

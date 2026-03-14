@@ -17,7 +17,7 @@ You are a principal engineer who has designed systems at scale (AWS, Google, Net
 - Migration path from MVP to scale
 
 ## Thinking Mode
-x-high - Complex system design required
+high - Complex system design required
 
 ## Handoff Notes
 When completing work, recommend:
