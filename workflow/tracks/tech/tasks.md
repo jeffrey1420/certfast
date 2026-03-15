@@ -100,6 +100,42 @@ Format: `tech/api-designer: documented core API endpoints`
 **Status**: ✅ COMPLETE  
 **Quality Score**: 5/5
 
+### TEC-003-SIMPLE: Core API Endpoints ✅
+**Role**: api-designer  
+**Type**: Quick (15 min)  
+**Status**: ✅ COMPLETE  
+**Quality Score**: 5/5  
+**Commits**: `ff783af`, `3586f8d` - API documentation for Users, Orgs, Assessments, Controls
+
+---
+
+## Active Task (CURRENT) - NO CONTEXT READING REQUIRED
+
+**Task ID**: TEC-004-SIMPLE
+**Type**: Standard (30 min)
+**Assigned Role**: `security-architect`
+**Status**: ACTIVE - EXECUTE NOW
+**Priority**: High
+
+### Description
+Security Architecture Review - Core Components
+
+Document security measures for the 4 core areas:
+1. Authentication (JWT, session management)
+2. Authorization (RBAC, permissions)
+3. Data protection (encryption at rest/transit)
+4. API security (rate limiting, input validation)
+
+### Output
+Create `/work/certfast/architecture/security-core.md` with:
+- Security measures for each area (bullet points)
+- Implementation notes
+- Min 600 words
+
+### Git Commit
+Format: `tech/security-architect: documented core security architecture`  
+**Quality Score**: 5/5
+
 ---
 
 ## Backlog

@@ -5,16 +5,30 @@
 
 ---
 
+## Completed Tasks
+
+### DSG-005-SIMPLE: Simple Wireframes ✅
+**Role**: ui-designer  
+**Type**: Quick (15 min)  
+**Status**: ✅ COMPLETE  
+**Quality Score**: 4/5  
+**Commits**: Multiple successful commits with ASCII wireframes
+
+---
+
 ## Active Task (CURRENT) - NO CONTEXT READING REQUIRED
 
-**Task ID**: DSG-005-SIMPLE
-**Type**: Quick (15 min)
+**Task ID**: DSG-006-SIMPLE
+**Type**: Standard (30 min)
 **Assigned Role**: `ui-designer`
 **Status**: ACTIVE - EXECUTE NOW
 **Priority**: High
 
 ### Description
-Simple Wireframe Sketches (ASCII/Text-based)
+High-Fidelity Mockups - Core Screens (Simplified)
+
+Create detailed mockups for 2 core screens with color, typography, and spacing.
+Focus on the main dashboard and assessment detail views.
 
 Create 3 simple wireframes using text/ASCII art. NO need to read external files - use the description below.
 
@@ -91,6 +105,13 @@ Format: `design/ui-designer: created simple ASCII wireframes`
 **Role**: ui-designer  
 **Status**: ✅ COMPLETE  
 **Quality Score**: 4/5
+
+### DSG-005-SIMPLE: Simple Wireframes ✅
+**Role**: ui-designer  
+**Type**: Quick (15 min)  
+**Status**: ✅ COMPLETE  
+**Quality Score**: 4/5  
+**Commit**: `86f068d` and others - ASCII wireframes created
 
 ---
 
