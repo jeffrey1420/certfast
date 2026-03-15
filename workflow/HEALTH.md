@@ -12,6 +12,41 @@
 2. Detect uncommitted changes → Commit and push
 3. Detect agent failures → Alert for manual investigation
 
+## Incident: Uncommitted Changes Auto-Recovery
+
+**Detected**: 2026-03-15 13:46 PM (Asia/Shanghai)
+**Severity**: Low
+**Status**: ✅ Auto-recovered successfully
+
+### Diagnostic Summary
+- Last GitHub push: 19 minutes ago (within threshold)
+- Working tree: 1 uncommitted file (`architecture/security-core.md`)
+- Unpushed commits: 2 (stale local refs, resolved with fetch)
+- Git config: Valid
+- GitHub API: Reachable
+- Subagents: None active (potential stall)
+
+### Root Cause
+- Local `origin/main` tracking branch was stale
+- `architecture/security-core.md` had 112 insertions, 239 deletions uncommitted
+- No agents currently processing active tasks
+
+### Recovery Actions Taken
+- ✅ `git fetch origin` - Updated stale tracking refs
+- ✅ `git add -A` - Staged uncommitted changes
+- ✅ `git commit` - Committed with message "monitor/auto-recovery: committed pending changes from agent failure"
+- ✅ `git push` - Successfully pushed to GitHub
+- ✅ Verified clean working directory
+
+### Active Tasks Without Agents
+- **DSG-006-SIMPLE**: High-Fidelity Mockups (ACTIVE, no agent running)
+- **TEC-003-SIMPLE**: API Documentation (ACTIVE, no agent running)
+
+### Lessons Learned
+1. Stale remote refs can cause false "unpushed commits" alerts - always fetch first
+2. Monitor successfully auto-committed 112 lines of security documentation
+3. No active agents despite ACTIVE tasks suggests guardian may need adjustment
+
 ## Previous Issues
 
 ### Issue: Stale remote-tracking branch
@@ -38,10 +73,10 @@
 
 | Component | Status | Last Check |
 |-----------|--------|------------|
-| GitHub Push | ✅ OK | 2026-03-15 10:46 |
-| Strategy Track | 🔄 Active | STR-MAINT-001 |
-| Design Track | 🔄 Active | DSG-005 Wireframes |
-| Tech Track | 🔄 Active | TEC-003 API Spec |
+| GitHub Push | ✅ OK | 2026-03-15 13:46 |
+| Strategy Track | 🔄 Active | STR-008 |
+| Design Track | 🔄 Active | DSG-006 High-Fidelity Mockups |
+| Tech Track | 🔄 Active | TEC-003 API Docs |
 | Cron Jobs | ✅ All running | 7/7 active |
 
 ## Incident: Silent Agent Failure
