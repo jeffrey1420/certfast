@@ -133,7 +133,8 @@ Define Beta program structure for first 50 customers.
 - **Role**: content-strategist
 - **Type**: Standard (30 min)
 - **Priority**: High
-- **Depends on**: STR-005 ✅, DSG-007 (web setup)
+- **Status**: ACTIVE - EXECUTE NOW
+- **Depends on**: STR-005 ✅, DSG-007 ✅
 
 **Description:**
 Write all copy for marketing website.
