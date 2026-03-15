@@ -1,4 +1,4 @@
-import { Menu, Bell, User, LogOut } from 'lucide-react'
+import { Menu, Bell, User, LogOut, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
