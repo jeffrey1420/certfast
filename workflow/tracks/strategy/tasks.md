@@ -157,6 +157,7 @@ Write all copy for marketing website.
 - **Role**: business-analyst
 - **Type**: Deep (60 min)
 - **Priority**: High
+- **Status**: **ACTIVE - EXECUTE NOW**
 - **Depends on**: STR-008 ✅, STR-009 ✅
 
 **Description:**
