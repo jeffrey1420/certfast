@@ -159,6 +159,7 @@ Refine pricing strategy based on GTM channel mix. Define discount policies, annu
 **Role**: content-strategist
 **Type**: Standard (30 min)
 **Priority**: Medium
+**Status**: ACTIVE - EXECUTE NOW
 **Depends on**: STR-005 ✅, STR-006 ✅
 
 **Description**:
