@@ -1,12 +1,12 @@
 <div align="center">
 
 <img src="https://img.shields.io/badge/status-active-success?style=flat-square" alt="Status">
-<img src="https://img.shields.io/badge/progress-47%25-blue?style=flat-square" alt="Progress">
-<img src="https://img.shields.io/badge/quality-4.6%2F5-brightgreen?style=flat-square" alt="Quality">
+<img src="https://img.shields.io/badge/progress-65%25-blue?style=flat-square" alt="Progress">
+<img src="https://img.shields.io/badge/quality-4.8%2F5-brightgreen?style=flat-square" alt="Quality">
 
 # 📊 CertFast Project Dashboard
 
-**Sprint**: #1 Foundation | **System**: v2 Multi-Track | **Updated**: 2026-03-15 05:00 CET
+**Sprint**: #1.5 Architecture Realignment | **System**: v2 Multi-Track | **Updated**: 2026-03-15 19:00 CET
 
 </div>
 
@@ -16,178 +16,164 @@
 
 | Metric | Value | Status |
 |--------|-------|--------|
-| **Overall Progress** | 8/17 tasks (47%) | 🟢 On Track |
-| **Quality Score** | 4.6/5 | 🟢 Excellent |
-| **Est. Completion** | ~5 hours | 🟡 Progressing |
+| **Overall Progress** | Sprint #1: 21/21 tasks (100%) | 🟢 Complete |
+| **Sprint #1.5** | 0/2 tasks (0%) | 🟡 In Progress |
+| **Quality Score** | 4.8/5 | 🟢 Excellent |
+| **Infrastructure** | Bare metal + Docker + R2 | 🟢 Decided |
 | **Active Tracks** | 3/3 | 🟢 All Active |
 
 ---
 
 ## 🚦 Track Status
 
-### 🎯 Strategy Track
+### 🎯 Strategy Track — SPRINT #1 COMPLETE ✅
 ```
-[████████░░░░░░░░░░░░]  67%  (4/6 tasks)
+[████████████████████]  100%  (10/10 tasks)
 ```
 
 | Metric | Value |
 |--------|-------|
-| **Completed** | 4/6 tasks |
-| **Active** | STR-005 — Positioning Strategy |
-| **Quality Avg** | 4.75/5 ⭐ |
-| **Status** | 🟢 Active |
+| **Completed** | 10/10 tasks |
+| **Active** | STR-011 — Pitch Deck (Sprint #2) |
+| **Quality Avg** | 4.9/5 ⭐ |
+| **Status** | 🟢 Sprint #1 Complete, #2 Ready |
 
-**Completed:**
+**Sprint #1 Completed:**
 - ✅ STR-001: Product Vision (5/5)
 - ✅ STR-002: Customer Validation Research (4/5)
 - ✅ STR-003: Business Model Refinement (5/5)
 - ✅ STR-004: Technical Architecture (5/5)
+- ✅ STR-005: Positioning Strategy (5/5)
+- ✅ STR-006: Go-to-Market Planning (5/5)
+- ✅ STR-007: Competitive Intelligence (4/5)
+- ✅ STR-008: CPA Partnership Strategy (5/5)
+- ✅ STR-009: Pricing Strategy Refinement (5/5)
+- ✅ STR-010: Content Strategy Framework (5/5)
 
-**Remaining:**
-- 🔄 STR-005: Positioning Strategy
-- ⏳ STR-006: Go-to-Market Planning
+**Sprint #2 Backlog:**
+- 🔄 STR-011: Pitch Deck Outline
+- ⏳ STR-012: Beta Program Definition
+- ⏳ STR-013: Landing Page Copywriting
+- ⏳ STR-014: Sales Playbook v1
+- ⏳ STR-015: Launch Checklist
+- ⏳ STR-016: First 100 Customers Plan
 
 ---
 
-### 🎨 Design Track
+### 🎨 Design Track — SPRINT #1 COMPLETE ✅
 ```
-[████░░░░░░░░░░░░░░░░]  40%  (2/5 tasks)
+[████████████████████]  100%  (6/6 tasks)
 ```
 
 | Metric | Value |
 |--------|-------|
-| **Completed** | 2/5 tasks |
-| **Active** | DSG-003 — User Flow Mapping |
+| **Completed** | 6/6 tasks |
+| **Active** | DSG-007 — React Setup (Sprint #2) |
 | **Quality Avg** | 4.0/5 |
-| **Status** | 🟢 Active |
+| **Status** | 🟢 Sprint #1 Complete, #2 Ready |
 
-**Completed:**
+**Sprint #1 Completed:**
 - ✅ DSG-001: Brand Identity (4/5)
-- ✅ DSG-002: UX Research & Personas (4/5) — *27,000+ words*
+- ✅ DSG-002: UX Research & Personas (4/5)
+- ✅ DSG-003: User Flow Mapping (4/5)
+- ✅ DSG-004: Design System Tokens (4/5)
+- ✅ DSG-005: Wireframes — Core Flows (4/5)
+- ✅ DSG-006: High-Fidelity Mockups (4/5)
 
-**Remaining:**
-- 🔄 DSG-003: User Flow Mapping
-- ⏳ DSG-004: Design System Tokens
-- ⏳ DSG-005: Wireframes — Core Flows
+**Sprint #2 Backlog:**
+- 🔄 DSG-007: React + Vite Project Setup
+- ⏳ DSG-008: Auth Pages Implementation
+- ⏳ DSG-009: Layout Components
+- ⏳ DSG-010: Dashboard Page
+- ⏳ DSG-011: Assessment List Page
+- ⏳ DSG-012: Assessment Detail Page
+- ⏳ DSG-013: Settings Pages
+- ⏳ DSG-014: UI Polish & Responsive
 
 ---
 
-### 🏗️ Tech Track
+### 🏗️ Tech Track — SPRINT #1.5 IN PROGRESS 🟡
 ```
-[██████░░░░░░░░░░░░░░]  33%  (2/6 tasks)
+[██████████░░░░░░░░░░]  50%  (5/10 tasks)
 ```
 
 | Metric | Value |
 |--------|-------|
-| **Completed** | 2/6 tasks |
-| **Active** | TEC-003 — API Specification Refinement |
-| **Quality Avg** | 5.0/5 ⭐⭐⭐ |
-| **Status** | 🟢 Active |
+| **Sprint #1 Completed** | 5/5 tasks |
+| **Sprint #1.5 Active** | TEC-001-UPDATE — Architecture Realignment |
+| **Quality Avg** | 5.0/5 |
+| **Status** | 🟡 Architecture Realignment Required |
 
-**Completed:**
-- ✅ TEC-001: System Architecture (5/5)
-- ✅ TEC-002: Database Schema (5/5) — *6 migrations, RLS, GDPR*
+**Sprint #1 Completed:**
+- ✅ TEC-001: System Architecture — AWS-based (5/5) — **NEEDS UPDATE**
+- ✅ TEC-002: Database Schema (5/5)
+- ✅ TEC-003: Core API Endpoints (5/5)
+- ✅ TEC-004: Security Architecture (5/5)
+- ✅ TEC-005: DevOps & Infrastructure — AWS-based (5/5) — **NEEDS UPDATE**
 
-**Remaining:**
-- 🔄 TEC-003: API Specification Refinement
-- ⏳ TEC-004: Security Architecture Review
-- ⏳ TEC-005: DevOps & Infrastructure
-- ⏳ TEC-006: Technical Documentation
+**Sprint #1.5 — Architecture Realignment (ACTIVE):**
+- 🔄 **TEC-001-UPDATE**: Update System Architecture for bare metal (BLOCKING)
+- ⏳ **TEC-005-UPDATE**: Update Infrastructure Plan for bare metal (BLOCKING)
 
----
-
-## 📋 Sprint #1 Goals Progress
-
-| Goal | Status | Progress |
-|------|--------|----------|
-| Product Vision | ✅ Complete | 100% |
-| Market Research | ✅ Complete | 100% |
-| Business Model | ✅ Complete | 100% |
-| Technical Architecture | ✅ Complete | 100% |
-| Database Schema | ✅ Complete | 100% |
-| Brand Identity | ✅ Complete | 100% |
-| UX Research | ✅ Complete | 100% |
-| Positioning Strategy | 🔄 In Progress | 80% |
-| User Flow Mapping | 🔄 In Progress | 20% |
-| API Specification | 🔄 In Progress | 35% |
+**Sprint #2 Backlog (BLOCKED until 1.5 complete):**
+- ⏳ TEC-006: Docker Compose Infrastructure
+- ⏳ TEC-007: Backend Project Setup (AdonisJS)
+- ⏳ TEC-008: Database Migrations
+- ⏳ TEC-009: Auth System Implementation
+- ⏳ TEC-010: Core API — Users & Orgs
+- ⏳ TEC-011: Core API — Assessments
+- ⏳ TEC-012: Core API — Controls & Evidence
+- ⏳ TEC-013: ClickHouse Integration
+- ⏳ TEC-014: API Testing Suite
 
 ---
 
-## 🔄 Recent Activity (Last 6h)
+## ⚠️ Critical Blockers
 
-| Time | Track | Commit | Description |
-|------|-------|--------|-------------|
-| 04:49 | Tech | `855987d` | API designer handoff created |
-| 04:42 | Design | `acee7d4` | UX Research & Personas completed |
-| 03:56 | Tech | `18d736b` | Database Schema completed |
-| 03:45 | Design | `fb17bcb` | Brand Identity completed |
-| 03:30 | Tech | `e863179` | System Architecture completed |
+| Blocker | Impact | Status |
+|---------|--------|--------|
+| Architecture docs are AWS-based | Sprint #2 cannot start | 🟡 In Progress |
+| Need bare metal + R2 docs | TEC-006 through TEC-014 blocked | 🟡 Waiting for TEC-001-UPDATE |
 
----
-
-## 📁 Key Deliverables
-
-### Strategy
-| Document | Status | Location |
-|----------|--------|----------|
-| Product Vision | ✅ | `/project/vision/product-vision.md` |
-| Competitive Analysis | ✅ | `/project/research/competitive-analysis.md` |
-| Unit Economics | ✅ | `/project/business-model/unit-economics.md` |
-| Financial Projections | ✅ | `/project/business-model/financial-projections-v2.md` |
-
-### Design
-| Document | Status | Location |
-|----------|--------|----------|
-| Brand Guidelines | ✅ | `/design/brand/guidelines.md` |
-| Color Palette | ✅ | `/design/brand/color-palette.md` |
-| Typography | ✅ | `/design/brand/typography.md` |
-| User Personas | ✅ | `/design/research/personas.md` |
-| Journey Maps | ✅ | `/design/research/journey-maps.md` |
-
-### Architecture
-| Document | Status | Location |
-|----------|--------|----------|
-| System Architecture | ✅ | `/architecture/system-architecture.md` |
-| Database Schema | ✅ | `/architecture/database-schema.md` |
-| Security Architecture | ✅ | `/architecture/security-architecture.md` |
-| Infrastructure Plan | ✅ | `/architecture/infrastructure-plan.md` |
-| API Specification | 🔄 | `/architecture/api-specification.yaml` |
-| Database Migrations | ✅ | `/architecture/migrations/` |
+**Resolution Plan:**
+1. System Architect updates TEC-001 (remove AWS, add bare metal/Docker/R2)
+2. DevOps Engineer updates TEC-005 (infrastructure plan for bare metal)
+3. Then: Sprint #2 development unblocked
 
 ---
 
-## 🚨 Active Alerts
+## 📈 Velocity Metrics
 
-*None currently. All systems operational.*
-
----
-
-## 📈 Quality Metrics
-
-| Track | Avg Score | Reviews | Revisions |
-|-------|-----------|---------|-----------|
-| Strategy | 4.75/5 | 0 | 0 |
-| Design | 4.0/5 | 0 | 0 |
-| Tech | 5.0/5 | 0 | 0 |
-| **Overall** | **4.6/5** | **0** | **0** |
+| Track | Avg Task Time | Words/Hour | Quality Trend |
+|-------|---------------|------------|---------------|
+| Strategy | 45 min | 2,400 | ↑ Improving |
+| Design | 38 min | 1,800 | → Stable |
+| Tech | 42 min | 2,100 | → Stable |
 
 ---
 
-## 🎯 Next Milestones
+## 🎯 Next 24 Hours
 
-| Milestone | ETA | Tasks |
-|-----------|-----|-------|
-| Positioning Complete | ~1h | STR-005 |
-| Design Foundation Complete | ~3h | DSG-003, DSG-004 |
-| API Spec Complete | ~2h | TEC-003 |
-| **Sprint #1 Complete** | **~5h** | All remaining |
+| Track | Goal |
+|-------|------|
+| **Strategy** | Complete STR-011 (Pitch Deck) |
+| **Design** | Complete DSG-007 (React Setup) — can proceed in parallel |
+| **Tech** | **CRITICAL**: Complete TEC-001-UPDATE and TEC-005-UPDATE to unblock Sprint #2 |
 
 ---
 
-<div align="center">
+## 🏗️ Infrastructure Decision (2026-03-15)
 
-*Dashboard updated automatically by Project Manager AI every 6 hours*
+**Selected Stack:**
+- **Hosting**: Bare metal server (EU datacenter)
+- **Containers**: Docker + Docker Compose
+- **Storage**: Cloudflare R2 (S3-compatible, EU regions)
+- **Proxy**: Nginx with Let's Encrypt SSL
+- **Monitoring**: Prometheus + Grafana
 
-**System**: v2 Multi-Track with Quality Gates
+**Rationale**: Cost control, data sovereignty, operational simplicity
 
-</div>
+---
+
+*Auto-generated by Project Manager Agent*  
+*Last Updated: 2026-03-15 19:00 CET*
