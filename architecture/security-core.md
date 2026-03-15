@@ -1,206 +1,198 @@
 # Security Architecture Review - Core Components
 
-This document outlines the security measures and implementation strategies for CertFast's core security components.
+This document outlines the security measures and implementation strategies for the CertFast certification management platform across four critical security domains.
 
 ---
 
 ## 1. Authentication
 
-Authentication is the foundation of our security model, ensuring that only verified users can access the system.
+Authentication is the foundation of platform security, ensuring that only legitimate users can access the system.
 
-### JWT-Based Authentication
+### Security Measures
 
-- **Token Structure**: Signed JWT tokens with RS256 algorithm
-- **Payload Contents**: User ID, email, role, organization ID, issued at (iat), expiration (exp)
-- **Token Lifespan**: Access tokens expire after 15 minutes; refresh tokens valid for 7 days
-- **Secret Management**: Private keys stored in AWS Secrets Manager with rotation every 90 days
+- **JWT-based Authentication**: Implement stateless JSON Web Token authentication for all API requests
+  - Access tokens with short expiration (15 minutes) to minimize exposure window
+  - Refresh tokens with longer expiration (7 days) for seamless user experience
+  - Token revocation capability for immediate session termination when needed
 
-### Session Management
+- **Multi-Factor Authentication (MFA)**: Enhanced protection for privileged accounts
+  - TOTP (Time-based One-Time Password) support via authenticator apps
+  - SMS-based fallback for backup authentication
+  - Mandatory MFA for admin and auditor roles
 
-- **Session Storage**: Redis cluster for distributed session state
-- **Session Binding**: Tokens bound to IP address and User-Agent fingerprint
-- **Concurrent Sessions**: Maximum 5 concurrent sessions per user account
-- **Session Termination**: Users can revoke all active sessions from profile settings
-- **Idle Timeout**: Sessions automatically expire after 30 minutes of inactivity
+- **Session Management**: Robust session lifecycle controls
+  - Maximum session duration enforcement (8 hours for standard users, 4 hours for admins)
+  - Automatic session termination on password change or suspicious activity
+  - Concurrent session limits per user account (maximum 3 active sessions)
+  - Device fingerprinting to detect unusual login patterns
 
-### Multi-Factor Authentication (MFA)
+- **Password Security**: Strong credential requirements
+  - Minimum 12 characters with complexity requirements (uppercase, lowercase, numbers, symbols)
+  - Password history enforcement (prevent last 5 passwords)
+  - Bcrypt hashing with salt (cost factor 12) for password storage
+  - Account lockout after 5 failed attempts (30-minute cooldown)
 
-- **TOTP Support**: Time-based One-Time Passwords via authenticator apps (Google Authenticator, Authy)
-- **Backup Codes**: 10 single-use backup codes generated during MFA setup
-- **Enforcement**: MFA required for admin roles; optional for standard users
-- **Recovery**: Secure account recovery via verified email with 24-hour cooldown
+### Implementation Notes
 
-### Password Security
-
-- **Requirements**: Minimum 12 characters, uppercase, lowercase, numbers, special characters
-- **Hashing Algorithm**: Argon2id with memory cost of 64MB, 3 iterations, parallelism of 4
-- **Breach Detection**: Integration with Have I Been Pwned API to check against known breaches
-- **Password History**: Prevents reuse of last 12 passwords
-- **Expiry Policy**: Passwords never expire; forced reset only on suspected compromise
+- JWT tokens should be stored in HttpOnly, Secure, SameSite=Strict cookies for web clients
+- Mobile clients may use secure device storage with token rotation
+- Implement JWT blacklisting using Redis for immediate token revocation
+- Login events must be logged with IP address, user agent, and timestamp for audit trails
+- Consider implementing WebAuthn/FIDO2 for passwordless authentication in future releases
 
 ---
 
 ## 2. Authorization
 
-Authorization determines what authenticated users can do within the system.
+Authorization ensures authenticated users can only access resources and perform actions appropriate to their role.
 
-### Role-Based Access Control (RBAC)
+### Security Measures
 
-- **Role Hierarchy**:
-  - `super_admin`: Full system access (platform operations team only)
-  - `org_admin`: Organization-level administration, user management, billing
-  - `compliance_officer`: Create assessments, review evidence, generate reports
-  - `auditor`: Read-only access to assessments and evidence
-  - `assessor`: Submit evidence, update control status
-  - `viewer`: Read-only access to assigned resources
+- **Role-Based Access Control (RBAC)**: Structured permission system
+  - Predefined roles: Super Admin, Organization Admin, Auditor, Assessor, Viewer
+  - Role hierarchy with inheritance where appropriate
+  - Principle of least privilege - users receive minimum necessary permissions
+  - Role assignment requires approval workflow for privileged roles
 
-- **Permission Granularity**: 47 fine-grained permissions mapped to roles
-- **Role Assignment**: One primary role per user with optional secondary roles
-- **Inheritance**: Organization settings inherited by default; can be overridden at project level
+- **Resource-Level Permissions**: Granular access control
+  - Organization isolation - users can only access their organization's data
+  - Project-level permissions for cross-functional teams
+  - Assessment ownership model - only owners and assignees can modify
+  - Evidence access restricted to relevant stakeholders and auditors
 
-### Resource-Level Permissions
+- **Permission Matrix**: Clear mapping of actions to roles
+  - Users: Full CRUD on own profile, read organization info
+  - Organization Admin: User management, org settings, billing access
+  - Auditor: Read access to assessments and evidence, write audit notes
+  - Assessor: Create and manage assessments, submit evidence
+  - Super Admin: System-wide configuration and user impersonation (for support)
 
-- **Ownership Model**: Every resource has an owner (user) and organization
-- **Sharing Controls**: Resources can be shared with specific users or teams
-- **Permission Levels**: None, View, Comment, Edit, Admin (full control including deletion)
-- **Inheritance Chain**: Organization → Team → Project → Resource
+- **Dynamic Authorization**: Context-aware access decisions
+  - Time-based restrictions (business hours access for sensitive operations)
+  - Location-based restrictions (IP allowlisting for admin functions)
+  - Just-in-time access elevation for temporary privileged operations
+  - Automatic deprovisioning when role changes or employment ends
 
-### Access Control Lists (ACL)
+### Implementation Notes
 
-- **Implementation**: PostgreSQL row-level security policies enforced at database level
-- **Query Filtering**: All queries automatically filtered by user's accessible organization IDs
-- **API Enforcement**: Authorization checks at middleware layer before controller logic
-- **Audit Trail**: Every permission check logged with timestamp, user, resource, decision
-
-### Dynamic Authorization
-
-- **Time-Based Access**: Temporary elevated access with automatic expiration
-- **Approval Workflows**: Sensitive operations require secondary approval
-- **Just-in-Time Access**: Users can request temporary permission grants with justification
-- **Break-Glass Procedures**: Emergency access procedures with mandatory post-incident review
+- Implement centralized authorization middleware for consistent policy enforcement
+- Use attribute-based access control (ABAC) for complex scenarios (e.g., assessment state transitions)
+- Cache permission calculations with TTL to balance performance and security
+- All authorization decisions must be logged for compliance auditing
+- Regular access reviews (quarterly) to identify and remove stale permissions
+- API endpoints should validate permissions at both route and resource levels
 
 ---
 
 ## 3. Data Protection
 
-Data protection ensures confidentiality and integrity of sensitive information.
+Data protection safeguards sensitive information throughout its lifecycle, both at rest and in transit.
 
-### Encryption at Rest
+### Security Measures
 
-- **Database Encryption**: AES-256-GCM for all PostgreSQL data files
-- **Key Management**: AWS KMS with customer-managed keys (CMK)
-- **Field-Level Encryption**: Additional encryption for PII fields (SSN, tax ID) with separate key hierarchy
-- **Backup Encryption**: All backups encrypted with GPG before storage
-- **Key Rotation**: Automatic annual rotation of encryption keys with 30-day overlap period
+- **Encryption at Rest**: Protect stored data from unauthorized access
+  - AES-256 encryption for database storage
+  - Transparent Data Encryption (TDE) for database files
+  - Encrypted backups with separate key management
+  - File-level encryption for uploaded evidence documents
+  - Secure key storage using Hardware Security Module (HSM) or cloud KMS
 
-### Encryption in Transit
+- **Encryption in Transit**: Protect data during transmission
+  - TLS 1.3 for all network communications
+  - Certificate pinning for mobile applications
+  - HSTS (HTTP Strict Transport Security) headers enforced
+  - End-to-end encryption for sensitive document transfers
+  - VPN requirements for administrative access to infrastructure
 
-- **TLS Configuration**: TLS 1.3 minimum; TLS 1.2 supported for legacy compatibility
-- **Certificate Management**: Let's Encrypt with automatic renewal
-- **HSTS**: Strict Transport Security with 2-year max-age
-- **Perfect Forward Secrecy**: ECDHE key exchange with X25519 and P-256 curves
-- **Cipher Suites**: Only AEAD ciphers allowed (AES-GCM, ChaCha20-Poly1305)
+- **Data Classification and Handling**: Categorize and protect based on sensitivity
+  - Public: General platform information, marketing content
+  - Internal: Organization names, user lists (non-PII)
+  - Confidential: Assessment details, compliance gaps, audit findings
+  - Restricted: Evidence documents, PII, financial data, API keys
 
-### Data Classification
+- **Data Retention and Disposal**: Lifecycle management
+  - Automated retention policies based on data classification
+  - Secure deletion with cryptographic erasure for sensitive data
+  - Data anonymization for analytics and reporting
+  - Legal hold capabilities for litigation requirements
+  - Customer-initiated data export and deletion (GDPR/CCPA compliance)
 
-- **Public**: Marketing materials, API documentation
-- **Internal**: Employee handbooks, non-sensitive operational data
-- **Confidential**: Customer data, assessment results, financial records
-- **Restricted**: Authentication credentials, encryption keys, audit logs
+- **Key Management**: Secure cryptographic key lifecycle
+  - Regular key rotation (annual for data encryption keys)
+  - Separation of duties for key administration
+  - Key versioning support for decryption of historical data
+  - Automated key backup and recovery procedures
 
-### Data Retention and Disposal
+### Implementation Notes
 
-- **Retention Policy**: Customer data retained for duration of contract plus 7 years
-- **Right to Deletion**: GDPR-compliant deletion within 30 days of request
-- **Secure Disposal**: Cryptographic erasure (delete encryption keys) followed by physical deletion
-- **Archive Encryption**: Archived data encrypted with separate keys stored offline
+- Implement field-level encryption for highly sensitive database columns (SSN, API secrets)
+- Use envelope encryption pattern - data encrypted with DEK, DEK encrypted with KEK
+- Database connections must use SSL with certificate verification
+- Implement data loss prevention (DLP) scanning for evidence uploads
+- Regular vulnerability scans and penetration testing of data stores
+- Document and test data breach response procedures
 
 ---
 
 ## 4. API Security
 
-API security protects the system's interfaces from abuse and attacks.
+API security protects the platform's interfaces from abuse, attacks, and unauthorized access.
 
-### Rate Limiting
+### Security Measures
 
-- **Tiered Limits**:
-  - Free tier: 100 requests per minute, 1,000 per hour
-  - Professional: 1,000 requests per minute, 10,000 per hour
-  - Enterprise: 10,000 requests per minute, 100,000 per hour
+- **Rate Limiting**: Prevent abuse and ensure availability
+  - Tiered rate limits based on user role and API key tier
+  - Standard tier: 100 requests per minute per user
+  - Burst allowance for legitimate traffic spikes
+  - IP-based rate limiting as additional protection layer
+  - 429 Too Many Requests response with Retry-After header
 
-- **Burst Handling**: Token bucket algorithm allowing short bursts
-- **Per-Endpoint Limits**: Stricter limits on expensive operations (exports, bulk updates)
-- **Penalty Box**: Violators blocked for 1 hour; repeated violations escalate to 24-hour ban
-- **Headers**: Rate limit info returned in `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+- **Input Validation**: Sanitize all incoming data
+  - Strict schema validation for all API payloads
+  - Parameterized queries to prevent SQL injection
+  - Content Security Policy headers for XSS protection
+  - File upload restrictions (type, size, content scanning)
+  - Output encoding to prevent injection attacks
 
-### Input Validation
+- **API Authentication and Authorization**
+  - OAuth 2.0 / OpenID Connect for third-party integrations
+  - API key management with rotation capabilities
+  - Scope-based permissions for API tokens
+  - Token binding to prevent token theft and replay attacks
 
-- **Schema Validation**: OpenAPI schema validation on all requests
-- **Type Coercion**: Strict mode; unexpected types rejected rather than coerced
-- **Size Limits**: Request body max 10MB; query string max 4KB
-- **Sanitization**: HTML encoding for all user input before storage
-- **SQL Injection Prevention**: Parameterized queries exclusively; ORM use enforced
-- **NoSQL Injection**: MongoDB query operators blocked in user input
+- **Security Headers and CORS**: Protect client-side interactions
+  - Content Security Policy (CSP) to mitigate XSS
+  - X-Content-Type-Options: nosniff
+  - X-Frame-Options: DENY to prevent clickjacking
+  - Strict CORS policy - whitelist allowed origins only
+  - Referrer-Policy: strict-origin-when-cross-origin
 
-### Output Encoding
+- **Error Handling and Logging**: Secure failure modes
+  - Generic error messages to prevent information leakage
+  - Detailed error logging to secure audit trail only
+  - Request/response logging with PII redaction
+  - Real-time alerting on suspicious patterns
+  - Centralized SIEM integration for security monitoring
 
-- **JSON Encoding**: Proper escaping of special characters
-- **Content-Type Headers**: Strictly enforced; no MIME sniffing
-- **Download Security**: Content-Disposition headers for file downloads
-- **Error Sanitization**: Internal error details never exposed to clients
+- **API Versioning and Deprecation**: Controlled evolution
+  - Semantic versioning for API endpoints
+  - Sunset headers for deprecated endpoints
+  - Breaking change notification policy (90 days minimum)
+  - Migration guides for major version updates
 
-### API Authentication
+### Implementation Notes
 
-- **Bearer Tokens**: OAuth 2.0 bearer tokens in Authorization header
-- **API Keys**: Separate API keys for service-to-service communication with IP whitelist
-- **Scope Validation**: Tokens checked against required scopes for each endpoint
-- **Token Binding**: Tokens cryptographically bound to TLS session where possible
-
-### Additional Protections
-
-- **CORS Policy**: Whitelist-based; preflight caching for 1 hour
-- **CSRF Protection**: Double-submit cookie pattern for state-changing operations
-- **Request Signing**: Optional HMAC request signing for sensitive webhooks
-- **API Versioning**: Version in URL path; deprecated versions supported for 12 months
-
----
-
-## Implementation Notes
-
-### Technology Stack
-
-- **Authentication**: Auth0 for identity management, custom JWT implementation
-- **Authorization**: Oso policy engine for fine-grained access control
-- **Encryption**: AWS KMS, OpenSSL for TLS
-- **Rate Limiting**: Redis-backed rate limiter with fallback to in-memory
-
-### Monitoring and Alerting
-
-- **Failed Login Tracking**: Alert on 10+ failed attempts from single IP in 5 minutes
-- **Privilege Escalation Detection**: Alert on unusual role assignments
-- **Data Exfiltration**: Monitor for bulk data access patterns
-- **Security Dashboard**: Real-time view of authentication events, blocked requests, active sessions
-
-### Compliance Alignment
-
-- **SOC 2 Type II**: Security controls mapped to Trust Services Criteria
-- **ISO 27001**: Controls aligned with Annex A requirements
-- **GDPR**: Data protection by design; privacy impact assessments documented
-- **HIPAA**: Business Associate Agreements in place; PHI access logging implemented
-
-### Incident Response
-
-- **Response Time**: Security incidents acknowledged within 1 hour
-- **Communication**: Automated customer notification for data breaches within 72 hours
-- **Forensics**: Comprehensive audit logs retained for 1 year
-- **Recovery**: Documented procedures for key compromise, credential rotation
+- Implement API gateway for centralized rate limiting, authentication, and logging
+- Use OpenAPI specification for automated validation and documentation
+- Deploy Web Application Firewall (WAF) for additional attack protection
+- Regular API security testing with tools like OWASP ZAP
+- Implement circuit breakers to prevent cascade failures
+- API changes require security review in the development lifecycle
 
 ---
 
 ## Summary
 
-The security architecture implements defense in depth across authentication, authorization, data protection, and API security layers. Regular security reviews, penetration testing, and compliance audits ensure continued effectiveness against evolving threats.
+This security architecture provides defense in depth across authentication, authorization, data protection, and API security domains. Regular security assessments, penetration testing, and compliance audits should validate the effectiveness of these controls.
 
-**Last Updated**: March 15, 2026  
-**Next Review**: June 15, 2026  
-**Owner**: Security Architecture Team
+For questions or to report security concerns, contact the security team at security@certfast.io.
