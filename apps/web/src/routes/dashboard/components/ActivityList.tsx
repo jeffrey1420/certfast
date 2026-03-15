@@ -1,25 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { 
-  ClipboardCheck, 
-  FileCheck, 
-  FileUp, 
-  AlertCircle,
-  CheckCircle2,
-  Clock,
-  type LucideIcon
-}
-
-type ActivityType = 
-  | 'assessment_completed' 
-  | 'evidence_uploaded' 
-  | 'control_verified' 
-  | 'deadline_approaching' 
-  | 'issue_detected'
+import { CheckCircle, FileText, AlertCircle, Upload, Clock } from 'lucide-react'
 
 interface Activity {
   id: number
-  type: ActivityType
+  type: 'assessment_completed' | 'evidence_uploaded' | 'control_reviewed' | 'alert' | 'deadline'
   title: string
   description?: string
   time: string
@@ -29,32 +14,20 @@ interface ActivityListProps {
   activities: Activity[]
 }
 
-const activityConfig: Record<ActivityType, { icon: LucideIcon; color: string; badge: string }> = {
-  assessment_completed: {
-    icon: ClipboardCheck,
-    color: 'text-green-600 bg-green-100',
-    badge: 'Completed',
-  },
-  evidence_uploaded: {
-    icon: FileUp,
-    color: 'text-blue-600 bg-blue-100',
-    badge: 'Uploaded',
-  },
-  control_verified: {
-    icon: FileCheck,
-    color: 'text-purple-600 bg-purple-100',
-    badge: 'Verified',
-  },
-  deadline_approaching: {
-    icon: Clock,
-    color: 'text-amber-600 bg-amber-100',
-    badge: 'Due Soon',
-  },
-  issue_detected: {
-    icon: AlertCircle,
-    color: 'text-red-600 bg-red-100',
-    badge: 'Issue',
-  },
+const activityIcons = {
+  assessment_completed: CheckCircle,
+  evidence_uploaded: Upload,
+  control_reviewed: FileText,
+  alert: AlertCircle,
+  deadline: Clock
+}
+
+const activityColors = {
+  assessment_completed: 'bg-green-100 text-green-700',
+  evidence_uploaded: 'bg-blue-100 text-blue-700',
+  control_reviewed: 'bg-purple-100 text-purple-700',
+  alert: 'bg-red-100 text-red-700',
+  deadline: 'bg-yellow-100 text-yellow-700'
 }
 
 export function ActivityList({ activities }: ActivityListProps) {
@@ -63,37 +36,31 @@ export function ActivityList({ activities }: ActivityListProps) {
       <CardHeader>
         <CardTitle className="text-lg">Recent Activity</CardTitle>
       </CardHeader>
-      <CardContent className="p-6 pt-0">
+      <CardContent>
         <div className="space-y-4">
           {activities.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <CheckCircle2 className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p>No recent activity</p>
-            </div>
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No recent activity
+            </p>
           ) : (
             activities.map((activity) => {
-              const config = activityConfig[activity.type]
-              const Icon = config.icon
-              
+              const Icon = activityIcons[activity.type]
               return (
-                <div key={activity.id} className="flex items-start gap-4 pb-4 border-b border-border last:border-0 last:pb-0">
-                  <div className={`p-2 rounded-lg shrink-0 ${config.color}`}>
-                    <Icon className="w-4 h-4" />
+                <div key={activity.id} className="flex items-start gap-3">
+                  <div className={`p-2 rounded-full ${activityColors[activity.type]}`}>
+                    <Icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-medium text-sm">{activity.title}</p>
-                      <Badge variant="secondary" className="text-xs">
-                        {config.badge}
-                      </Badge>
-                    </div>
+                    <p className="text-sm font-medium truncate">{activity.title}</p>
                     {activity.description && (
-                      <p className="text-sm text-muted-foreground mt-0.5">
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {activity.description}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
                   </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {activity.time}
+                  </span>
                 </div>
               )
             })
@@ -103,5 +70,3 @@ export function ActivityList({ activities }: ActivityListProps) {
     </Card>
   )
 }
-
-export default ActivityList

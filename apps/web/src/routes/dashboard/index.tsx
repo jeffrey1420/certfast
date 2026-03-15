@@ -1,168 +1,175 @@
-import { Layout } from '@/components/layout/layout'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { useEffect, useState } from 'react'
 import { MetricCard } from './components/MetricCard'
 import { ProgressBar } from './components/ProgressBar'
 import { ActivityList } from './components/ActivityList'
 import { QuickActions } from './components/QuickActions'
-import { Shield, ClipboardCheck, FileCheck, Calendar, TrendingUp } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Activity, TrendingUp, Shield, FileCheck, Loader2 } from 'lucide-react'
 
-// Mock data for now (API not ready)
-const metrics = {
+// Mock data - will be replaced with API call
+const mockMetrics = {
   complianceScore: 85,
   totalAssessments: 12,
   evidenceCount: 47,
   daysToCompliance: 45
 }
 
-const activities = [
-  { 
-    id: 1, 
-    type: 'assessment_completed' as const, 
-    title: 'ISO 27001 Assessment', 
-    description: 'All controls verified successfully',
-    time: '2h ago' 
-  },
-  { 
-    id: 2, 
-    type: 'evidence_uploaded' as const, 
-    title: 'Security Policy Document', 
-    description: 'Uploaded by John Doe',
-    time: '4h ago' 
-  },
-  { 
-    id: 3, 
-    type: 'control_verified' as const, 
-    title: 'Access Control Policy', 
-    description: 'Control AC-001 approved',
-    time: '6h ago' 
-  },
-  { 
-    id: 4, 
-    type: 'deadline_approaching' as const, 
-    title: 'SOC 2 Audit Due', 
-    description: 'Due in 7 days',
-    time: '1d ago' 
-  },
-  { 
-    id: 5, 
-    type: 'issue_detected' as const, 
-    title: 'Missing Evidence', 
-    description: '3 controls require evidence',
-    time: '2d ago' 
-  },
+const mockActivities = [
+  { id: 1, type: 'assessment_completed' as const, title: 'ISO 27001 Assessment', description: 'All controls passed', time: '2h ago' },
+  { id: 2, type: 'evidence_uploaded' as const, title: 'Evidence Uploaded', description: 'Firewall configuration uploaded', time: '4h ago' },
+  { id: 3, type: 'control_reviewed' as const, title: 'Control Reviewed', description: 'Access control policy reviewed', time: '1d ago' },
+  { id: 4, type: 'alert' as const, title: 'Action Required', description: 'Missing evidence for SOC 2', time: '1d ago' },
+  { id: 5, type: 'deadline' as const, title: 'Deadline Approaching', description: 'Annual audit due in 30 days', time: '2d ago' }
 ]
 
+interface DashboardMetrics {
+  complianceScore: number
+  totalAssessments: number
+  evidenceCount: number
+  daysToCompliance: number
+}
+
+interface Activity {
+  id: number
+  type: 'assessment_completed' | 'evidence_uploaded' | 'control_reviewed' | 'alert' | 'deadline'
+  title: string
+  description?: string
+  time: string
+}
+
 export function DashboardPage() {
-  return (
-    <Layout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">
-            Welcome back! Here's your compliance overview.
-          </p>
-        </div>
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-        {/* Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            title="Compliance Score"
-            value={`${metrics.complianceScore}%`}
-            icon={Shield}
-            color="green"
-            trend={{ value: 5.2, label: 'from last month' }}
-          />
-          <MetricCard
-            title="Total Assessments"
-            value={metrics.totalAssessments}
-            icon={ClipboardCheck}
-            color="blue"
-            trend={{ value: 2, label: 'new this week' }}
-          />
-          
-<MetricCard
-            title="Evidence Items"
-            value={metrics.evidenceCount}
-            icon={FileCheck}
-            color="purple"
-            trend={{ value: 12, label: 'uploaded this week' }}
-          />
-          <MetricCard
-            title="Days to Compliance"
-            value={metrics.daysToCompliance}
-            icon={Calendar}
-            color="amber"
-          />
-        </div>
+  useEffect(() => {
+    // Simulate API call - will be replaced with real API
+    const fetchDashboardData = async () => {
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        // TODO: Replace with actual API call
+        // const response = await fetch('/api/v1/dashboard/metrics')
+        // const data = await response.json()
+        
+        // Simulate network delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+        
+        setMetrics(mockMetrics)
+        setActivities(mockActivities)
+      } catch (err) {
+        setError('Failed to load dashboard data')
+      } finally {
+        setIsLoading(false)
+      }
+    }
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Progress & Activity */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Compliance Progress */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">Compliance Progress</CardTitle>
-                    <CardDescription>
-                      Overall compliance readiness across all frameworks
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-2 text-green-600 bg-green-100 px-3 py-1 rounded-full">
-                    <TrendingUp className="w-4 h-4" />
-                    <span className="text-sm font-medium">On Track</span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6 pt-0">
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between mb-2">
-                      <span className="font-medium">Overall Compliance</span>
-                      <span className="text-2xl font-bold">{metrics.complianceScore}%</span>
-                    </div>
-                    <ProgressBar 
-                      value={metrics.complianceScore} 
-                      size="lg" 
-                      showLabel={false}
-                      color="green"
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t">
-                    <div>
-                      <p className="text-sm text-muted-foreground">ISO 27001</p>
-                      <p className="text-lg font-semibold">92%</p>
-                      <ProgressBar value={92} size="sm" showLabel={false} color="blue" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">SOC 2</p>
-                      <p className="text-lg font-semibold">78%</p>
-                      <ProgressBar value={78} size="sm" showLabel={false} color="amber" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">GDPR</p>
-                      <p className="text-lg font-semibold">85%</p>
-                      <ProgressBar value={85} size="sm" showLabel={false} color="green" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+    fetchDashboardData()
+  }, [])
 
-            {/* Recent Activity */}
-            <ActivityList activities={activities} />
-          </div>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
 
-          {/* Right Column - Quick Actions */}
-          <div>
-            <QuickActions />
-          </div>
+  if (error || !metrics) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-destructive mb-2">{error || 'Failed to load dashboard'}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="text-primary hover:underline text-sm"
+          >
+            Try again
+          </button>
         </div>
       </div>
-    </Layout>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Overview of your compliance status and recent activity
+          </p>
+        </div>
+      </div>
+
+      {/* Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard
+          title="Compliance Score"
+          value={`${metrics.complianceScore}%`}
+          description="Overall compliance rating"
+          icon={Shield}
+          trend={{ value: 5, positive: true }}
+        />
+        <MetricCard
+          title="Assessments"
+          value={metrics.totalAssessments}
+          description="Active compliance assessments"
+          icon={Activity}
+          trend={{ value: 2, positive: true }}
+        />
+        <MetricCard
+          title="Evidence"
+          value={metrics.evidenceCount}
+          description="Evidence files uploaded"
+          icon={FileCheck}
+          trend={{ value: 12, positive: true }}
+        />
+        <MetricCard
+          title="Days to Compliance"
+          value={metrics.daysToCompliance}
+          description="Estimated time to full compliance"
+          icon={TrendingUp}
+        />
+      </div>
+
+      {/* Progress Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Compliance Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ProgressBar
+            value={metrics.complianceScore}
+            label="Overall Compliance Score"
+            size="lg"
+          />
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+            <div className="text-center p-3 bg-green-50 rounded-lg">
+              <p className="font-semibold text-green-700">85%</p>
+              <p className="text-green-600">Controls Passed</p>
+            </div>
+            <div className="text-center p-3 bg-yellow-50 rounded-lg">
+              <p className="font-semibold text-yellow-700">10%</p>
+              <p className="text-yellow-600">In Progress</p>
+            </div>
+            <div className="text-center p-3 bg-red-50 rounded-lg">
+              <p className="font-semibold text-red-700">5%</p>
+              <p className="text-red-600">Needs Attention</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bottom Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ActivityList activities={activities} />
+        <QuickActions />
+      </div>
+    </div>
   )
 }
 

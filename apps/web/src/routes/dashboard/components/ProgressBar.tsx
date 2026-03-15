@@ -1,56 +1,49 @@
 interface ProgressBarProps {
   value: number
   max?: number
+  label?: string
+  showPercentage?: boolean
   size?: 'sm' | 'md' | 'lg'
-  showLabel?: boolean
-  color?: 'blue' | 'green' | 'amber' | 'red'
-}
-
-const sizeVariants = {
-  sm: 'h-1.5',
-  md: 'h-2.5',
-  lg: 'h-4',
-}
-
-const colorVariants = {
-  blue: 'bg-blue-600',
-  green: 'bg-green-600',
-  amber: 'bg-amber-500',
-  red: 'bg-red-600',
 }
 
 export function ProgressBar({ 
   value, 
   max = 100, 
-  size = 'md', 
-  showLabel = true,
-  color = 'blue' 
+  label, 
+  showPercentage = true,
+  size = 'md' 
 }: ProgressBarProps) {
   const percentage = Math.min(100, Math.max(0, (value / max) * 100))
   
-  // Determine color based on percentage if not specified
-  const computedColor = color || (percentage >= 80 ? 'green' : percentage >= 50 ? 'blue' : percentage >= 30 ? 'amber' : 'red')
+  const heightClasses = {
+    sm: 'h-2',
+    md: 'h-4',
+    lg: 'h-6'
+  }
+  
+  const getColorClass = (pct: number) => {
+    if (pct >= 80) return 'bg-green-500'
+    if (pct >= 60) return 'bg-yellow-500'
+    if (pct >= 40) return 'bg-orange-500'
+    return 'bg-red-500'
+  }
   
   return (
     <div className="w-full space-y-2">
-      {showLabel && (
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Progress</span>
-          <span className="font-medium">{Math.round(percentage)}%</span>
+      {(label || showPercentage) && (
+        <div className="flex justify-between items-center">
+          {label && <span className="text-sm font-medium">{label}</span>}
+          {showPercentage && (
+            <span className="text-sm text-muted-foreground">{Math.round(percentage)}%</span>
+          )}
         </div>
       )}
-      <div className={`w-full bg-muted rounded-full ${sizeVariants[size]}`}>
-        <div
-          className={`${sizeVariants[size]} ${colorVariants[computedColor]} rounded-full transition-all duration-500 ease-out`}
+      <div className={`w-full bg-secondary rounded-full ${heightClasses[size]} overflow-hidden`}>
+        <div 
+          className={`${heightClasses[size]} ${getColorClass(percentage)} transition-all duration-500 ease-out rounded-full`}
           style={{ width: `${percentage}%` }}
-          role="progressbar"
-          aria-valuenow={value}
-          aria-valuemin={0}
-          aria-valuemax={max}
         />
       </div>
     </div>
   )
 }
-
-export default ProgressBar
