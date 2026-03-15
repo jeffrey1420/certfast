@@ -3,6 +3,7 @@ import { LoginPage } from '@/routes/auth/login'
 import { RegisterPage } from '@/routes/auth/register'
 import { ForgotPasswordPage } from '@/routes/auth/forgot-password'
 import { ResetPasswordPage } from '@/routes/auth/reset-password'
+import { DashboardPage } from '@/routes/dashboard'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="*" element={<div className="p-8">404 - Not Found</div>} />
       </Routes>
     </div>
