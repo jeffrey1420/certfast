@@ -197,11 +197,17 @@ Comprehensive go-live checklist.
 
 ---
 
-### STR-016: First 100 Customers Plan
-- **Role**: business-analyst
-- **Type**: Standard (30 min)
-- **Priority**: High
-- **Depends on**: STR-012
+### Active Task (CURRENT)
+
+**Task ID**: STR-016
+**Type**: Standard (30 min)
+**Assigned Role**: `business-analyst`
+**Status**: ACTIVE - EXECUTE NOW
+**Priority**: High
+**Depends on**: STR-012 ✅
+
+#### Description
+First 100 Customers Plan
 
 **Description:**
 Detailed acquisition plan for first 100 paying customers.
