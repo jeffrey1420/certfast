@@ -44,82 +44,27 @@
 
 ---
 
+### ✅ DSG-009: Layout Components - COMPLETE
+**Commit**: `e2da033`
+**Files created**:
+- `apps/web/src/components/layout/Sidebar.tsx`
+- `apps/web/src/components/layout/Header.tsx`  
+- `apps/web/src/components/layout/MainContent.tsx`
+- Responsive mobile hamburger menu implemented
+
+---
+
 ### Active Task (CURRENT)
 
-**Task ID**: DSG-009
-**Type**: Quick (15 min)
+**Task ID**: DSG-010
+**Type**: Standard (30 min)
 **Assigned Role**: `frontend-developer`
 **Status**: ACTIVE - EXECUTE NOW
 **Priority**: High
-**Depends on**: DSG-008 ✅
+**Depends on**: DSG-009 ✅
 
 #### Description
-Layout Components
-
-**Components:** Sidebar, Header, MainContent
-**Responsive:** Mobile hamburger menu
-
-**Pages to create:**
-1. **Login** (`/login`) - Email + password, errors, loading
-2. **Register** (`/register`) - Email, password, org name
-3. **Forgot Password** (`/forgot-password`) - Email input
-4. **Reset Password** (`/reset-password`) - New password form
-
-**API:** `POST /api/v1/auth/login`, etc.
-
-**Files to create:**
-```
-apps/web/src/routes/auth/
-├── login.tsx
-├── register.tsx
-├── forgot-password.tsx
-└── reset-password.tsx
-```
-
-**shadcn components to use:**
-- `Button`, `Input`, `Label`, `Card`
-- `Form` (with React Hook Form + Zod)
-
-**Pattern:**
-```typescript
-// stores/auth.ts already exists
-import { useAuthStore } from '@/stores/auth'
-
-// API call
-const response = await fetch('/api/v1/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ email, password })
-})
-```
-
-**Quality Gates:**
-- [ ] 4 pages created
-- [ ] Forms validated (Zod)
-- [ ] Loading/error states handled
-- [ ] Redirect after login
-- [ ] Commit + push
-
-**Commit:** `design/frontend-developer: created auth pages (login, register, forgot, reset)`
-
----
-
-## Backlog - Sprint #2
-
-### DSG-009: Layout Components
-- **Role**: frontend-developer
-- **Type**: Quick (15 min)
-- **Depends on**: DSG-008
-
-**Components:** Sidebar, Header, MainContent
-**Responsive:** Mobile hamburger menu
-
----
-
-### DSG-010: Dashboard Page
-- **Role**: frontend-developer
-- **Type**: Standard (30 min)
-- **Depends on**: DSG-009
+Dashboard Page
 
 **Features:**
 - 4 metric cards (Compliance Score, Assessments, Evidence, Days)
@@ -129,7 +74,51 @@ const response = await fetch('/api/v1/auth/login', {
 
 **API:** `GET /api/v1/dashboard/metrics`
 
+**Files to create:**
+```
+apps/web/src/routes/dashboard/
+├── index.tsx          # Dashboard main page
+└── components/
+    ├── MetricCard.tsx
+    ├── ProgressBar.tsx
+    ├── ActivityList.tsx
+    └── QuickActions.tsx
+```
+
+**shadcn components to use:**
+- `Card`, `CardHeader`, `CardContent`, `CardTitle`
+- `Progress`, `Button`, `Badge`
+- `Activity`, `TrendingUp`, `Shield`, `FileCheck` icons
+
+**Pattern:**
+```typescript
+// Mock data for now (API not ready)
+const metrics = {
+  complianceScore: 85,
+  totalAssessments: 12,
+  evidenceCount: 47,
+  daysToCompliance: 45
+}
+
+const activities = [
+  { id: 1, type: 'assessment_completed', title: 'ISO 27001 Assessment', time: '2h ago' },
+  // ...
+]
+```
+
+**Quality Gates:**
+- [ ] 4 metric cards displayed
+- [ ] Progress bar shows compliance score
+- [ ] Activity list renders
+- [ ] Quick actions buttons work
+- [ ] Responsive layout
+- [ ] Commit + push
+
+**Commit:** `design/frontend-developer: created dashboard page with metrics and activity feed`
+
 ---
+
+## Backlog - Sprint #2
 
 ### DSG-011: Assessment List Page
 - **Role**: frontend-developer
@@ -183,7 +172,7 @@ const response = await fetch('/api/v1/auth/login', {
 | Metric | Value |
 |--------|-------|
 | Sprint #1 | 6/6 ✅ |
-| Sprint #2 | 1/8 (DSG-007 ✅) |
+| Sprint #2 | 3/8 (DSG-007 ✅, DSG-008 ✅, DSG-009 ✅) |
 | Quality Average | 4.0/5 |
 
 ---
