@@ -1,234 +1,219 @@
-# CertFast Simple Wireframes
+# CertFast - Simple Wireframes
 
-> Text-based wireframes for the ISO 27001 compliance platform  
-> Created by: ui-designer  
-> Date: 2026-03-15
-
----
-
-## Overview
-
-These wireframes represent the core user interface screens for CertFast, a SaaS platform designed to help small businesses achieve ISO 27001 certification quickly and efficiently. The designs prioritize clarity, ease of use, and clear progress visualization to guide users through the compliance journey.
+This document contains ASCII/text-based wireframe sketches for the CertFast compliance management platform. These wireframes provide a visual representation of the key user interfaces without requiring design tools.
 
 ---
 
 ## Screen 1: Landing Page
 
-### Wireframe
+The landing page serves as the primary entry point for visitors to understand CertFast's value proposition and begin their compliance journey. It features a clean, professional layout that establishes trust and guides users toward the primary call-to-action. The design prioritizes clarity and conversion by presenting key information in a scannable format while maintaining visual hierarchy through spacing and structure.
 
 ```
-+==================================================================+
-|  CERTFAST                    Home  Features  Pricing  [Sign Up]   |
-+==================================================================+
-|                                                                   |
-|                                                                   |
-|               Get ISO 27001 Certified in 60 Days                 |
-|                                                                   |
-|       Join 1,000+ small businesses that simplified their         |
-|                information security certification                |
-|                                                                   |
-|              [  Start Free Trial  ]  [  Book Demo  ]             |
-|                                                                   |
-|                                                                   |
-+------------------------------------------------------------------+
-|                                                                   |
-|    +--------------+    +--------------+    +--------------+      |
-|    |   🛡️         |    |   📋         |    |   🚀         |      |
-|    |              |    |              |    |              |      |
-|    |   Guided     |    |   Evidence   |    |   Audit-     |      |
-|    |   Assessment |    |   Management |    |   Ready      |      |
-|    |              |    |              |    |   Reports    |      |
-|    |   Step-by-   |    |   Upload and |    |              |      |
-|    |   step ISO   |    |   organize   |    |   Generate   |      |
-|    |   27001      |    |   compliance |    |   auditor-   |      |
-|    |   controls   |    |   documents  |    |   friendly   |      |
-|    |   walkthrough|    |   in one     |    |   evidence   |      |
-|    |              |    |   secure     |    |   packages   |      |
-|    |              |    |   location   |    |              |      |
-|    +--------------+    +--------------+    +--------------+      |
-|                                                                   |
-+==================================================================+
-|  © 2026 CertFast    Privacy    Terms    Contact Us    LinkedIn   |
-+==================================================================+
++================================================================================+
+|                                                                                |
+|    [CERTFAST LOGO]        Home  Features  Pricing  About          [Sign In]   |
+|                                                                                |
++================================================================================+
+|                                                                                |
+|                                                                                |
+|                       +--------------------------------------+                 |
+|                       |                                      |                 |
+|                       |    SIMPLIFY YOUR COMPLIANCE          |                 |
+|                       |    JOURNEY                           |                 |
+|                       |                                      |                 |
+|                       |    Streamline certifications,        |                 |
+|                       |    assessments, and evidence         |                 |
+|                       |    management in one platform        |                 |
+|                       |                                      |                 |
+|                       |    +-----------------------------+   |                 |
+|                       |    |   Get Started - It's Free   |   |                 |
+|                       |    +-----------------------------+   |                 |
+|                       |                                      |                 |
+|                       +--------------------------------------+                 |
+|                                                                                |
+|                                                                                |
++--------------------------------------------------------------------------------+
+|                                                                                |
+|    +----------------+    +----------------+    +----------------+             |
+|    |   [ICON]       |    |   [ICON]       |    |   [ICON]       |             |
+|    |                |    |                |    |                |             |
+|    | Smart          |    | Collaborative  |    | Audit-Ready    |             |
+|    | Assessments    |    | Workspaces     |    | Reports        |             |
+|    |                |    |                |    |                |             |
+|    | Automate your  |    | Work together  |    | Generate       |             |
+|    | compliance     |    | with your team |    | comprehensive  |             |
+|    | evaluations    |    | seamlessly     |    | audit trails   |             |
+|    |                |    |                |    |                |             |
+|    +----------------+    +----------------+    +----------------+             |
+|                                                                                |
++================================================================================+
+|                                                                                |
+|    © 2026 CertFast    |    Privacy    |    Terms    |    Contact              |
+|                                                                                |
++================================================================================+
 ```
 
-### Description
-
-The Landing Page serves as the primary entry point for potential customers discovering CertFast. It follows a proven SaaS conversion pattern with a clear hierarchy that immediately communicates value proposition. The header maintains consistent branding with the CertFast logo positioned left, accompanied by a minimal navigation menu offering Home, Features, and Pricing options, plus a prominent Sign Up call-to-action button.
-
-The hero section dominates the viewport with a compelling headline that addresses the core pain point: the lengthy ISO 27001 certification process. The subheadline reinforces credibility by referencing existing customer base. Two distinct CTAs provide conversion paths for different user segments—those ready to try the product immediately versus those preferring a guided demonstration.
-
-Below the fold, three feature cards visualize the platform's core value pillars using iconography for quick visual scanning. Each card contains a concise title, descriptive text explaining the benefit, and maintains consistent padding for visual rhythm. The footer provides essential legal links and social proof through LinkedIn presence, establishing trust and compliance transparency expected in the security software space.
+**Description:** The landing page wireframe features a fixed header containing the CertFast logo positioned on the left with a horizontal navigation menu and sign-in button aligned to the right. The hero section occupies the majority of the viewport, presenting a bold headline, supportive subtext explaining the platform's value, and a prominent call-to-action button designed to capture user interest. Below the hero, three feature cards are arranged in a horizontal grid, each containing an icon placeholder, feature title, and brief description highlighting key product benefits. The footer provides standard legal links and copyright information, completing the professional appearance expected of a compliance management solution.
 
 ---
 
 ## Screen 2: Dashboard
 
-### Wireframe
+The dashboard functions as the central command center where users monitor their overall compliance posture and track progress across multiple dimensions. This interface consolidates critical metrics into an at-a-glance view while providing navigation to deeper functionality. The layout balances information density with readability, ensuring users can quickly assess their status without feeling overwhelmed by data.
 
 ```
-+==================================================================+
-|  ≡                              CertFast        👤 Admin ▼       |
-+------------------------------------------------------------------+
-|  Dashboard        |                                             |
-|  Assessments      |   +--------------------------------------+   |
-|  Evidence         |   |  Overall Compliance Score            |   |
-|  Documents        |   |                                      |   |
-|  Team             |   |          73%                         |   |
-|  Reports          |   |                                      |   |
-|  Settings         |   |   ████████████████████░░░░░░░░░░░░   |   |
-|                   |   |                                      |   |
-|                   |   |   +12% from last month               |   |
-|                   |   +--------------------------------------+   |
-|                   |                                             |
-|                   |   +------------+  +------------+  +--------+|
-|                   |   | Active     |  | Evidence   |  | Days   ||
-|                   |   |            |  |            |  | to     ||
-|                   |   |    12      |  |   47/60    |  | Audit  ||
-|                   |   |            |  |            |  |        ||
-|                   |   |Assessments |  | Documents  |  |   23   ||
-|                   |   |            |  | Uploaded   |  |        ||
-|                   |   +------------+  +------------+  +--------+
-|                   |                                             |
-|                   |   +--------------------------------------+   |
-|                   |   | Certification Progress               |   |
-|                   |   |                                      |   |
-|                   |   |   Phase 1      Phase 2      Phase 3  |   |
-|                   |   |   [====]       [====]       [    ]   |   |
-|                   |   |   Complete     In Progress   Pending |   |
-|                   |   |                                      |   |
-|                   |   |   ████████████████████████████████   |   |
-|                   |   |   73% Complete                       |   |
-|                   |   +--------------------------------------+   |
-|                   |                                             |
-|                   |   +--------------------------------------+   |
-|                   |   | Recent Activity                      |   |
-|                   |   | • Evidence uploaded: Policy v2.3     |   |
-|                   |   | • Assessment completed: Access Ctrl  |   |
-|                   |   | • Team member added: Sarah Chen      |   |
-|                   |   +--------------------------------------+   |
-+==================================================================+
++================================================================================+
+|                                                                                |
+|  [LOGO]                                    [🔍 Search...]    [👤 User ▼]      |
+|                                                                                |
++================================================================================+
+|             |                                                                  |
+|             |   DASHBOARD                                          [? Help]  |
+|             |                                                                  |
+|  DASHBOARD  |   +------------------------------------------------------------+|
+|  ─────────  |   |                                                            ||
+|             |   |   COMPLIANCE SCORE          ASSESSMENTS      EVIDENCE      ||
+|  Assessments|   |   +----------------+      +---------+    +-------------+   ||
+|  ─────────  |   |   |                |      |   12    |    |    47/60    |   ||
+|             |   |   |     87%        |      |  Active |    |   Uploaded  |   ||
+|  Evidence   |   |   |   [███████░░░] |      +---------+    +-------------+   ||
+|  ─────────  |   |   |                |                                          |
+|             |   |   +----------------+      +-------------+                   |
+|  Reports    |   |                         | DAYS TO AUDIT |                   ||
+|  ─────────  |   |                         |             |                   ||
+|             |   |                         |     14      |                   ||
+|  Settings   |   |                         |    Days     |                   ||
+|  ─────────  |   |                         +-------------+                   ||
+|             |   |                                                            ||
+|  [+ New]    |   +------------------------------------------------------------+|
+|             |                                                                  |
+|             |   +------------------------------------------------------------+|
+|             |   |   CERTIFICATION PROGRESS                                   ||
+|             |   |                                                            ||
+|             |   |   ISO 27001 Implementation                                 ||
+|             |   |   +--------------------------------------------------+     ||
+|             |   |   [████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 65%  ||
+|             |   |   Phase 3: Evidence Collection (In Progress)               ||
+|             |   |                                                            ||
+|             |   |   SOC 2 Type II Preparation                                ||
+|             |   |   +--------------------------------------------------+     ||
+|             |   |   [██████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░] 42%  ||
+|             |   |   Phase 2: Gap Assessment (In Progress)                    ||
+|             |   |                                                            ||
+|             |   |   GDPR Compliance Review                                   ||
+|             |   |   +--------------------------------------------------+     ||
+|             |   |   [████████████████████████████████████████████░░░░] 89%  ||
+|             |   |   Phase 5: Final Review (Pending Approval)                 ||
+|             |   |                                                            ||
+|             |   +------------------------------------------------------------+|
+|             |                                                                  |
++================================================================================+
 ```
 
-### Description
-
-The Dashboard functions as the command center for users managing their ISO 27001 certification journey. The layout adopts a standard SaaS sidebar navigation pattern, providing persistent access to all major platform sections while maximizing horizontal space for data visualization. The sidebar collapsible menu icon allows users to expand workspace when needed.
-
-Four primary metric cards deliver at-a-glance status awareness. The prominent Compliance Score card occupies full width with a large percentage display and visual progress bar, immediately communicating overall health. The secondary metric cards present Active Assessments count, Evidence Documents ratio, and Days to Audit countdown—critical time-sensitive information for certification planning.
-
-The Certification Progress section breaks down the journey into three logical phases, each with completion indicators and current status labels. This phased approach helps users understand where they are in the broader process and what remains. A horizontal progress bar provides an alternative visualization for users preferring linear representations.
-
-The Recent Activity feed adds temporal context, showing the latest actions taken within the workspace. This audit trail supports compliance requirements while helping team members stay informed of progress without requiring direct communication. The user menu in the header provides account access and team switching capabilities for users managing multiple certifications.
+**Description:** The dashboard wireframe implements a classic sidebar layout with a fixed left navigation panel containing primary application sections including Dashboard, Assessments, Evidence, Reports, and Settings, with a prominent New action button at the bottom. The main content area begins with a top header bar featuring a search field and user account menu for quick access to profile functions. Below the header, four metric cards are arranged in a responsive grid displaying the Compliance Score with a visual progress indicator, the count of Active Assessments requiring attention, Evidence upload statistics showing completion ratio, and a countdown showing Days to Audit to maintain urgency. The lower section presents Certification Progress tracking, displaying multiple compliance initiatives with labeled progress bars indicating percentage completion and current phase status. This comprehensive overview enables compliance officers to immediately identify priorities and track organizational readiness.
 
 ---
 
 ## Screen 3: Assessment Detail
 
-### Wireframe
+The assessment detail page provides a focused workspace for managing individual compliance evaluations. This interface enables users to track specific requirements, upload supporting evidence, and monitor completion status. The design emphasizes task orientation, guiding users through the assessment workflow with clear status indicators and intuitive action placement.
 
 ```
-+==================================================================+
-|  ← Back to Assessments              ISO 27001: A.9 Access Control |
-+------------------------------------------------------------------+
-|                                                                   |
-|  A.9.1 Business Requirement of Access Control              🔵     |
-|                                                                   |
-|  Status: In Progress                                     Active   |
-|                                                                   |
-+------------------------------------------------------------------+
-|                                                                   |
-|  DESCRIPTION                                                      |
-|  ---------------------------------------------------------------- |
-|  Establish a policy for access control to ensure authorized       |
-|  access to information and systems. This control addresses        |
-|  business requirements for limiting access to information         |
-|  and information processing facilities.                           |
-|                                                                   |
-+------------------------------------------------------------------+
-|                                                                   |
-|  EVIDENCE UPLOAD                                                  |
-|  ---------------------------------------------------------------- |
-|  +------------------------------------------+                     |
-|  |                                          |                     |
-|  |          📤 Drop files here              |                     |
-|  |                                          |                     |
-|  |     or click to browse from computer     |                     |
-|  |                                          |                     |
-|  |     Supported: PDF, DOCX, XLSX (max 50MB)|                     |
-|  |                                          |                     |
-|  +------------------------------------------+                     |
-|                                                                   |
-|  Uploaded Files:                                                  |
-|  ✅ Access_Control_Policy_v2.3.pdf           2.4 MB    2026-03-14 |
-|  ✅ User_Access_Matrix.xlsx                  156 KB    2026-03-12 |
-|  ⏳ Network_Access_Procedure.docx            Pending review      |
-|                                                                   |
-+------------------------------------------------------------------+
-|                                                                   |
-|  REQUIREMENTS CHECKLIST                                           |
-|  ---------------------------------------------------------------- |
-|                                                                   |
-|  [✓] A.9.1.1 Access control policy documented                     |
-|      • Policy approved by management                              |
-|      • Reviewed within last 12 months                             |
-|      • Communicated to relevant personnel                         |
-|                                                                   |
-|  [✓] A.9.1.2 Access to networks controlled                        |
-|      • Network segmentation implemented                           |
-|      • Authentication required for all access                     |
-|                                                                   |
-|  [ ] A.9.1.3 User access provisioning process                     |
-|      • Formal registration procedure exists                       |
-|      • Privileges assigned based on roles                         |
-|      ○ Upload evidence for this requirement →                     |
-|                                                                   |
-|  [ ] A.9.1.4 Management of privileged access rights               |
-|      • List of privileged accounts maintained                     |
-|      • Regular review of privileged access                        |
-|                                                                   |
-|  [✓] A.9.1.5 Secret authentication information management         |
-|      • Password policy enforced                                   |
-|      • MFA implemented for privileged accounts                    |
-|                                                                   |
-|  Progress: 3 of 5 complete (60%)                                  |
-|  ██████████████████████████████░░░░░░░░░░                         |
-|                                                                   |
-+------------------------------------------------------------------+
-|                        [  Save Progress  ]  [  Mark Complete  ]  |
-+==================================================================+
++================================================================================+
+|                                                                                |
+|  [LOGO]                                    [🔍 Search...]    [👤 User ▼]      |
+|                                                                                |
++================================================================================+
+|             |                                                                  |
+|             |   [← Back to Assessments]                                        |
+|             |                                                                  |
+|  DASHBOARD  |   ISO 27001:2022 - Information Security Management              |
+|  ─────────  |                                                                  |
+|             |   [🟡 IN PROGRESS]                                    [Edit]   |
+|  Assessments|                                                                  |
+|  ►────────  |   +------------------------------------------------------------+|
+|             |   |   ASSESSMENT DETAILS                                       ||
+|  Evidence   |   |                                                            ||
+|  ─────────  |   |   Started: March 10, 2026                                  ||
+|             |   |   Last Updated: March 14, 2026                             ||
+|  Reports    |   |   Assigned: Sarah Chen, James Wilson                       ||
+|  ─────────  |   |                                                            ||
+|             |   |   Description: Comprehensive evaluation of information      ||
+|  Settings   |   |   security controls against ISO 27001:2022 requirements.   ||
+|  ─────────  |   |                                                            ||
+|             |   +------------------------------------------------------------+|
+|  [+ New]    |                                                                  |
+|             |   +------------------------------------------------------------+|
+|             |   |   EVIDENCE UPLOAD                                          ||
+|             |   |                                                            ||
+|             |   |   +--------------------------------------------------+     ||
+|             |   |   |                                                  |     ||
+|             |   |   |              [📁 UPLOAD ZONE]                     |     ||
+|             |   |   |                                                  |     ||
+|             |   |   |         Drag and drop files here                  |     ||
+|             |   |   |              or click to browse                   |     ||
+|             |   |   |                                                  |     ||
+|             |   |   |         Supported: PDF, DOCX, XLSX, PNG (max 50MB)||
+|             |   |   |                                                  |     ||
+|             |   |   +--------------------------------------------------+     ||
+|             |   |                                                            ||
+|             |   |   Recent Uploads:                                          ||
+|             |   |   • Risk_Assessment_Q1_2026.pdf    ✓ Verified   [View]   ||
+|             |   |   • Access_Control_Policy_v2.docx  ✓ Verified   [View]   ||
+|             |   |   • Incident_Response_Log.xlsx     ⏳ Pending   [View]   ||
+|             |   |                                                            ||
+|             |   +------------------------------------------------------------+|
+|             |                                                                  |
+|             |   +------------------------------------------------------------+|
+|             |   |   REQUIREMENTS CHECKLIST                                   ||
+|             |   |                                                            ||
+|             |   |   □ A.5 Information Security Policies                      ||
+|             |   |     ├─ □ A.5.1 Management direction for information        ||
+|             |   |     │      security   [📎 2 files]                 [Start] ||
+|             |   |     └─ □ A.5.2 Review of the policies for information      ||
+|             |   |            security         [📎 0 files]                 ||
+|             |   |                                                            ||
+|             |   |   ☑ A.6 Organization of Information Security              ||
+|             |   |     ├─ ☑ A.6.1 Internal organization               [View]||
+|             |   |     │      [📎 3 files] ✓ Complete                         ||
+|             |   |     └─ ☑ A.6.2 Mobile devices and teleworking       [View]||
+|             |   |            [📎 1 file] ✓ Complete                          ||
+|             |   |                                                            ||
+|             |   |   □ A.7 Human Resource Security                           ||
+|             |   |     ├─ □ A.7.1 Prior to employment                  [Start]||
+|             |   |     │      [📎 0 files]                                    ||
+|             |   |     ├─ □ A.7.2 During employment                     [Start]||
+|             |   |     │      [📎 0 files]                                    ||
+|             |   |     └─ □ A.7.3 Termination and change of              ||
+|             |   |            employment   [📎 0 files]                 [Start]||
+|             |   |                                                            ||
+|             |   |   □ A.8 Asset Management                                  ||
+|             |   |     ├─ □ A.8.1 Responsibility for assets             [Start]||
+|             |   |     └─ □ A.8.2 Information classification              [Start]||
+|             |   |                                                            ||
+|             |   |   [+ Load More Requirements...]                           ||
+|             |   |                                                            ||
+|             |   +------------------------------------------------------------+|
+|             |                                                                  |
++================================================================================+
 ```
 
-### Description
-
-The Assessment Detail screen provides deep-dive functionality for individual ISO 27001 control assessments. The header establishes clear navigation hierarchy with a back button linking to the assessments list, while prominently displaying the specific control being evaluated. A status badge uses color coding for quick visual identification of assessment state.
-
-The description section provides context about the control's purpose and scope, helping users understand the business requirement being addressed. This educational component reduces reliance on external documentation and supports users newer to information security compliance frameworks.
-
-The Evidence Upload zone implements a familiar drag-and-drop interaction pattern, reducing friction for document submission. The upload area specifies supported formats and size limits upfront, preventing user frustration from failed uploads. Below, a file list shows current evidence with status indicators—completed uploads show file size and date, while pending items indicate review status, creating transparency in the approval workflow.
-
-The Requirements Checklist forms the core interaction area, breaking complex controls into verifiable sub-requirements. Each item includes a checkbox for completion status, descriptive text, and supporting criteria bullets that define what constitutes adequate evidence. Incomplete items feature a direct link to upload evidence, streamlining the workflow. A progress bar at the bottom quantifies completion percentage, providing motivation and clarity on remaining work. Action buttons allow users to save progress incrementally or formally mark the assessment as complete when all requirements are satisfied.
+**Description:** The assessment detail wireframe maintains the consistent sidebar navigation from the dashboard while dedicating the main content area to assessment-specific functionality. The page header includes a back navigation link for returning to the assessments list, followed by the assessment title and a prominent status badge indicating the current state as In Progress, complemented by an edit action for metadata modification. The Assessment Details section presents essential metadata including start date, last activity timestamp, assigned team members, and a description of the evaluation scope. The Evidence Upload zone occupies a significant portion of the interface, featuring a drag-and-drop area with clear file format and size guidelines, accompanied by a list of recently uploaded documents with verification status indicators. The Requirements Checklist forms the core interactive element, displaying a hierarchical tree structure of compliance controls with expandable sections, completion checkboxes, attached file counts, and contextual action buttons that adapt based on completion status. Completed items display a checkmark and view action, while pending items offer start buttons to initiate evaluation workflows. This structured approach ensures assessors can systematically work through requirements while maintaining complete documentation trails.
 
 ---
 
-## Design Notes
+## Summary
 
-### Typography & Layout
-- Monospace fonts used for ASCII compatibility
-- Consistent border characters define containers
-- Visual hierarchy established through size and positioning
+These three wireframes establish the foundational user interface structure for the CertFast platform:
 
-### Color Indicators (for implementation reference)
-- 🔵 Blue = Active/In Progress
-- ✅ Green = Complete/Approved
-- ⏳ Yellow = Pending/Under Review
-- [ ] Empty = Not Started
+1. **Landing Page** - Focuses on conversion and value communication for prospective users
+2. **Dashboard** - Provides operational visibility and progress monitoring for active users  
+3. **Assessment Detail** - Enables detailed compliance evaluation and evidence management
 
-### Responsive Considerations
-- Sidebar collapses to hamburger menu on mobile
-- Metric cards stack vertically on narrow viewports
-- Upload zone maintains touch-friendly minimum sizes
-- Checklist items remain tappable at 44px minimum height
+The wireframes prioritize clarity, consistency, and task efficiency while maintaining professional aesthetics appropriate for enterprise compliance management use cases.
 
 ---
 
-*End of Wireframes Document*
+*Document Version: 1.0*  
+*Created: March 15, 2026*  
+*Track: Design - Wireframes*
