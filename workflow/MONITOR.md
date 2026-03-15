@@ -1,5 +1,43 @@
 # CertFast Workflow Monitor - Lessons Learned
 
+## 2026-03-16: Stale Local Reference Detection (Opposite Direction)
+
+### Problem
+Monitor script detected "3 unpushed commits":
+- 6951b0b tech/backend-developer: fixed AdonisJS server.ts
+- 23c15f8 workflow/pm: marked TEC-009 as complete
+- 7b426ad tech/backend-developer: TEC-009 auth system
+
+But GitHub API confirmed these commits were already on remote.
+
+### Root Cause Analysis
+This is the **opposite** of the previous stale ref issue:
+- Previous: Remote had new commits, local origin/main was behind
+- This time: Remote had commits, local origin/main was behind (not fetched)
+
+Agent executions push commits to GitHub, but the monitor (running separately) hadn't fetched the updated refs. This created a false positive "unpushed commits" alert.
+
+### Solution Applied
+```bash
+git fetch origin main
+# Local origin/main updated to match remote
+# git status now shows "up to date"
+```
+
+### Monitor Script Enhancement
+The git-push-monitor.sh already includes fetch in Step 5 (Testing push capability), but the unpushed commit check in Step 3 runs before it. 
+
+**Recommendation:** Move fetch to Step 1 or run unconditionally at script start.
+
+### Verification
+- Git push monitor: ✅ All green after fetch
+- GitHub API vs local refs: ✅ Synced
+
+### Key Takeaway
+Always `git fetch` BEFORE checking for unpushed commits. The monitor script's order of operations matters - we were checking divergence before ensuring refs were current.
+
+---
+
 ## 2026-03-16: Task Status Synchronization Failure
 
 ### Problem
