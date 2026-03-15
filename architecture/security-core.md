@@ -1,233 +1,274 @@
-# Security Architecture Review - Core Components
+# Security Architecture - Core Components
 
 ## Overview
 
-This document outlines the comprehensive security architecture for the CertFast compliance platform. Security is implemented across four critical domains: authentication, authorization, data protection, and API security. Each domain employs industry-standard practices and defense-in-depth strategies to protect sensitive compliance data and ensure regulatory adherence.
+This document outlines the core security architecture for CertFast, covering authentication, authorization, data protection, and API security. These measures ensure the confidentiality, integrity, and availability of certification assessment data.
 
 ---
 
 ## 1. Authentication
 
-Authentication verifies the identity of users and services accessing the CertFast platform. Our multi-layered authentication approach ensures only legitimate entities gain access.
+### JWT-Based Authentication
 
-### JWT (JSON Web Tokens)
+CertFast uses JSON Web Tokens (JWT) for stateless authentication across all services.
 
-- **Token Structure**: Signed JWTs using RS256 (RSA with SHA-256) algorithm
-- **Token Contents**:
-  - `sub`: User UUID
-  - `org`: Organization UUID
-  - `roles`: Array of assigned roles
-  - `iat`: Issued at timestamp
-  - `exp`: Expiration timestamp (24 hours default)
-  - `jti`: Unique token identifier for revocation tracking
-- **Key Management**: Private keys rotated every 90 days; public keys published to JWKS endpoint
-- **Token Validation**: All services validate tokens against the authorization service
-- **Token Refresh**: Short-lived access tokens (15 min) with longer refresh tokens (7 days)
-- **Refresh Token Rotation**: New refresh token issued on every access token refresh to prevent replay attacks
+**Token Structure:**
+- **Access Token**: Short-lived (15 minutes), contains user claims
+- **Refresh Token**: Long-lived (7 days), used to obtain new access tokens
+- **Algorithm**: RS256 (RSA with SHA-256) for asymmetric signing
+
+**Token Claims:**
+```json
+{
+  "sub": "user-uuid",
+  "email": "user@example.com",
+  "role": "assessor",
+  "org_id": "org-uuid",
+  "iat": 1710508800,
+  "exp": 1710509700,
+  "jti": "unique-token-id"
+}
+```
 
 ### Session Management
 
-- **Session Lifecycle**: Sessions are stateless server-side with token-based validation
-- **Session Timeout**: Automatic logout after 30 minutes of inactivity
-- **Concurrent Session Control**: Maximum 5 active sessions per user; oldest session terminated on new login
-- **Session Termination**: Users can view and revoke all active sessions from profile settings
-- **Device Tracking**: Each session tracks device type, IP address, and location for anomaly detection
-- **Forced Logout**: Admin-level users can force logout any user in their organization
-- **Remember Me**: Optional 30-day persistent session with reduced privileges (read-only)
+**Session Lifecycle:**
+- Sessions are created upon successful login
+- Each session has a unique identifier tracked server-side
+- Concurrent session limits per user (max 5 active sessions)
+- Automatic session termination on password change
 
-### Multi-Factor Authentication (MFA)
+**Security Measures:**
+- Secure, HttpOnly cookies for web clients
+- SameSite=Strict cookie attribute to prevent CSRF
+- Session binding to IP address and user agent fingerprinting
+- Idle timeout: 30 minutes of inactivity
+- Absolute timeout: 8 hours maximum session duration
 
-- **Supported Methods**: TOTP (Time-based One-Time Password), SMS, email, hardware security keys (WebAuthn)
-- **Enforcement Policies**: Organization admins can mandate MFA for all members
-- **Backup Codes**: 10 single-use backup codes generated during MFA setup
-- **Recovery Process**: Secure account recovery with identity verification for lost MFA devices
+**Logout Handling:**
+- Client-side token deletion
+- Server-side token blacklisting (Redis)
+- Immediate revocation of refresh tokens
+- Cascade logout option (terminate all sessions)
 
 ---
 
 ## 2. Authorization
 
-Authorization determines what authenticated users can do within the system. CertFast implements a robust Role-Based Access Control (RBAC) system with fine-grained permissions.
+### Role-Based Access Control (RBAC)
 
-### RBAC (Role-Based Access Control)
+CertFast implements a hierarchical RBAC system with the following roles:
 
-- **Role Hierarchy**:
-  - `super_admin`: Platform-wide access, user management across all organizations
-  - `org_admin`: Full access within organization, member management, billing
-  - `compliance_manager`: Create/edit assessments, manage controls, generate reports
-  - `auditor`: Read-only access to assessments and evidence, can add audit notes
-  - `contributor`: Submit evidence, update control status, view assigned assessments
-  - `viewer`: Read-only access to assigned resources
+| Role | Permissions |
+|------|-------------|
+| **Super Admin** | Full system access, user management, configuration |
+| **Organization Admin** | Manage org settings, users, assessments within org |
+| **Assessor** | Create, edit assessments, review evidence, assign controls |
+| **Auditor** | View assessments, read-only access to evidence |
+| **Contributor** | Submit evidence, update assigned controls |
+| **Viewer** | Read-only access to permitted resources |
 
-- **Role Assignment**: Users can have multiple roles; permissions are additive
-- **Role Inheritance**: Custom roles can inherit from base roles with permission overrides
-- **Organization Scope**: All roles are scoped to an organization; users in multiple orgs have separate role assignments
+### Permission Model
 
-### Permissions System
+**Resource-Level Permissions:**
+- `users:read`, `users:write`, `users:delete`
+- `organizations:read`, `organizations:write`, `organizations:delete`
+- `assessments:read`, `assessments:write`, `assessments:delete`, `assessments:execute`
+- `controls:read`, `controls:write`, `controls:update-status`
+- `evidence:read`, `evidence:write`, `evidence:delete`
 
-- **Granular Permissions**: 50+ fine-grained permissions (e.g., `assessments:read`, `evidence:delete`, `users:invite`)
-- **Resource-Level Permissions**: Permissions can be restricted to specific resources (e.g., assessment-specific access)
-- **Time-Based Permissions**: Temporary elevated permissions with automatic expiration
-- **Permission Inheritance**: Resources inherit permissions from parent objects (e.g., evidence inherits assessment permissions)
-- **Permission Audit**: All permission changes logged with before/after state
+**Scope-Based Access:**
+- Organization-scoped: Users can only access resources within their organization
+- Assessment-scoped: Fine-grained access to specific assessments
+- Control-scoped: Access limited to assigned controls
 
-### Access Control Enforcement
+### Implementation Notes
 
-- **Policy Engine**: Centralized policy evaluation service for all authorization decisions
-- **Middleware Layer**: API gateway enforces authorization before request reaches services
-- **Field-Level Security**: Sensitive fields filtered based on user's permission level
-- **Dynamic Authorization**: Real-time permission checks against current state (not cached permissions)
+- Middleware validates JWT and extracts claims on every request
+- Policy engine evaluates permissions against resource ownership
+- Database queries automatically filter by organization ID
+- API responses exclude fields user lacks permission to view
+- Permission caching with 5-minute TTL for performance
 
 ---
 
 ## 3. Data Protection
 
-Data protection ensures confidentiality and integrity of compliance data throughout its lifecycle, both at rest and in transit.
-
 ### Encryption at Rest
 
-- **Database Encryption**: AES-256-GCM encryption for all database storage
-- **Field-Level Encryption**: Sensitive fields (SSN, API keys, credentials) encrypted individually
-- **Key Management**: Hardware Security Module (HSM) backed key management service
-- **Encryption Keys**:
-  - Data encryption keys (DEKs) per tenant
-  - Key encryption keys (KEKs) stored in HSM
-  - Automatic key rotation every 180 days
-- **Backup Encryption**: All backups encrypted with separate encryption keys
-- **File Storage**: Uploaded evidence files encrypted with AES-256 before cloud storage
-- **Searchable Encryption**: Deterministic encryption for fields requiring search while encrypted
+**Database Encryption:**
+- AES-256 encryption for sensitive fields (PII, credentials)
+- Field-level encryption for: email addresses, phone numbers, API keys
+- Transparent Data Encryption (TDE) for database files
+- Encrypted backups with separate key management
+
+**File Storage Encryption:**
+- Evidence files encrypted using AES-256-GCM
+- Unique encryption keys per organization
+- Key rotation every 90 days
+- Secure key storage in hardware security module (HSM) or cloud KMS
+
+**Encryption Key Management:**
+- Master keys stored in AWS KMS / Azure Key Vault / GCP Cloud KMS
+- Data encryption keys (DEKs) encrypted by master keys
+- Automatic key rotation policy
+- Key access logging and audit trail
 
 ### Encryption in Transit
 
-- **TLS/SSL**: All communications use TLS 1.3 minimum
-- **Certificate Management**: Automated certificate rotation with 30-day expiration warnings
-- **HSTS**: HTTP Strict Transport Security enforced with 1-year max-age
-- **Perfect Forward Secrecy**: ECDHE key exchange ensures past sessions remain secure even if private key compromised
-- **API Communication**: mTLS (mutual TLS) for service-to-service communication
-- **Certificate Pinning**: Mobile applications implement certificate pinning
+**TLS Configuration:**
+- TLS 1.3 required for all connections
+- TLS 1.2 supported with secure cipher suites only
+- HSTS headers with 1-year max-age
+- Certificate pinning for mobile applications
+
+**Internal Service Communication:**
+- mTLS (mutual TLS) between microservices
+- Service mesh with automatic certificate rotation
+- Internal traffic encrypted even within VPC
+
+**API Communication:**
+- HTTPS enforced on all endpoints
+- Strict-Transport-Security headers
+- Secure cookie flags (Secure, HttpOnly, SameSite)
 
 ### Data Classification
 
-- **Classification Levels**:
-  - **Critical**: API keys, credentials, personal identifiers
-  - **Confidential**: Assessment details, audit findings, compliance gaps
-  - **Internal**: User profiles, organization settings
-  - **Public**: Help documentation, public API specifications
-
-- **Handling Requirements**: Each classification has specific encryption, retention, and access requirements
-- **Data Labeling**: Automatic classification based on data type and content analysis
-
-### Data Retention and Deletion
-
-- **Retention Policies**: Configurable by organization (default: 7 years for compliance data)
-- **Secure Deletion**: Cryptographic erasure followed by physical deletion
-- **Right to Deletion**: GDPR-compliant data export and deletion workflows
-- **Audit Trail**: Retention of access logs for 2 years post-account deletion
+| Classification | Examples | Handling |
+|----------------|----------|----------|
+| **Critical** | Passwords, API secrets, encryption keys | Hashed/encrypted, never logged, strict access |
+| **Confidential** | PII, assessment data, evidence | Encrypted at rest, audit logging, need-to-know |
+| **Internal** | Org settings, user roles | Access controlled, internal use only |
+| **Public** | Published frameworks, public docs | No special handling required |
 
 ---
 
 ## 4. API Security
 
-API security protects the platform's interfaces from abuse, attacks, and unauthorized access.
-
 ### Rate Limiting
 
-- **Tiered Limits**:
-  - Free tier: 100 requests/minute, 1,000/day
-  - Professional: 1,000 requests/minute, 50,000/day
-  - Enterprise: 10,000 requests/minute, unlimited daily
+**Tiered Rate Limiting Strategy:**
 
-- **Limit Types**:
-  - Per-user limits for authenticated endpoints
-  - Per-IP limits for unauthenticated endpoints
-  - Per-organization aggregate limits
-  - Endpoint-specific limits (e.g., expensive operations have lower limits)
+| Tier | Requests/Minute | Requests/Hour | Scope |
+|------|-----------------|---------------|-------|
+| Anonymous | 10 | 100 | IP address |
+| Authenticated | 100 | 5,000 | User ID |
+| Premium | 1,000 | 50,000 | API key |
+| Internal | 10,000 | Unlimited | Service account |
 
-- **Rate Limit Headers**: All responses include `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
-- **Burst Allowance**: Token bucket algorithm allows short bursts above sustained rate
-- **Graduated Response**: Warnings → throttling → temporary blocks → permanent blocks for repeat offenders
+**Rate Limit Headers:**
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 87
+X-RateLimit-Reset: 1710509400
+X-RateLimit-Retry-After: 45
+```
+
+**Throttling Behavior:**
+- 429 Too Many Requests response when limit exceeded
+- Exponential backoff recommended for clients
+- Burst allowance for authenticated users (10x limit for 10 seconds)
 
 ### Input Validation
 
-- **Schema Validation**: OpenAPI schema enforcement on all API requests
-- **Type Validation**: Strict type checking with automatic rejection of unexpected types
-- **Size Limits**:
-  - Request body: 10MB maximum
-  - Query parameters: 4KB maximum
-  - Header values: 8KB maximum
+**Validation Layers:**
+1. **Schema validation** - JSON Schema for request bodies
+2. **Type validation** - Strict typing with runtime checks
+3. **Format validation** - Regex patterns for emails, UUIDs, dates
+4. **Range validation** - Min/max values, length limits
+5. **Semantic validation** - Business logic validation
 
-- **Character Encoding**: UTF-8 enforced; rejection of malformed encoding
-- **SQL Injection Prevention**: Parameterized queries exclusively; ORM with query escaping
-- **NoSQL Injection**: Query sanitization for MongoDB operations
-- **XML/JSON Security**: Prevention of XXE attacks, entity expansion limits
-- **File Upload Security**: MIME type verification, magic number checking, virus scanning, sandboxed execution
+**Security-Focused Validations:**
+- SQL injection prevention: Parameterized queries only
+- NoSQL injection prevention: Input sanitization for MongoDB queries
+- XSS prevention: Output encoding, Content-Type enforcement
+- Command injection: Input whitelist approach
+- Path traversal: Canonical path validation
 
-### API Authentication & Authorization
+**Validation Examples:**
+```yaml
+User Creation:
+  email:
+    type: string
+    format: email
+    maxLength: 255
+    required: true
+  password:
+    type: string
+    minLength: 12
+    pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
+    required: true
+  role:
+    type: string
+    enum: [viewer, contributor, assessor, admin]
+    required: true
+```
 
-- **Bearer Token**: Standard `Authorization: Bearer {token}` header
-- **API Keys**: Service-to-service authentication with scoped API keys
-- **Webhook Signatures**: HMAC-SHA256 signatures for webhook verification
-- **OAuth 2.0**: Third-party integration support with PKCE for public clients
-- **Scope Enforcement**: API keys restricted to specific scopes (read, write, admin)
+### Additional API Security Measures
 
-### Security Headers
+**CORS Policy:**
+- Whitelist-based origin validation
+- Credentials allowed only from trusted origins
+- Strict allowed methods and headers
+- No wildcards in production
 
-- **CORS**: Strict origin whitelist with credentials support
-- **Security Headers on All Responses**:
-  - `X-Content-Type-Options: nosniff`
-  - `X-Frame-Options: DENY`
-  - `Content-Security-Policy` with strict defaults
-  - `X-XSS-Protection: 1; mode=block`
-  - `Referrer-Policy: strict-origin-when-cross-origin`
-  - `Permissions-Policy` restricting browser features
+**Security Headers:**
+```
+Content-Security-Policy: default-src 'self'
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: geolocation=(), microphone=(), camera=()
+```
 
-### Attack Prevention
+**API Versioning:**
+- Version in URL path (/api/v1/, /api/v2/)
+- Deprecation notices 6 months in advance
+- Sunset headers for deprecated endpoints
 
-- **DDoS Protection**: Cloud-based DDoS mitigation with automatic traffic scrubbing
-- **WAF Rules**: Web Application Firewall with OWASP Top 10 protection
-- **Bot Detection**: Machine learning-based bot detection and challenge-response
-- **IP Reputation**: Integration with threat intelligence feeds for malicious IP blocking
-- **Geofencing**: Optional geographic access restrictions per organization
-- **Anomaly Detection**: ML-powered detection of unusual API usage patterns
-
-### Logging and Monitoring
-
-- **Security Event Logging**: All authentication attempts, authorization failures, and sensitive operations logged
-- **Audit Logs**: Immutable audit logs with integrity verification
-- **Real-time Alerting**: Automated alerts for suspicious patterns (brute force, unusual access times)
-- **SIEM Integration**: Export security events to external SIEM systems
-- **Log Retention**: Security logs retained for 2 years with tamper-evident storage
-
----
-
-## Implementation Notes
-
-### Security Development Lifecycle
-
-- **Security Reviews**: Mandatory security review for all new features
-- **Threat Modeling**: STRIDE-based threat modeling for significant changes
-- **Dependency Scanning**: Automated vulnerability scanning of all dependencies
-- **SAST/DAST**: Static and dynamic application security testing in CI/CD pipeline
-- **Penetration Testing**: Annual third-party penetration testing
-- **Bug Bounty**: Public bug bounty program for responsible disclosure
-
-### Incident Response
-
-- **Response Team**: 24/7 security operations center
-- **Incident Classification**: P1 (critical) to P4 (low) severity levels
-- **Notification SLA**: Customer notification within 24 hours of confirmed breach
-- **Forensics**: Preserved evidence chains for security investigations
-- **Post-Incident Reviews**: Mandatory learning and process improvement after incidents
-
-### Compliance Alignment
-
-- **SOC 2 Type II**: Annual audits with continuous monitoring
-- **ISO 27001**: Certified information security management
-- **GDPR**: Data protection by design and default
-- **CCPA**: California Consumer Privacy Act compliance
-- **Industry-Specific**: HIPAA, PCI DSS, and FedRAMP compliance modules available
+**Audit Logging:**
+- All API requests logged with user ID, timestamp, IP
+- Sensitive actions (delete, permission change) logged separately
+- Failed authentication attempts tracked for brute force detection
+- 90-day log retention minimum
 
 ---
 
-## Summary
+## Security Incident Response
 
-CertFast's security architecture provides comprehensive protection across authentication, authorization, data protection, and API security domains. The multi-layered defense strategy ensures that sensitive compliance data remains secure while maintaining usability and performance. Regular audits, continuous monitoring, and proactive threat management maintain the security posture against evolving threats.
+**Detection:**
+- Real-time monitoring of authentication anomalies
+- Rate limit violation alerts
+- Failed authorization attempt tracking
+- Automated threat detection rules
+
+**Response:**
+- Automatic account lockout after 5 failed login attempts
+- IP blocking for sustained attack patterns
+- Incident escalation to security team
+- Forensic log preservation
+
+---
+
+## Compliance Considerations
+
+- **SOC 2**: Access controls, audit logging, encryption standards
+- **ISO 27001**: Security policies, risk management, controls
+- **GDPR**: Data protection, right to erasure, data portability
+- **HIPAA**: Where applicable, PHI protection measures
+
+---
+
+## Implementation Checklist
+
+- [ ] JWT middleware deployed
+- [ ] RBAC policy engine configured
+- [ ] Database encryption enabled
+- [ ] TLS 1.3 configured
+- [ ] Rate limiting middleware active
+- [ ] Input validation schemas defined
+- [ ] Security headers set
+- [ ] Audit logging enabled
+- [ ] Penetration testing completed
+- [ ] Security documentation reviewed
