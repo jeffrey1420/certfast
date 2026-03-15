@@ -1,53 +1,53 @@
 # Agent Execution Guide - SIMPLIFIED
 
-**Pour les agents qui exécutent les tâches de Sprint #2**
+**For agents executing Sprint #2 tasks**
 
 ---
 
-## ⚡ RÈGLE D'OR : Lis MOINS, fais PLUS
+## ⚡ GOLDEN RULE: Read LESS, Do MORE
 
-**Tu as 15-30 minutes MAX. Ne perds pas de temps à lire des tonnes de fichiers.**
+**You have 15-30 minutes MAX. Don't waste time reading tons of files.**
 
 ---
 
-## 📋 Checklist avant de commencer
+## 📋 Pre-Start Checklist
 
-1. ✅ Lis SEULEMENT cette tâche dans `tasks.md`
-2. ✅ Vérifie le type : Quick (15min) / Standard (30min)
-3. ✅ Crée le livrable directement
+1. ✅ Read ONLY this task in `tasks.md`
+2. ✅ Check type: Quick (15min) / Standard (30min)
+3. ✅ Create the deliverable directly
 4. ✅ Commit + push
 
-**NE LIS PAS :**
-- ❌ Tous les fichiers d'architecture
-- ❌ CONTEXT.md entier
-- ❌ Les autres tâches
-- ❌ Les fichiers de design
+**DO NOT READ:**
+- ❌ All architecture files
+- ❌ Full CONTEXT.md
+- ❌ Other tasks
+- ❌ Design files
 
 ---
 
-## 🏗️ Architecture Bare Metal (Résumé 10 secondes)
+## 🏗️ Bare Metal Architecture (10-Second Summary)
 
 ```
 Nginx (SSL) → AdonisJS API → PostgreSQL + Redis + ClickHouse + R2
 ```
 
-**Stack :**
-- Backend : AdonisJS v6 (Node.js 20)
-- Frontend : React 18 + Vite (déjà créé dans `apps/web/`)
-- DB : PostgreSQL 15 (Docker)
-- Cache : Redis 7 (Docker)
-- Analytics : ClickHouse 23 (Docker)
-- Storage : Cloudflare R2 (S3-compatible)
-- Proxy : Nginx + Let's Encrypt
+**Stack:**
+- Backend: AdonisJS v6 (Node.js 20)
+- Frontend: React 18 + Vite (already created in `apps/web/`)
+- DB: PostgreSQL 15 (Docker)
+- Cache: Redis 7 (Docker)
+- Analytics: ClickHouse 23 (Docker)
+- Storage: Cloudflare R2 (S3-compatible)
+- Proxy: Nginx + Let's Encrypt
 
 ---
 
-## 💾 Cloudflare R2 (Stockage fichiers)
+## 💾 Cloudflare R2 (File Storage)
 
-**Pour TEC-012 (Evidence upload) :**
+**For TEC-012 (Evidence upload):**
 
 ```typescript
-// Utilise le SDK AWS S3 (compatible R2)
+// Use AWS S3 SDK (R2-compatible)
 import { S3Client } from '@aws-sdk/client-s3'
 
 const r2 = new S3Client({
@@ -60,27 +60,27 @@ const r2 = new S3Client({
 })
 ```
 
-**Buckets nécessaires :**
-- `certfast-evidence-{env}` - Fichiers d'évidence
-- `certfast-backups-{env}` - Backups DB
+**Required buckets:**
+- `certfast-evidence-{env}` - Evidence files
+- `certfast-backups-{env}` - DB backups
 
 ---
 
-## 🔧 Tâches Sprint #2 - Mode d'emploi
+## 🔧 Sprint #2 Tasks - Quick Guide
 
-### TEC-006 : Docker Compose
-**Fichiers à créer :**
+### TEC-006: Docker Compose
+**Files to create:**
 - `infrastructure/docker-compose.yml`
 - `infrastructure/.env.example`
 
-**Services obligatoires :**
+**Required services:**
 ```yaml
-# 6 services : app, postgres, redis, clickhouse, nginx, (minio optionnel)
-# Copie la structure de la doc d'architecture
+# 6 services: app, postgres, redis, clickhouse, nginx, (minio optional)
+# Copy structure from architecture doc
 ```
 
-### TEC-007 : Setup AdonisJS
-**Commande :**
+### TEC-007: AdonisJS Setup
+**Command:**
 ```bash
 cd apps/
 npm init adonis-ts-app api
@@ -89,66 +89,66 @@ npm install @adonisjs/auth @adonisjs/lucid @adonisjs/redis luxon
 npm install @aws-sdk/client-s3 clickhouse
 ```
 
-### TEC-008 : Migrations
-**Tables :** users, organizations, organization_users, assessments, controls, evidence, audit_logs
-**Copie le schéma de :** `/work/certfast/architecture/database-schema.md`
+### TEC-008: Migrations
+**Tables:** users, organizations, organization_users, assessments, controls, evidence, audit_logs
+**Copy schema from:** `/work/certfast/architecture/database-schema.md`
 
-### TEC-009 : Auth
-**Endpoints :** register, login, refresh, logout, forgot-password, reset-password, me
-**JWT :** access token 15min, refresh token 7jours dans Redis
+### TEC-009: Auth
+**Endpoints:** register, login, refresh, logout, forgot-password, reset-password, me
+**JWT:** access token 15min, refresh token 7days in Redis
 
-### TEC-010 à TEC-012 : APIs
-**Base URL :** `/api/v1/`
-**Format :** REST JSON
-**Auth :** Bearer token
+### TEC-010 to TEC-012: APIs
+**Base URL:** `/api/v1/`
+**Format:** REST JSON
+**Auth:** Bearer token
 
-### DSG-008 à DSG-014 : Frontend
-**Déjà setup dans :** `apps/web/`
-**API URL :** utilise `import.meta.env.VITE_API_URL`
-**Composants :** shadcn/ui déjà installés
+### DSG-008 to DSG-014: Frontend
+**Already setup in:** `apps/web/`
+**API URL:** use `import.meta.env.VITE_API_URL`
+**Components:** shadcn/ui already installed
 
 ---
 
-## ✅ Quality Gates SIMPLIFIÉS
+## ✅ SIMPLIFIED Quality Gates
 
 | Check | Quick (15min) | Standard (30min) |
 |-------|---------------|------------------|
-| Fichier créé | ✅ | ✅ |
-| Code compile/parses | ✅ | ✅ |
-| `.env.example` à jour | - | ✅ |
+| File created | ✅ | ✅ |
+| Code compiles/parses | ✅ | ✅ |
+| `.env.example` updated | - | ✅ |
 | Commit + push | ✅ | ✅ |
 
-**Word count :** Pas important pour le code, mais commente ton code.
+**Word count:** Not important for code, but comment your code.
 
 ---
 
-## 🚨 Anti-Patterns à ÉVITER
+## 🚨 Anti-Patterns to AVOID
 
-❌ **Ne fais pas :**
-- Lire 10 fichiers avant de commencer
-- Réécrire toute l'architecture
-- Créer des générateurs de code complexes
-- Chercher la perfection
+❌ **DON'T:**
+- Read 10 files before starting
+- Rewrite the entire architecture
+- Create complex code generators
+- Chase perfection
 
-✅ **Fais :**
-- Copier les patterns de la doc d'architecture
-- Utiliser les valeurs par défaut raisonnables
-- Tester que ça compile/démarre
-- Push rapidement
-
----
-
-## 💡 Rappels
-
-- **15 min = Quick** : Fichier simple, config basique
-- **30 min = Standard** : Setup complet, mais pas over-engineered
-- **PAS de Deep (60min)** pour le code initial
-- **Commit format :** `tech/backend-developer: setup Adonis project`
-- **Push OBLIGATOIRE** avant de finir
+✅ **DO:**
+- Copy patterns from architecture doc
+- Use reasonable defaults
+- Test that it compiles/starts
+- Push quickly
 
 ---
 
-## 📁 Structure attendue après Sprint #2
+## 💡 Reminders
+
+- **15 min = Quick**: Simple file, basic config
+- **30 min = Standard**: Complete setup, but not over-engineered
+- **NO Deep (60min)** for initial code
+- **Commit format:** `tech/backend-developer: setup Adonis project`
+- **Push MANDATORY** before finishing
+
+---
+
+## 📁 Expected Structure After Sprint #2
 
 ```
 /work/certfast/
@@ -158,16 +158,16 @@ npm install @aws-sdk/client-s3 clickhouse
 │   │   ├── config/
 │   │   ├── database/
 │   │   └── start/
-│   └── web/              # React (déjà créé)
+│   └── web/              # React (already created)
 ├── infrastructure/
 │   ├── docker-compose.yml    # (TEC-006)
 │   ├── docker-compose.prod.yml
 │   └── .env.example
-└── architecture/         # Docs déjà créées
+└── architecture/         # Docs already created
 ```
 
 ---
 
-**Questions ?** Réfère-toi à `/work/certfast/architecture/system-architecture.md` UNIQUEMENT si tu bloques sur une décision technique.
+**Questions?** Refer to `/work/certfast/architecture/system-architecture.md` ONLY if blocked on technical decision.
 
-**Maintenant : EXECUTE ta tâche et PUSH !** 🚀
+**Now: EXECUTE your task and PUSH!** 🚀

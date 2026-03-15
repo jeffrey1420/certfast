@@ -1,20 +1,20 @@
 # Tech Track - Sprint #2 SIMPLIFIED
 
-**NOUVELLES TÂCHES : Ultra-simples, exécutables en 15-30 min**
+**NEW TASKS: Ultra-simple, executable in 15-30 min**
 
 ---
 
-## ⚡ RAPPEL : Tu as PEU DE TEMPS
+## ⚡ REMINDER: You have LIMITED TIME
 
-- **Quick (15 min)** : 1-2 fichiers, setup basique
-- **Standard (30 min)** : 3-5 fichiers, fonctionnel mais simple
-- **NE LIS PAS** la doc en entier, utilise les snippets ci-dessous
+- **Quick (15 min)**: 1-2 files, basic setup
+- **Standard (30 min)**: 3-5 files, functional but simple
+- **DO NOT READ** the full doc, use snippets below
 
 ---
 
-## TEC-006 : Docker Compose Infrastructure ⏱️ 30 min
+## TEC-006: Docker Compose Infrastructure ⏱️ 30 min
 
-**Fichiers à créer :**
+**Files to create:**
 
 ### 1. `infrastructure/docker-compose.yml`
 
@@ -158,7 +158,7 @@ REDIS_PASSWORD=change_me_in_production
 # ClickHouse
 CLICKHOUSE_PASSWORD=change_me_in_production
 
-# Cloudflare R2 (pour fichiers)
+# Cloudflare R2 (for files)
 R2_ACCOUNT_ID=your_account_id
 R2_ACCESS_KEY_ID=your_access_key
 R2_SECRET_ACCESS_KEY=your_secret_key
@@ -235,36 +235,36 @@ http {
 }
 ```
 
-**Commit :** `tech/devops-engineer: created Docker Compose with postgres, redis, clickhouse, nginx`
+**Commit:** `tech/devops-engineer: created Docker Compose with postgres, redis, clickhouse, nginx`
 
 ---
 
-## TEC-007 : Setup AdonisJS ⏱️ 30 min
+## TEC-007: AdonisJS Setup ⏱️ 30 min
 
-**Commandes à exécuter :**
+**Commands to run:**
 
 ```bash
 cd /work/certfast/apps
-# Crée le projet
+# Create project
 npm init adonis-ts-app@latest api -- --eslint --prettier
 
-# Attends la fin...
+# Wait for completion...
 cd api
 
-# Installe les packages essentiels
+# Install essential packages
 npm install @adonisjs/auth @adonisjs/lucid @adonisjs/redis
 npm install luxon @aws-sdk/client-s3
 npm install clickhouse
 
-# Configure les providers
+# Configure providers
 node ace configure @adonisjs/lucid
 node ace configure @adonisjs/redis
 node ace configure @adonisjs/auth
 ```
 
-**Fichiers de config à créer/modifier :**
+**Config files to create/modify:**
 
-1. `apps/api/.env.example` :
+1. `apps/api/.env.example`:
 ```bash
 PORT=3333
 HOST=0.0.0.0
@@ -282,18 +282,18 @@ REDIS_PORT=6379
 REDIS_PASSWORD=secret
 ```
 
-**Commit :** `tech/backend-developer: initialized AdonisJS with auth, lucid, redis`
+**Commit:** `tech/backend-developer: initialized AdonisJS with auth, lucid, redis`
 
 ---
 
-## TEC-008 : Migrations Database ⏱️ 30 min
+## TEC-008: Database Migrations ⏱️ 30 min
 
-**Commandes :**
+**Commands:**
 
 ```bash
 cd /work/certfast/apps/api
 
-# Crée les migrations
+# Create migrations
 node ace make:migration users
 node ace make:migration organizations
 node ace make:migration organization_users
@@ -302,9 +302,9 @@ node ace make:migration controls
 node ace make:migration evidence
 ```
 
-**Modifie chaque fichier dans `database/migrations/` avec ce modèle :**
+**Edit each file in `database/migrations/` with this pattern:**
 
-### `users` :
+### `users`:
 ```typescript
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
@@ -331,15 +331,15 @@ export default class extends BaseSchema {
 }
 ```
 
-**Commit :** `tech/backend-developer: created migrations for users, orgs, assessments, controls, evidence`
+**Commit:** `tech/backend-developer: created migrations for users, orgs, assessments, controls, evidence`
 
 ---
 
-## TEC-009 : Auth System ⏱️ 30 min
+## TEC-009: Auth System ⏱️ 30 min
 
-**Fichiers à créer :**
+**Files to create:**
 
-1. `apps/api/app/controllers/auth_controller.ts` :
+1. `apps/api/app/controllers/auth_controller.ts`:
 
 ```typescript
 import { HttpContext } from '@adonisjs/core/http'
@@ -371,7 +371,7 @@ export default class AuthController {
 }
 ```
 
-2. `apps/api/start/routes.ts` (ajoute) :
+2. `apps/api/start/routes.ts` (add):
 
 ```typescript
 import router from '@adonisjs/core/services/router'
@@ -385,19 +385,19 @@ router.group(() => {
 }).prefix('/api/v1')
 ```
 
-**Commit :** `tech/backend-developer: implemented auth endpoints (register, login, logout, me)`
+**Commit:** `tech/backend-developer: implemented auth endpoints (register, login, logout, me)`
 
 ---
 
-## TEC-010 à TEC-012 : API CRUD ⏱️ 30 min chaque
+## TEC-010 to TEC-012: API CRUD ⏱️ 30 min each
 
-**Pattern pour chaque ressource :**
+**Pattern for each resource:**
 
-1. Crée le modèle : `node ace make:model Assessment`
-2. Crée le contrôleur : `node ace make:controller assessment`
-3. Ajoute les routes dans `start/routes.ts`
+1. Create model: `node ace make:model Assessment`
+2. Create controller: `node ace make:controller assessment`
+3. Add routes in `start/routes.ts`
 
-**Exemple pour Assessments :**
+**Example for Assessments:**
 
 ```typescript
 // app/models/assessment.ts
@@ -429,20 +429,20 @@ export default class Assessment extends BaseModel {
 }
 ```
 
-**Commit format :** `tech/backend-developer: implemented [resource] CRUD endpoints`
+**Commit format:** `tech/backend-developer: implemented [resource] CRUD endpoints`
 
 ---
 
-## Règles pour ÉVITER les Rate Limits
+## Rules to AVOID Rate Limits
 
-1. **COPIE les snippets ci-dessus** - Ne les réécris pas
-2. **1 commit = 1 tâche** - Push rapidement
-3. **Pas de perfection** - Fonctionnel > Parfait
-4. **Commentaires minimaux** - Le code doit parler
-5. **Tests ?** Optionnels pour l'instant
+1. **COPY the snippets above** - Don't rewrite them
+2. **1 commit = 1 task** - Push quickly
+3. **No perfection** - Functional > Perfect
+4. **Minimal comments** - Code should speak
+5. **Tests?** Optional for now
 
-**Si bloqué :** Lis UNIQUEMENT `/work/certfast/architecture/system-architecture.md` section concernée.
+**If stuck:** Read ONLY `/work/certfast/architecture/system-architecture.md` relevant section.
 
 ---
 
-**GO ! Crée tes fichiers et PUSH !** 🚀
+**GO! Create your files and PUSH!** 🚀

@@ -24,10 +24,10 @@
 | **TEC-001-UPDATE**: System Architecture (bare metal) | ✅ | `7a7890f` |
 | **TEC-005-UPDATE**: Infrastructure Plan (bare metal) | ✅ | Included in above |
 
-**Architecture maintenant alignée :**
+**Architecture now aligned:**
 - ✅ Bare metal server
-- ✅ Docker Compose (pas Kubernetes)
-- ✅ Cloudflare R2 (pas AWS S3)
+- ✅ Docker Compose (not Kubernetes)
+- ✅ Cloudflare R2 (not AWS S3)
 - ✅ Self-hosted PostgreSQL + Redis + ClickHouse
 - ✅ Nginx + Let's Encrypt
 
@@ -35,11 +35,11 @@
 
 ## 🚀 Sprint #2 - Development (READY)
 
-### ⚡ NOUVELLE DOC : `SIMPLIFIED_SPRINT2.md`
+### ⚡ NEW DOC: `SIMPLIFIED_SPRINT2.md`
 
-**Les agents doivent lire :**
-1. Cette tâche (ACTIVE ci-dessous)
-2. `SIMPLIFIED_SPRINT2.md` pour le snippet de code exact
+**Agents must read:**
+1. This task (ACTIVE below)
+2. `SIMPLIFIED_SPRINT2.md` for exact code snippets
 
 ---
 
@@ -54,18 +54,18 @@
 #### Description
 Docker Compose Infrastructure
 
-**RAPPEL :** Tu as 30 minutes MAX. Copie les snippets de `SIMPLIFIED_SPRINT2.md`, n'écris pas from scratch.
+**REMINDER:** You have 30 minutes MAX. Copy snippets from `SIMPLIFIED_SPRINT2.md`, don't write from scratch.
 
-**Fichiers à créer :**
+**Files to create:**
 1. `infrastructure/docker-compose.yml` - 6 services (app, postgres, redis, clickhouse, nginx)
-2. `infrastructure/.env.example` - Variables d'environnement
-3. `infrastructure/docker/app/Dockerfile` - Build AdonisJS
+2. `infrastructure/.env.example` - Environment variables
+3. `infrastructure/docker/app/Dockerfile` - AdonisJS build
 4. `infrastructure/nginx/nginx.conf` - Reverse proxy
 
 **Quality Gates:**
-- [ ] `docker-compose.yml` valide (teste avec `docker-compose config`)
-- [ ] 6 services définis
-- [ ] Healthchecks configurés
+- [ ] Valid `docker-compose.yml` (test with `docker-compose config`)
+- [ ] 6 services defined
+- [ ] Healthchecks configured
 - [ ] Commit + push
 
 **Commit:** `tech/devops-engineer: created Docker Compose infrastructure`
@@ -80,11 +80,11 @@ Docker Compose Infrastructure
 - **Depends on**: TEC-006 ✅
 - **Doc**: `SIMPLIFIED_SPRINT2.md` section TEC-007
 
-**Commandes exactes à exécuter :**
+**Exact commands to run:**
 ```bash
 cd /work/certfast/apps
 npm init adonis-ts-app@latest api -- --eslint --prettier
-# ... (voir SIMPLIFIED_SPRINT2.md pour la suite)
+# ... (see SIMPLIFIED_SPRINT2.md for rest)
 ```
 
 ---
@@ -95,7 +95,7 @@ npm init adonis-ts-app@latest api -- --eslint --prettier
 - **Depends on**: TEC-007
 - **Doc**: `SIMPLIFIED_SPRINT2.md` section TEC-008
 
-**Tables :** users, organizations, organization_users, assessments, controls, evidence
+**Tables:** users, organizations, organization_users, assessments, controls, evidence
 
 ---
 
@@ -105,7 +105,7 @@ npm init adonis-ts-app@latest api -- --eslint --prettier
 - **Depends on**: TEC-008
 - **Doc**: `SIMPLIFIED_SPRINT2.md` section TEC-009
 
-**Endpoints :** register, login, logout, me
+**Endpoints:** register, login, logout, me
 
 ---
 
@@ -128,7 +128,7 @@ npm init adonis-ts-app@latest api -- --eslint --prettier
 - **Type**: Standard (30 min)
 - **Depends on**: TEC-011
 
-**Note :** Evidence utilise Cloudflare R2 (voir `SIMPLIFIED_SPRINT2.md`)
+**Note:** Evidence uses Cloudflare R2 (see `SIMPLIFIED_SPRINT2.md`)
 
 ---
 
@@ -137,7 +137,7 @@ npm init adonis-ts-app@latest api -- --eslint --prettier
 - **Type**: Quick (15 min)
 - **Depends on**: TEC-007
 
-**Setup basique pour analytics** - Pattern event tracking simple
+**Basic setup for analytics** - Simple event tracking pattern
 
 ---
 
@@ -146,7 +146,7 @@ npm init adonis-ts-app@latest api -- --eslint --prettier
 - **Type**: Standard (30 min)
 - **Depends on**: TEC-012
 
-**Tests Japa basiques** pour auth + 1-2 endpoints CRUD
+**Basic Japa tests** for auth + 1-2 CRUD endpoints
 
 ---
 
@@ -160,12 +160,12 @@ npm init adonis-ts-app@latest api -- --eslint --prettier
 
 ---
 
-## ⚠️ Instructions Anti-Rate-Limit
+## ⚠️ Anti-Rate-Limit Instructions
 
-1. **Lis SEULEMENT** la tâche ACTIVE + `SIMPLIFIED_SPRINT2.md`
-2. **COPIE les snippets** - Ne réécris pas
-3. **1 commit par tâche** - Push rapidement
-4. **Pas de perfection** - Fonctionnel > Parfait
-5. **Word count** : N/A pour le code, mais commente brièvement
+1. **Read ONLY** the ACTIVE task + `SIMPLIFIED_SPRINT2.md`
+2. **COPY the snippets** - Don't rewrite
+3. **1 commit per task** - Push quickly
+4. **No perfection** - Functional > Perfect
+5. **Word count**: N/A for code, but brief comments
 
-**Guide complet pour agents :** `/work/certfast/workflow/AGENT_GUIDE.md`
+**Complete agent guide:** `/work/certfast/workflow/AGENT_GUIDE.md`

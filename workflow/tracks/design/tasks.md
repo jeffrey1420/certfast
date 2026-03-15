@@ -24,7 +24,7 @@
 
 **Status**: ✅ DONE (commit `df732ee`)
 
-**Créé dans :** `apps/web/`
+**Created in:** `apps/web/`
 - React 18 + TypeScript
 - Vite 5
 - Tailwind CSS
@@ -45,15 +45,15 @@
 #### Description
 Auth Pages Implementation
 
-**Pages à créer :**
-1. **Login** (`/login`) - Email + password, erreurs, loading
+**Pages to create:**
+1. **Login** (`/login`) - Email + password, errors, loading
 2. **Register** (`/register`) - Email, password, org name
 3. **Forgot Password** (`/forgot-password`) - Email input
 4. **Reset Password** (`/reset-password`) - New password form
 
-**API :** `POST /api/v1/auth/login`, etc.
+**API:** `POST /api/v1/auth/login`, etc.
 
-**Fichiers à créer :**
+**Files to create:**
 ```
 apps/web/src/routes/auth/
 ├── login.tsx
@@ -62,13 +62,13 @@ apps/web/src/routes/auth/
 └── reset-password.tsx
 ```
 
-**Composants shadcn à utiliser :**
+**shadcn components to use:**
 - `Button`, `Input`, `Label`, `Card`
-- `Form` (avec React Hook Form + Zod)
+- `Form` (with React Hook Form + Zod)
 
-**Pattern :**
+**Pattern:**
 ```typescript
-// stores/auth.ts existe déjà
+// stores/auth.ts already exists
 import { useAuthStore } from '@/stores/auth'
 
 // API call
@@ -80,10 +80,10 @@ const response = await fetch('/api/v1/auth/login', {
 ```
 
 **Quality Gates:**
-- [ ] 4 pages créées
-- [ ] Formulaires validés (Zod)
-- [ ] États loading/erreur gérés
-- [ ] Redirection après login
+- [ ] 4 pages created
+- [ ] Forms validated (Zod)
+- [ ] Loading/error states handled
+- [ ] Redirect after login
 - [ ] Commit + push
 
 **Commit:** `design/frontend-developer: created auth pages (login, register, forgot, reset)`
@@ -97,8 +97,8 @@ const response = await fetch('/api/v1/auth/login', {
 - **Type**: Quick (15 min)
 - **Depends on**: DSG-008
 
-**Components :** Sidebar, Header, MainContent
-**Responsive :** Menu mobile hamburger
+**Components:** Sidebar, Header, MainContent
+**Responsive:** Mobile hamburger menu
 
 ---
 
@@ -107,13 +107,13 @@ const response = await fetch('/api/v1/auth/login', {
 - **Type**: Standard (30 min)
 - **Depends on**: DSG-009
 
-**Features :**
+**Features:**
 - 4 metric cards (Compliance Score, Assessments, Evidence, Days)
 - Progress bar
 - Recent activity list
 - Quick actions buttons
 
-**API :** `GET /api/v1/dashboard/metrics`
+**API:** `GET /api/v1/dashboard/metrics`
 
 ---
 
@@ -122,8 +122,8 @@ const response = await fetch('/api/v1/auth/login', {
 - **Type**: Standard (30 min)
 - **Depends on**: DSG-009
 
-**Features :**
-- Table avec pagination
+**Features:**
+- Table with pagination
 - Filters (status, framework)
 - Search
 - Create button
@@ -135,8 +135,8 @@ const response = await fetch('/api/v1/auth/login', {
 - **Type**: Standard (30 min)
 - **Depends on**: DSG-011
 
-**Features :**
-- Header avec status
+**Features:**
+- Header with status
 - Controls list (expandable)
 - Evidence upload (drag & drop)
 - Checklist
@@ -148,7 +148,7 @@ const response = await fetch('/api/v1/auth/login', {
 - **Type**: Quick (15 min)
 - **Depends on**: DSG-009
 
-**Pages :** Organization, Profile, Integrations (simple forms)
+**Pages:** Organization, Profile, Integrations (simple forms)
 
 ---
 
@@ -157,7 +157,7 @@ const response = await fetch('/api/v1/auth/login', {
 - **Type**: Quick (15 min)
 - **Depends on**: DSG-013
 
-**Tâches :**
+**Tasks:**
 - Mobile responsive check
 - Loading skeletons
 - Empty states
@@ -174,7 +174,7 @@ const response = await fetch('/api/v1/auth/login', {
 
 ---
 
-## 🎨 Stack Frontend
+## 🎨 Frontend Stack
 
 ```
 React 18 + TypeScript
@@ -187,16 +187,16 @@ React Hook Form + Zod (forms)
 React Router v6
 ```
 
-**Déjà setup dans :** `apps/web/`
+**Already setup in:** `apps/web/`
 
 ---
 
-## ⚡ Instructions Anti-Rate-Limit
+## ⚡ Anti-Rate-Limit Instructions
 
-1. **Copie les patterns** de shadcn/ui existants
-2. **Utilise les stores** déjà créés dans `src/stores/`
-3. **Mock l'API** si besoin (type les réponses)
-4. **1 commit par page** - Push rapidement
-5. **Responsive ?** Mobile-first avec Tailwind
+1. **Copy patterns** from existing shadcn/ui
+2. **Use stores** already created in `src/stores/`
+3. **Mock API** if needed (type the responses)
+4. **1 commit per page** - Push quickly
+5. **Responsive?** Mobile-first with Tailwind
 
-**Guide agents :** `/work/certfast/workflow/AGENT_GUIDE.md`
+**Agent guide:** `/work/certfast/workflow/AGENT_GUIDE.md`
