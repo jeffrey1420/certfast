@@ -1,23 +1,32 @@
+import { HttpContext } from '@adonisjs/core/http'
 import { createHash, randomBytes } from 'node:crypto'
 
-// Simple in-memory user store for now
+// Simple in-memory user store for now (will be replaced with DB)
 const users: Map<number, any> = new Map()
 const tokens: Map<string, number> = new Map()
 let userIdCounter = 1
 
 export default class AuthController {
-  async register({ request, response }: { request: any; response: any }) {
-    const { email, password, fullName } = request.body
+  /**
+   * Register a new user
+   */
+  async register({ request, response }: HttpContext) {
+    const { email, password, fullName } = request.body()
 
     // Validation
     if (!email || !password) {
-      return response.status(422).json({ error: 'Validation failed', message: 'Email and password required' })
+      return response.status(422).json({ 
+        error: 'Validation failed', 
+        message: 'Email and password required' 
+      })
     }
 
     // Check if user exists
     for (const user of users.values()) {
       if (user.email === email) {
-        return response.status(422).json({ error: 'User already exists' })
+        return response.status(422).json({ 
+          error: 'User already exists' 
+        })
       }
     }
 
@@ -46,11 +55,17 @@ export default class AuthController {
     })
   }
 
-  async login({ request, response }: { request: any; response: any }) {
-    const { email, password } = request.body
+  /**
+   * Login user
+   */
+  async login({ request, response }: HttpContext) {
+    const { email, password } = request.body()
 
     if (!email || !password) {
-      return response.status(422).json({ error: 'Validation failed', message: 'Email and password required' })
+      return response.status(422).json({ 
+        error: 'Validation failed', 
+        message: 'Email and password required' 
+      })
     }
 
     // Find user
@@ -63,13 +78,17 @@ export default class AuthController {
     }
 
     if (!user) {
-      return response.status(401).json({ error: 'Invalid credentials' })
+      return response.status(401).json({ 
+        error: 'Invalid credentials' 
+      })
     }
 
     // Verify password
     const hashedPassword = createHash('sha256').update(password).digest('hex')
     if (user.password !== hashedPassword) {
-      return response.status(401).json({ error: 'Invalid credentials' })
+      return response.status(401).json({ 
+        error: 'Invalid credentials' 
+      })
     }
 
     // Generate token
@@ -87,24 +106,33 @@ export default class AuthController {
     })
   }
 
-  async me({ request, response }: { request: any; response: any }) {
-    const authHeader = request.headers.authorization
+  /**
+   * Get current user
+   */
+  async me({ request, response }: HttpContext) {
+    const authHeader = request.header('authorization')
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return response.status(401).json({ error: 'Unauthorized' })
+      return response.status(401).json({ 
+        error: 'Unauthorized' 
+      })
     }
 
     const token = authHeader.substring(7)
     const userId = tokens.get(token)
 
     if (!userId) {
-      return response.status(401).json({ error: 'Unauthorized' })
+      return response.status(401).json({ 
+        error: 'Unauthorized' 
+      })
     }
 
     const user = users.get(userId)
 
     if (!user) {
-      return response.status(401).json({ error: 'Unauthorized' })
+      return response.status(401).json({ 
+        error: 'Unauthorized' 
+      })
     }
 
     return response.status(200).json({
@@ -115,16 +143,23 @@ export default class AuthController {
     })
   }
 
-  async logout({ request, response }: { request: any; response: any }) {
-    const authHeader = request.headers.authorization
+  /**
+   * Logout user
+   */
+  async logout({ request, response }: HttpContext) {
+    const authHeader = request.header('authorization')
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return response.status(401).json({ error: 'Unauthorized' })
+      return response.status(401).json({ 
+        error: 'Unauthorized' 
+      })
     }
 
     const token = authHeader.substring(7)
     tokens.delete(token)
 
-    return response.status(200).json({ message: 'Logged out successfully' })
+    return response.status(200).json({ 
+      message: 'Logged out successfully' 
+    })
   }
 }
