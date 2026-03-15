@@ -94,33 +94,54 @@
 
 ---
 
+### ✅ TEC-009: Auth System - COMPLETE
+**Commit**: `7b426ad`
+**Files created**:
+- `apps/api/tests/auth.spec.ts` - Tests FIRST (TDD)
+- `apps/api/app/controllers/auth_controller.ts` - Auth controller with register/login/logout/me
+- `apps/api/start/routes.ts` - Auth routes
+
+**Features**:
+- ✅ Tests written FIRST (TDD compliance)
+- ✅ POST /auth/register - User registration
+- ✅ POST /auth/login - User login with token
+- ✅ POST /auth/logout - Token invalidation
+- ✅ GET /auth/me - Current user profile
+- ✅ Password hashing (SHA-256)
+- ✅ Bearer token authentication
+
+---
+
 ### Active Task (CURRENT)
 
-**Task ID**: TEC-009
+**Task ID**: TEC-010
 **Type**: Standard (30 min)
 **Assigned Role**: `backend-developer`
 **Status**: ACTIVE - EXECUTE NOW
 **Priority**: Critical
-**Depends on**: TEC-008 ✅
+**Depends on**: TEC-009 ✅
 
 #### Description
-Auth System Implementation
+Core API - Users & Organizations
 
 **Endpoints to implement:**
-1. POST /auth/register - User registration
-2. POST /auth/login - User login  
-3. POST /auth/logout - User logout
-4. GET /auth/me - Current user profile
+1. GET /users - List users
+2. GET /users/:id - Get user by ID
+3. PUT /users/:id - Update user
+4. GET /organizations - List organizations
+5. POST /organizations - Create organization
+6. GET /organizations/:id - Get organization
+7. PUT /organizations/:id - Update organization
 
-**TDD REQUIRED - Write tests FIRST in `tests/auth.spec.ts`**
+**TDD REQUIRED - Write tests FIRST in `tests/users_orgs.spec.ts`**
 
 **Files to create:**
-1. `apps/api/app/controllers/auth_controller.ts`
-2. `apps/api/app/validators/auth_validator.ts`
-3. `apps/api/tests/auth.spec.ts` (tests FIRST)
-4. Update `apps/api/start/routes.ts` with auth routes
+1. `apps/api/app/controllers/users_controller.ts`
+2. `apps/api/app/controllers/organizations_controller.ts`
+3. `apps/api/tests/users_orgs.spec.ts` (tests FIRST)
+4. Update `apps/api/start/routes.ts` with new routes
 
-**Commit:** `tech/backend-developer: TEC-009 auth system with login/register/logout/me endpoints`
+**Commit:** `tech/backend-developer: TEC-010 users and organizations CRUD endpoints`
 
 ---
 
@@ -142,17 +163,15 @@ Auth System Implementation
 
 ---
 
-### TEC-009: Auth System - ACTIVE - EXECUTE NOW
+### ✅ TEC-009: Auth System - COMPLETE
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
-- **Depends on**: TEC-008
-- **Doc**: `SIMPLIFIED_SPRINT2.md` section TEC-009
-
-**Endpoints:** register, login, logout, me
+- **Commit**: `7b426ad`
+- **Status**: ✅ COMPLETE
 
 ---
 
-### TEC-010: Core API - Users & Orgs
+### TEC-010: Core API - Users & Orgs - ACTIVE - EXECUTE NOW
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
 - **Depends on**: TEC-009
