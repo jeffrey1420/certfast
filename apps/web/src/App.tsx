@@ -1,12 +1,18 @@
 import { Routes, Route } from 'react-router-dom'
+import { LoginPage } from '@/routes/auth/login'
+import { RegisterPage } from '@/routes/auth/register'
+import { ForgotPasswordPage } from '@/routes/auth/forgot-password'
+import { ResetPasswordPage } from '@/routes/auth/reset-password'
 
 function App() {
   return (
     <div className="min-h-screen bg-background">
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<div className="p-8">Login Page</div>} />
-        <Route path="/register" element={<div className="p-8">Register Page</div>} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="*" element={<div className="p-8">404 - Not Found</div>} />
       </Routes>
     </div>
