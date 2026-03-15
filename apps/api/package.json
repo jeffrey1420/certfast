@@ -1,0 +1,32 @@
+{
+  "name": "certfast-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node bin/server.js",
+    "build": "tsc",
+    "dev": "tsx watch bin/server.js",
+    "test": "node --import tsx tests/bootstrap.ts",
+    "lint": "eslint . --ext=.ts",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "@adonisjs/core": "^6.17.2",
+    "@adonisjs/cors": "^2.2.1",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@japa/runner": "^4.0.0",
+    "@japa/assert": "^3.0.0",
+    "@japa/api-client": "^2.0.0",
+    "@types/node": "^22.13.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
