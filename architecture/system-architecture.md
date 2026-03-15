@@ -1,568 +1,665 @@
 # CertFast System Architecture
 
-**Document Version**: 1.0  
-**Date**: March 15, 2026  
-**Architect**: System Architect  
-**Status**: Complete  
-**Classification**: Deep Task (TEC-001)
-
----
-
 ## Executive Summary
 
-CertFast is a multi-tenant SaaS platform delivering AI-powered compliance automation for B2B startups. The architecture is designed to support 1,900 customers by Year 3 across four pricing tiers, with EU data residency as a foundational constraint. The system emphasizes security by design, horizontal scalability, and pragmatic technology choices that balance innovation with operational simplicity.
+CertFast is a comprehensive compliance automation platform designed for SMBs and mid-market companies. This document outlines the bare metal deployment architecture optimized for single-node deployment using Docker Compose, delivering enterprise-grade compliance automation at significantly reduced infrastructure costs.
 
-**Key Architectural Principles**:
-1. **Security First**: Compliance automation requires exemplary security posture
-2. **EU Data Sovereignty**: All data stored and processed within EU boundaries
-3. **Multi-tenancy with Isolation**: Complete tenant separation at database and application layers
-4. **API-First Design**: All functionality exposed via RESTful APIs for integrations
-5. **Event-Driven Async Processing**: Heavy compliance operations handled asynchronously
-6. **Observability Built-In**: Comprehensive logging, metrics, and tracing from day one
+**Architecture Decision**: Bare Metal Single-Node Deployment  
+**Target Environment**: Production on dedicated server or Hetzner/AWS EC2 bare instance  
+**Container Orchestration**: Docker Compose (not Kubernetes)  
+**Object Storage**: Cloudflare R2 (S3-compatible, cost-effective)  
+**Database**: Self-hosted PostgreSQL 15  
+**Cache**: Self-hosted Redis 7  
+**Reverse Proxy**: Nginx with SSL/TLS via Let's Encrypt
 
 ---
 
-## 1. High-Level System Architecture
+## 1. High-Level Architecture
 
 ### 1.1 Architecture Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              CERTFAST PLATFORM                               │
+│                           CERTFAST PLATFORM                                 │
+│                    Bare Metal Single-Node Deployment                        │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │   Web App    │  │   Mobile     │  │  Partner     │  │   Auditor    │     │
-│  │   (React)    │  │   (React     │  │   Portal     │  │   Portal     │     │
-│  │              │  │   Native)    │  │              │  │              │     │
-│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘     │
-│         │                 │                  │                 │             │
-│         └─────────────────┴──────────────────┴─────────────────┘             │
-│                                   │                                          │
-│                    ┌──────────────▼──────────────┐                          │
-│                    │     AWS CloudFront CDN      │                          │
-│                    │    (DDoS + Edge Caching)    │                          │
-│                    └──────────────┬──────────────┘                          │
-│                                   │                                          │
-│                    ┌──────────────▼──────────────┐                          │
-│                    │      AWS WAF / Shield       │                          │
-│                    │    (Application Firewall)   │                          │
-│                    └──────────────┬──────────────┘                          │
-│                                   │                                          │
-│  ╔═══════════════════════════════▼═══════════════════════════════╗          │
-│  ║                    APPLICATION LAYER                          ║          │
-│  ║  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐   ║          │
-│  ║  │   API GW    │  │   API GW    │  │     API GW          │   ║          │
-│  ║  │  (Public)   │  │  (Partner)  │  │   (Internal)        │   ║          │
-│  ║  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘   ║          │
-│  ║         │                │                    │              ║          │
-│  ║         └────────────────┴────────────────────┘              ║          │
-│  ║                          │                                   ║          │
-│  ║           ┌──────────────▼──────────────┐                    ║          │
-│  ║           │     Application Cluster     │                    ║          │
-│  ║           │    (EKS - Kubernetes)       │                    ║          │
-│  ║           │  ┌─────────────────────────┐ │                    ║          │
-│  ║           │  │  CertFast API Services  │ │                    ║          │
-│  ║           │  │  - Authentication       │ │                    ║          │
-│  ║           │  │  - Tenant Management    │ │                    ║          │
-│  ║           │  │  - Compliance Engine    │ │                    ║          │
-│  ║           │  │  - Evidence Collection  │ │                    ║          │
-│  ║           │  │  - Policy Management    │ │                    ║          │
-│  ║           │  │  - Reporting            │ │                    ║          │
-│  ║           │  └─────────────────────────┘ │                    ║          │
-│  ║           └──────────────────────────────┘                    ║          │
-│  ╚═══════════════════════════════│═══════════════════════════════╝          │
-│                                  │                                          │
-│  ╔═══════════════════════════════▼═══════════════════════════════╗          │
-│  ║                    MESSAGE QUEUE LAYER                        ║          │
-│  ║              ┌─────────────────────────────┐                  ║          │
-│  ║              │     Amazon MQ (RabbitMQ)    │                  ║          │
-│  ║              │  - Async job processing     │                  ║          │
-│  ║              │  - Integration webhooks     │                  ║          │
-│  ║              │  - Audit log streaming      │                  ║          │
-│  ║              └─────────────────────────────┘                  ║          │
-│  ╚═══════════════════════════════════════════════════════════════╝          │
-│                                  │                                          │
-│  ╔═══════════════════════════════▼═══════════════════════════════╗          │
-│  ║                    DATA LAYER                                 ║          │
-│  ║  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────┐   ║          │
-│  ║  │   PostgreSQL    │  │     Redis       │  │    S3        │   ║          │
-│  ║  │   (Primary DB)  │  │   (Cache/Queue) │  │  (Storage)   │   ║          │
-│  ║  │  - RDS Aurora   │  │  - ElastiCache  │  │  - Evidence  │   ║          │
-│  ║  │  - EU Region    │  │  - EU Region    │  │  - Documents │   ║          │
-│  ║  └─────────────────┘  └─────────────────┘  └──────────────┘   ║          │
-│  ╚═══════════════════════════════════════════════════════════════╝          │
-│                                  │                                          │
-│  ╔═══════════════════════════════▼═══════════════════════════════╗          │
-│  ║                 INTEGRATION LAYER                             ║          │
-│  ║  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────────┐  ║          │
-│  ║  │  GitHub  │ │  AWS     │ │  GCP     │ │  CPA Firms       │  ║          │
-│  ║  │  GitLab  │ │  Azure   │ │  Okta    │ │  (API Partners)  │  ║          │
-│  ║  │  Jira    │ │  Slack   │ │ ...      │ │                  │  ║          │
-│  ║  └──────────┘ └──────────┘ └──────────┘ └──────────────────┘  ║          │
-│  ╚═══════════════════════════════════════════════════════════════╝          │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    NGINX REVERSE PROXY (SSL)                        │   │
+│  │           (Rate Limiting, Static Assets, Load Balancing)            │   │
+│  └─────────────────────────────┬───────────────────────────────────────┘   │
+│                                │                                            │
+│  ┌─────────────────────────────▼───────────────────────────────────────┐   │
+│  │                 ADONISJS API APPLICATION                            │   │
+│  │         (Node.js 20, TypeScript, Lucid ORM)                         │   │
+│  └──────┬────────────┬────────────────┬────────────────┬──────────────┘   │
+│         │            │                │                │                   │
+│  ┌──────▼─────┐ ┌────▼─────┐ ┌────────▼──────┐ ┌───────▼───────┐         │
+│  │ PostgreSQL │ │  Redis   │ │  ClickHouse   │ │  Cloudflare   │         │
+│  │    15      │ │    7     │ │     23        │ │      R2       │         │
+│  │(Main DB)   │ │ (Cache)  │ │ (Analytics)   │ │ (File Storage)│         │
+│  └────────────┘ └──────────┘ └───────────────┘ └───────────────┘         │
 │                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    MONITORING STACK                                 │   │
+│  │        Prometheus (Metrics) + Grafana (Visualization)               │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                             │
+│  ┌─────────────────────────────────────────────────────────────────────┐   │
+│  │                    BACKUP SYSTEM                                    │   │
+│  │        Local Backups + Cloudflare R2 Offsite Replication            │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 1.2 Service Boundaries
+### 1.2 Infrastructure Stack Overview
 
-The system is decomposed into six bounded contexts, each representing a cohesive business capability:
+| Component | Technology | Purpose | AWS Equivalent |
+|-----------|------------|---------|----------------|
+| **Compute** | Docker Compose | Container orchestration | EKS / ECS |
+| **Application** | AdonisJS v6 | REST API backend | ECS Fargate |
+| **Database** | PostgreSQL 15 | Primary data store | RDS Aurora |
+| **Cache** | Redis 7 | Session & query caching | ElastiCache |
+| **Analytics** | ClickHouse 23 | Audit logs & analytics | Redshift |
+| **Object Storage** | Cloudflare R2 | File storage (evidence) | S3 |
+| **CDN** | Nginx + Cloudflare | Static assets & caching | CloudFront |
+| **Load Balancer** | Nginx | Reverse proxy & SSL | ALB |
+| **Security** | Nginx + fail2ban | Rate limiting, DDoS protection | AWS WAF |
+| **SSL/TLS** | Let's Encrypt + certbot | Free SSL certificates | ACM |
+| **Monitoring** | Prometheus + Grafana | Metrics & dashboards | CloudWatch |
+| **Logging** | Loki + Grafana | Log aggregation | CloudWatch Logs |
 
-| Service | Responsibility | Team Size | Criticality |
-|---------|----------------|-----------|-------------|
-| **Identity Service** | Authentication, authorization, tenant management | 2 engineers | Critical |
-| **Compliance Engine** | Control evaluation, evidence validation, gap analysis | 3 engineers | Critical |
-| **Policy Service** | Policy templates, generation, versioning, attestation | 2 engineers | High |
-| **Evidence Service** | Collection, storage, correlation, tamper-proofing | 2 engineers | Critical |
-| **Integration Hub** | Third-party connectors, webhook management | 2 engineers | High |
-| **Reporting Service** | Dashboards, audit reports, analytics | 1 engineer | Medium |
+### 1.3 Key Design Decisions
 
-### 1.3 Communication Patterns
+**Why Bare Metal Over Cloud-Native?**
 
-**Synchronous (REST/gRPC)**:
-- User-facing API calls (sub-500ms SLA)
-- Real-time tenant queries
-- Authentication/authorization checks
+1. **Cost Optimization**: Eliminate managed service markups (~70% cost reduction)
+2. **Predictable Pricing**: Fixed monthly costs vs variable cloud usage
+3. **Performance**: Direct hardware access, no virtualization overhead
+4. **Simplicity**: Single-node Docker Compose is operationally simpler than Kubernetes
+5. **Sovereignty**: Complete data control for compliance-sensitive organizations
 
-**Asynchronous (Message Queue)**:
-- Evidence collection jobs (may take minutes)
-- Compliance control evaluation
-- Integration sync operations
-- Audit log streaming
-- Email notifications
+**Why Cloudflare R2 Over MinIO?**
 
-**Event Streaming (Future)**:
-- Real-time compliance status updates
-- Cross-service state synchronization
-- Analytics data pipeline
-
----
-
-## 2. Technology Stack Decisions
-
-### 2.1 Core Stack
-
-| Layer | Technology | Version | Rationale |
-|-------|------------|---------|-----------|
-| **Cloud** | AWS | N/A | Market leader, strong EU regions, mature compliance certifications |
-| **Regions** | eu-west-1 (Ireland), eu-central-1 (Frankfurt) | N/A | GDPR-compliant, low latency across EU |
-| **Container Orchestration** | Amazon EKS | 1.29 | Managed Kubernetes, auto-scaling, AWS-native |
-| **API Runtime** | Go (Golang) | 1.22 | Performance, concurrency, small footprint, strong typing |
-| **Web Frontend** | React + TypeScript | 18.x | Ecosystem maturity, developer availability |
-| **Mobile** | React Native | 0.73 | Code sharing, faster delivery |
-| **Database** | PostgreSQL (Aurora) | 15.x | ACID compliance, JSON support, row-level security |
-| **Cache** | Redis (ElastiCache) | 7.1 | Session management, rate limiting, query caching |
-| **Message Queue** | RabbitMQ (Amazon MQ) | 3.12 | Proven reliability, complex routing, DLQ support |
-| **Object Storage** | S3 | N/A | Evidence storage, document archives |
-| **Search** | PostgreSQL Full-Text | 15.x | Simpler ops, sufficient for MVP |
-
-### 2.2 DevOps & Observability
-
-| Tool | Purpose | Rationale |
-|------|---------|-----------|
-| **GitHub Actions** | CI/CD | Native GitHub integration, marketplace actions |
-| **ArgoCD** | GitOps deployment | Declarative, rollback capability, drift detection |
-| **Prometheus + Grafana** | Metrics | Industry standard, extensive AWS integrations |
-| **Jaeger** | Distributed tracing | OpenTelemetry compatible, troubleshooting |
-| **ELK Stack** | Centralized logging | Searchable logs, alerting, compliance audit trails |
-| **PagerDuty** | Incident management | On-call scheduling, escalation policies |
-| **Terraform** | Infrastructure as Code | State management, plan/apply workflow |
-
-### 2.3 Decision Rationale
-
-**Why Go instead of Node.js/Python?**
-- Compilation catches errors before deployment
-- Goroutines handle concurrency efficiently for I/O-bound compliance checks
-- Static binary simplifies containerization
-- Lower memory footprint = lower infrastructure costs at scale
-
-**Why PostgreSQL over specialized databases?**
-- ACID compliance essential for audit trails
-- Row-level security enables true multi-tenancy
-- JSONB handles semi-structured compliance data
-- Reduces operational complexity (one primary datastore)
-
-**Why AWS over GCP/Azure?**
-- Broadest EU region coverage
-- Most mature compliance certifications (SOC 2, ISO 27001)
-- Deepest integration between managed services
-- Largest talent pool in European market
+1. **Cost**: $0.015/GB vs AWS S3 at $0.023/GB, zero egress fees
+2. **Durability**: 99.9999999% durability (same as S3)
+3. **S3 API**: Drop-in replacement, no code changes needed
+4. **Bandwidth Alliance**: Free egress to many cloud providers
 
 ---
 
-## 3. Scalability Architecture
+## 2. Application Layer
 
-### 3.1 Horizontal Scaling Strategy
+### 2.1 AdonisJS API Application
 
-The architecture supports 10x growth without architectural changes:
+**Runtime**: Node.js 20 LTS  
+**Framework**: AdonisJS v6 (TypeScript-first)  
+**Process Model**: PM2 cluster mode (4 workers recommended)  
+**Port**: 3333 (internal)  
+**Protocol**: HTTP/2 via Nginx reverse proxy
 
-**Application Layer**:
-- Stateless microservices enable horizontal pod autoscaling
-- Target: 50 RPS per pod, scale 3-100 pods per service
-- HPA based on CPU (70%) and custom metrics (queue depth)
-
-**Database Layer**:
-- Aurora PostgreSQL with auto-scaling read replicas
-- Writer: db.r6g.xlarge (initial)
-- Readers: db.r6g.large × 2 (auto-scale to 15)
-- Connection pooling via PgBouncer
-
-**Cache Layer**:
-- Redis Cluster mode for horizontal scaling
-- Initial: cache.r6g.large × 2 shards
-- Scale: Add shards for memory, replicas for read throughput
-
-**Storage Layer**:
-- S3 automatically scales
-- CloudFront edge caching for evidence downloads
-- Lifecycle policies: Hot (90 days) → Glacier (7 years retention)
-
-### 3.2 Capacity Planning (Year 3)
-
-**Target Load**: 1,900 customers
-
-| Metric | Year 1 | Year 2 | Year 3 |
-|--------|--------|--------|--------|
-| Customers | 150 | 600 | 1,900 |
-| Daily Active Users | 450 | 1,800 | 5,700 |
-| API Requests/day | 500K | 2M | 6.5M |
-| Evidence Files/day | 5K | 20K | 65K |
-| Storage Growth | 2TB | 8TB | 25TB |
-
-### 3.3 Scaling Triggers
-
-| Resource | Scale Up Trigger | Scale Down Trigger |
-|----------|------------------|-------------------|
-| API Pods | CPU > 70% for 2 min | CPU < 30% for 10 min |
-| DB Read Replicas | Lag > 1 second | < 40% utilization |
-| Redis | Memory > 80% | N/A (manual) |
-| Queue Workers | Queue depth > 1000 | Queue depth < 100 |
-
----
-
-## 4. Multi-Tenancy Architecture
-
-### 4.1 Tenant Isolation Model
-
-**Approach**: Shared Database, Schema-per-Tenant with Row-Level Security
-
-Rationale: Balances operational efficiency (shared infrastructure) with security isolation (RLS prevents data leakage). Simpler than database-per-tenant at our scale.
-
-```sql
--- Row-Level Security Implementation
-ALTER TABLE evidence ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY tenant_isolation ON evidence
-  USING (tenant_id = current_setting('app.current_tenant')::UUID);
-```
-
-### 4.2 Tenant Context Propagation
-
-```
-Request Flow:
-┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────┐
-│  Client  │────▶│  API GW  │────▶│   Auth   │────▶│   App    │
-│          │     │          │     │ Middleware│     │  Server  │
-└──────────┘     └──────────┘     └────┬─────┘     └────┬─────┘
-                                       │                │
-                                       │  JWT Validation │
-                                       │  + Tenant Claim │
-                                       └────────────────▶│
-                                                         │
-                              ┌──────────────────────────┘
-                              │
-                              ▼
-                    ┌──────────────────┐
-                    │ SET app.current_tenant = 'tenant-uuid'
-                    │ Execute Query with RLS
-                    └──────────────────┘
-```
-
-### 4.3 Tier-Based Feature Gates
-
-Features enabled per pricing tier enforced at API layer:
-
-| Feature | Lite | Starter | Pro | Enterprise |
-|---------|------|---------|-----|------------|
-| Max Users | 5 | 15 | 50 | Unlimited |
-| Frameworks | 1 | 2 | Unlimited | Unlimited |
-| Integrations | 10 | 25 | 100 | Unlimited |
-| API Rate Limit | 100/hr | 500/hr | 2000/hr | 10000/hr |
-| Evidence Retention | 1 year | 3 years | 7 years | Unlimited |
-| Support SLA | Email | Email | Chat | Dedicated |
-
----
-
-## 5. Integration Architecture
-
-### 5.1 Integration Hub Design
-
-All third-party connections flow through the Integration Hub:
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    INTEGRATION HUB                       │
-├─────────────────────────────────────────────────────────┤
-│                                                         │
-│  ┌───────────────┐    ┌───────────────┐                │
-│  │   Connector   │    │   Connector   │                │
-│  │   Registry    │◄───│   Factory     │                │
-│  │               │    │               │                │
-│  └───────┬───────┘    └───────────────┘                │
-│          │                                              │
-│          ▼                                              │
-│  ┌─────────────────────────────────────────┐           │
-│  │         Connector Instances             │           │
-│  │  ┌────────┐ ┌────────┐ ┌────────┐      │           │
-│  │  │ GitHub │ │  AWS   │ │ Slack  │      │           │
-│  │  │ GitLab │ │ Azure  │ │ Jira   │      │           │
-│  │  │ ...    │ │ GCP    │ │ Okta   │      │           │
-│  │  └────────┘ └────────┘ └────────┘      │           │
-│  └─────────────────────────────────────────┘           │
-│                                                         │
-│  ┌─────────────────────────────────────────┐           │
-│  │         Webhook Manager                 │           │
-│  │  - Inbound webhook handling             │           │
-│  │  - Signature verification               │           │
-│  │  - Idempotency                          │           │
-│  │  - Retry logic                          │           │
-│  └─────────────────────────────────────────┘           │
-│                                                         │
-│  ┌─────────────────────────────────────────┐           │
-│  │      OAuth Token Management             │           │
-│  │  - Secure storage (AWS Secrets Manager) │           │
-│  │  - Token refresh automation             │           │
-│  │  - Scope validation                     │           │
-│  └─────────────────────────────────────────┘           │
-│                                                         │
-└─────────────────────────────────────────────────────────┘
-```
-
-### 5.2 CPA Firm Integration API
-
-Partner API for CPA firms to access client compliance data:
-
+**Container Configuration**:
 ```yaml
-# Partner API Specification Overview
-Base URL: https://api.certfast.eu/v1/partners
-Authentication: OAuth 2.0 (Client Credentials)
-Rate Limiting: Tier-based
-
-Key Endpoints:
-- GET /clients - List assigned clients
-- GET /clients/{id}/compliance-status - Current compliance posture
-- GET /clients/{id}/evidence - Access evidence packages
-- POST /clients/{id}/audit-notes - Submit audit findings
-- GET /clients/{id}/controls - Control implementation status
+services:
+  app:
+    build:
+      context: ./docker/app
+      dockerfile: Dockerfile
+    container_name: certfast-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3333
+      - DB_CONNECTION=pg
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+      - R2_ENDPOINT=${R2_ENDPOINT}
+    ports:
+      - "127.0.0.1:3333:3333"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./uploads:/app/uploads:delegated
 ```
 
-### 5.3 Integration Roadmap
+**Key Dependencies**:
+- `@adonisjs/core` - Framework core
+- `@adonisjs/lucid` - Database ORM (PostgreSQL)
+- `@adonisjs/auth` - Authentication system
+- `@adonisjs/redis` - Redis integration
+- `aws-sdk` - R2 compatibility (S3 API)
+- `bullmq` - Background job processing
 
-| Phase | Integrations | Timeline |
-|-------|--------------|----------|
-| **MVP** | GitHub, GitLab, AWS, Slack, Okta | Launch |
-| **Q2** | Jira, Confluence, Azure DevOps, GCP | +2 months |
-| **Q3** | Salesforce, HubSpot, Datadog, Snyk | +4 months |
-| **Q4** | Custom webhook, SCIM provisioning | +6 months |
+### 2.2 Worker Processes
+
+Background jobs are handled by BullMQ with Redis:
+
+| Queue | Purpose | Concurrency |
+|-------|---------|-------------|
+| `assessment` | Assessment execution | 2 workers |
+| `notification` | Email/SMS delivery | 4 workers |
+| `export` | Report generation | 2 workers |
+| `import` | Bulk data imports | 1 worker |
 
 ---
 
-## 6. Failure Modes & Resilience
+## 3. Data Layer
 
-### 6.1 Single Points of Failure
+### 3.1 PostgreSQL 15 - Primary Database
 
-| Component | Risk Level | Mitigation |
-|-----------|------------|------------|
-| **Aurora Primary** | High | Multi-AZ with automatic failover (< 60s) |
-| **EKS Control Plane** | Medium | AWS managed SLA 99.95%, cross-AZ |
-| **Message Queue** | High | Clustered RabbitMQ with mirrored queues |
-| **Redis** | Medium | Multi-AZ with auto-failover |
-| **API Gateway** | Low | CloudFront origin failover |
+**Role**: Main transactional database  
+**Container**: `postgres:15-alpine`  
+**Port**: 5432 (internal)  
+**Storage**: Persistent volume (SSD recommended)
 
-### 6.2 Circuit Breaker Pattern
+**Database Schema**:
+- `users` - User accounts and authentication
+- `organizations` - Tenant data (multi-tenant)
+- `frameworks` - Compliance frameworks (ISO27001, SOC2, etc.)
+- `controls` - Individual compliance controls
+- `assessments` - Assessment records and results
+- `evidence` - Evidence file metadata (files in R2)
+- `audit_logs` - Immutable audit trail (synced to ClickHouse)
 
-Implemented for external integrations:
-
-```go
-// Pseudo-code for circuit breaker
-if integrationCircuitBreaker.IsOpen() {
-    return ErrIntegrationUnavailable
-}
-
-response, err := callIntegration()
-if err != nil {
-    integrationCircuitBreaker.RecordFailure()
-    return err
-}
-integrationCircuitBreaker.RecordSuccess()
-return response
+**Configuration**:
+```yaml
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: certfast-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=certfast
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups/postgres:/backups
+    ports:
+      - "127.0.0.1:5432:5432"
 ```
 
-**Thresholds**:
-- Open after 5 consecutive failures
-- Half-open after 30 seconds
-- Close after 3 consecutive successes
+**Performance Tuning**:
+- `shared_buffers = 256MB`
+- `effective_cache_size = 1GB`
+- `work_mem = 16MB`
+- `maintenance_work_mem = 128MB`
 
-### 6.3 Disaster Recovery
+### 3.2 Redis 7 - Cache & Sessions
 
-| Scenario | RTO | RPO | Strategy |
-|----------|-----|-----|----------|
-| Database corruption | 1 hour | 5 min | Point-in-time restore from Aurora backups |
-| Region failure | 4 hours | 15 min | Cross-region replica promotion |
-| Complete data loss | 8 hours | 5 min | S3 cross-region replication + Aurora restore |
-| Application bug | 30 min | N/A | Blue/green rollback via ArgoCD |
+**Role**: Session storage, query cache, job queue  
+**Container**: `redis:7-alpine`  
+**Port**: 6379 (internal)  
+**Persistence**: AOF + RDB
 
-### 6.4 Backup Strategy
+**Use Cases**:
+1. **Session Store**: User authentication sessions
+2. **Query Cache**: Frequently accessed framework data
+3. **Rate Limiting**: API request throttling
+4. **Job Queue**: BullMQ background tasks
 
-| Data Type | Frequency | Retention | Location |
-|-----------|-----------|-----------|----------|
-| Database | Continuous + Daily snapshots | 35 days | Same region, cross-AZ |
-| S3 Evidence | Versioning enabled | 7 years | Cross-region replication |
-| Configuration | On every change | Infinite | Git repository |
+**Configuration**:
+```yaml
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: certfast-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+```
 
----
+### 3.3 ClickHouse 23 - Analytics
 
-## 7. Migration Path: MVP to Scale
+**Role**: Audit log storage and compliance analytics  
+**Container**: `clickhouse/clickhouse-server:23`  
+**Port**: 8123 (HTTP), 9000 (native)  
+**Storage**: Separate volume for analytics data
 
-### 7.1 Phase 1: MVP (Months 1-3)
+**Use Cases**:
+1. **Audit Trail**: Immutable compliance audit logs
+2. **Analytics**: Assessment completion metrics
+3. **Reporting**: Historical trend analysis
 
-- Single EKS cluster, 3 nodes
-- Aurora PostgreSQL single instance
-- Basic horizontal pod autoscaling
-- Manual deployment via GitHub Actions
-
-**Cost**: ~€800/month infrastructure
-
-### 7.2 Phase 2: Growth (Months 4-12)
-
-- Aurora with read replicas
-- Redis cluster for caching
-- ArgoCD for GitOps
-- Automated backup verification
-
-**Cost**: ~€2,500/month infrastructure
-
-### 7.3 Phase 3: Scale (Year 2+)
-
-- Multi-region consideration (disaster recovery)
-- Database sharding (if tenant count > 5,000)
-- Dedicated message queue cluster
-- Advanced observability (custom metrics)
-
-**Cost**: ~€8,000/month infrastructure
+**Key Tables**:
+- `audit_logs` - All user actions with timestamp
+- `assessment_events` - Assessment state changes
+- `login_events` - Authentication attempts
 
 ---
 
-## 8. Cost Estimates
+## 4. Storage Layer
 
-### 8.1 Monthly Infrastructure Costs (Year 1)
+### 4.1 Cloudflare R2 - Object Storage
 
-| Service | Configuration | Monthly Cost |
-|---------|--------------|--------------|
-| **EKS Control Plane** | Managed | €70 |
-| **EKS Worker Nodes** | 3 × m6i.large | €200 |
-| **Aurora PostgreSQL** | db.r6g.large | €300 |
-| **ElastiCache Redis** | cache.r6g.large | €120 |
-| **Amazon MQ** | mq.m5.large | €200 |
-| **S3 Storage** | 500 GB | €15 |
-| **CloudFront** | 100 GB/month | €10 |
-| **WAF + Shield** | Standard | €100 |
-| **CloudWatch** | Logs + Metrics | €80 |
-| **Secrets Manager** | 50 secrets | €20 |
-| **Total Base** | | **€1,115/month** |
+**Role**: File storage for evidence documents  
+**API**: S3-compatible  
+**Buckets**:
+- `certfast-evidence-{env}` - Evidence files
+- `certfast-exports-{env}` - Generated reports
+- `certfast-backups-{env}` - Database backups
 
-### 8.2 Cost at Scale (Year 3)
+**Integration**:
+```typescript
+// AdonisJS R2 configuration
+export default {
+  driver: 's3',
+  config: {
+    endpoint: Env.get('R2_ENDPOINT'),        // https://xxx.r2.cloudflarestorage.com
+    region: 'auto',
+    credentials: {
+      accessKeyId: Env.get('R2_ACCESS_KEY_ID'),
+      secretAccessKey: Env.get('R2_SECRET_ACCESS_KEY'),
+    },
+    bucket: Env.get('R2_BUCKET'),
+    forcePathStyle: true,
+  },
+}
+```
 
-| Scenario | Monthly Cost | Per-Customer |
-|----------|--------------|--------------|
-| 1,900 customers | ~€8,500 | €4.47 |
-| With reserved instances (40% savings) | ~€5,100 | €2.68 |
+**Cost Projection**:
+- Storage: $0.015/GB/month
+- Class A operations: $4.50/million
+- Class B operations: $0.36/million
+- Egress: $0 (free)
 
-**Unit Economics Impact**: Infrastructure represents < 3% of revenue at scale.
+**Estimated Monthly Cost**: $15-30 for 100GB storage
 
----
+### 4.2 Local Storage
 
-## 9. Security Architecture Overview
-
-Security is covered in detail in `security-architecture.md`. Key principles:
-
-- Defense in depth (WAF → API Gateway → Service → Database)
-- Zero-trust networking (mTLS between services)
-- Encryption at rest and in transit
-- Principle of least privilege (IAM roles)
-- Audit logging for all access
-
----
-
-## 10. Operational Considerations
-
-### 10.1 Deployment Strategy
-
-**Blue/Green Deployment** via ArgoCD:
-- Zero-downtime deployments
-- Instant rollback capability
-- Automated smoke tests before traffic shift
-
-### 10.2 Monitoring & Alerting
-
-**SLIs/SLOs**:
-
-| SLI | SLO | Alert Threshold |
-|-----|-----|-----------------|
-| API Availability | 99.9% | < 99.5% for 5 min |
-| API Latency (p99) | < 500ms | > 1s for 2 min |
-| Error Rate | < 0.1% | > 0.5% for 5 min |
-| Evidence Processing | < 5 min | > 10 min queue age |
-
-### 10.3 Compliance Certifications
-
-Our architecture is designed to achieve:
-- SOC 2 Type II (via Vanta/Drata self-assessment)
-- ISO 27001 (via external auditor)
-- GDPR compliance (EU data residency + processing agreements)
+**Purpose**: Temporary uploads, processing files  
+**Location**: `./uploads` directory (bind mount)  
+**Cleanup**: Daily cleanup job removes files > 7 days
 
 ---
 
-## 11. Self-Evaluation
+## 5. Security Architecture
 
-| Criteria | Score | Rationale |
-|----------|-------|-----------|
-| **Completeness** | 5/5 | All required sections present, diagrams included |
-| **Technical Depth** | 5/5 | Concrete tech choices with versions and rationale |
-| **Scalability** | 5/5 | 10x growth path defined with capacity planning |
-| **Security** | 5/5 | Security by design, detailed in companion doc |
-| **Cost Consciousness** | 5/5 | Cost estimates at each phase, unit economics calculated |
-| **Pragmatism** | 5/5 | Balances best practices with startup constraints |
+### 5.1 Network Security
 
-**Overall Confidence Score: 5/5**
+**Nginx Reverse Proxy**:
+- SSL/TLS termination with Let's Encrypt
+- HTTP/2 support
+- WebSocket support for real-time features
+- Static file serving
 
-This architecture is ready for implementation and can support CertFast from MVP through Year 3 growth targets.
+**Nginx Configuration**:
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name api.certfast.io;
+
+    ssl_certificate /etc/letsencrypt/live/certfast.io/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/certfast.io/privkey.pem;
+
+    # Rate limiting
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+    limit_req zone=api burst=20 nodelay;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    location / {
+        proxy_pass http://127.0.0.1:3333;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+### 5.2 Application Security
+
+**fail2ban Integration**:
+```ini
+# /etc/fail2ban/jail.local
+[nginx-auth]
+enabled = true
+filter = nginx-auth
+logpath = /var/log/nginx/access.log
+maxretry = 5
+bantime = 3600
+
+[nginx-badbots]
+enabled = true
+filter = nginx-badbots
+logpath = /var/log/nginx/access.log
+maxretry = 2
+bantime = 86400
+```
+
+**Rate Limiting**:
+- API: 100 requests/minute per IP
+- Auth endpoints: 10 requests/minute per IP
+- File uploads: 10 MB/minute per user
+
+### 5.3 SSL/TLS Configuration
+
+**Let's Encrypt + certbot**:
+- Automatic certificate renewal
+- HTTP-01 challenge
+- Wildcard certificate support
+
+**Certificate Renewal**:
+```bash
+# Daily cron job
+0 3 * * * certbot renew --quiet --deploy-hook "docker compose restart nginx"
+```
+
+### 5.4 Data Security
+
+**Encryption at Rest**:
+- PostgreSQL: Native encryption via LUKS (optional)
+- R2: Server-side encryption (AES-256)
+- Backups: GPG-encrypted before upload
+
+**Encryption in Transit**:
+- TLS 1.3 for all external traffic
+- Internal container communication: HTTP (trusted network)
 
 ---
 
-## 12. Handoff Notes
+## 6. Deployment Architecture
 
-### Recommended Next Steps
+### 6.1 Docker Compose Deployment
 
-1. **Database Architect**: Review and expand the database schema in `database-schema.md`
-2. **API Designer**: Create detailed OpenAPI specification in `api-specification.yaml`
-3. **Security Architect**: Review and validate security architecture in `security-architecture.md`
-4. **DevOps Engineer**: Implement infrastructure plan in `infrastructure-plan.md`
+**Production File Structure**:
+```
+certfast/
+├── docker-compose.yml          # Base services
+├── docker-compose.prod.yml     # Production overrides
+├── docker-compose.override.yml # Local development
+├── .env                        # Environment variables
+├── .env.example                # Template
+├── docker/
+│   ├── app/
+│   │   └── Dockerfile
+│   └── nginx/
+│       ├── nginx.conf
+│       └── ssl/
+├── scripts/
+│   ├── setup.sh               # Initial server setup
+│   ├── backup.sh              # Backup to R2
+│   └── deploy.sh              # Deployment script
+└── backups/                   # Local backup storage
+```
 
-### Dependencies
+### 6.2 Server Requirements
 
-- Database schema depends on this system architecture
-- Security architecture references this document for context
-- Infrastructure plan implements this architecture on AWS
+**Minimum (10 users)**:
+- CPU: 2 cores
+- RAM: 4 GB
+- Storage: 50 GB SSD
+- Network: 100 Mbps
 
-### Questions for Review
+**Recommended (100 users)**:
+- CPU: 4 cores
+- RAM: 8 GB
+- Storage: 100 GB SSD
+- Network: 1 Gbps
 
-1. Should we consider serverless (Lambda) for specific workloads?
-2. Is the multi-tenancy approach appropriate for our compliance requirements?
-3. Do we need a separate data warehouse for analytics?
+**High Load (500+ users)**:
+- CPU: 8 cores
+- RAM: 16 GB
+- Storage: 200 GB SSD
+- Network: 1 Gbps
+
+### 6.3 Deployment Workflow
+
+```bash
+# 1. Clone repository
+git clone https://github.com/jeffrey1420/certfast.git
+cd certfast
+
+# 2. Configure environment
+cp .env.example .env
+# Edit .env with production values
+
+# 3. Run setup
+./scripts/setup.sh
+
+# 4. Start services
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+# 5. Run migrations
+docker compose exec app node ace migration:run
+
+# 6. Setup SSL
+certbot --nginx -d api.certfast.io
+```
 
 ---
 
-**Document Complete**  
-**Next Review**: After database schema completion
+## 7. Backup & Disaster Recovery
+
+### 7.1 Backup Strategy
+
+**PostgreSQL Backups**:
+- **Frequency**: Daily at 2 AM UTC
+- **Retention**: 7 days local, 30 days R2
+- **Method**: `pg_dump` compressed with gzip
+
+**Redis Backups**:
+- **Frequency**: Daily RDB snapshot
+- **Retention**: 7 days
+- **Method**: Redis BGSAVE
+
+**File Backups (R2)**:
+- **Frequency**: Real-time (R2 is the source of truth)
+- **Replication**: Bucket replication to secondary region
+
+### 7.2 Backup Script
+
+```bash
+#!/bin/bash
+# scripts/backup.sh
+
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/opt/certfast/backups"
+R2_BUCKET="certfast-backups-prod"
+
+# PostgreSQL backup
+docker exec certfast-postgres pg_dump -U certfast certfast | gzip > "$BACKUP_DIR/db_$DATE.sql.gz"
+
+# Upload to R2
+aws s3 cp "$BACKUP_DIR/db_$DATE.sql.gz" s3://$R2_BUCKET/postgres/ --endpoint-url=$R2_ENDPOINT
+
+# Cleanup old local backups (keep 7 days)
+find "$BACKUP_DIR" -name "db_*.sql.gz" -mtime +7 -delete
+
+echo "Backup completed: db_$DATE.sql.gz"
+```
+
+### 7.3 Recovery Procedures
+
+**Database Recovery**:
+```bash
+# Restore from backup
+gunzip < backups/db_20240315_020000.sql.gz | docker exec -i certfast-postgres psql -U certfast certfast
+```
+
+**Full System Recovery**:
+1. Provision new server
+2. Run `setup.sh`
+3. Restore database from R2
+4. Restart services
+
+**RTO**: 4 hours  
+**RPO**: 24 hours
+
+---
+
+## 8. Monitoring & Observability
+
+### 8.1 Metrics Collection
+
+**Prometheus Stack**:
+- **Prometheus**: Metrics collection and storage
+- **Grafana**: Visualization dashboards
+- **Node Exporter**: Server-level metrics
+- **cAdvisor**: Container metrics
+- **PostgreSQL Exporter**: Database metrics
+
+### 8.2 Key Metrics
+
+**Application Metrics**:
+- Request rate and latency (p50, p95, p99)
+- Error rate (4xx, 5xx)
+- Active user sessions
+- Queue depths (BullMQ)
+
+**Infrastructure Metrics**:
+- CPU, memory, disk usage
+- Network I/O
+- Container resource usage
+- Database connections
+
+### 8.3 Alerting Rules
+
+| Condition | Severity | Action |
+|-----------|----------|--------|
+| CPU > 80% for 5min | Warning | Slack notification |
+| Disk > 85% | Critical | PagerDuty + cleanup |
+| 5xx errors > 1% | Critical | Immediate investigation |
+| DB connections > 80% | Warning | Connection pool review |
+| Backup failure | Critical | Manual intervention |
+
+### 8.4 Log Management
+
+**Loki + Grafana**:
+- Centralized log aggregation
+- Structured logging (JSON)
+- Log retention: 30 days
+
+**Log Locations**:
+- Application: `docker logs certfast-app`
+- Nginx: `/var/log/nginx/`
+- Database: `/var/lib/postgresql/data/log/`
+
+---
+
+## 9. Scalability Considerations
+
+### 9.1 Vertical Scaling
+
+Single-node deployment supports vertical scaling:
+- CPU: Up to 64 cores
+- RAM: Up to 512 GB
+- Storage: Scale SSD capacity
+
+### 9.2 Horizontal Scaling Path
+
+If single-node limits are reached:
+
+1. **Separate Database**: Move PostgreSQL to dedicated server
+2. **Read Replicas**: PostgreSQL streaming replication
+3. **Load Balancer**: HAProxy for multi-app nodes
+4. **Full Kubernetes**: Migrate to EKS/GKE when justified
+
+### 9.3 Performance Targets
+
+| Metric | Target | Current Capacity |
+|--------|--------|------------------|
+| API Response Time (p95) | < 200ms | < 150ms |
+| Concurrent Users | 500 | 200 |
+| File Upload | 50MB | 100MB |
+| Assessment Execution | 100/hour | 50/hour |
+
+---
+
+## 10. Cost Analysis
+
+### 10.1 Bare Metal vs AWS Cost Comparison
+
+| Component | Bare Metal | AWS Equivalent | Monthly Savings |
+|-----------|------------|----------------|-----------------|
+| Compute (4vCPU/8GB) | $20 (Hetzner CX31) | $140 (t3.xlarge) | $120 |
+| Database | Self-hosted (included) | $200 (RDS db.t3.medium) | $200 |
+| Cache | Self-hosted (included) | $45 (ElastiCache t3.micro) | $45 |
+| Storage (100GB) | $5 (SSD) | $23 (EBS gp3) | $18 |
+| Object Storage | $1.50 (R2) | $2.30 (S3) | $0.80 |
+| Data Transfer | $0 | ~$50 | $50 |
+| **Total** | **~$27** | **~$460** | **~$433 (94% savings)** |
+
+### 10.2 Maintenance Overhead
+
+**Estimated Time**:
+- Updates/Patches: 2 hours/month
+- Monitoring: 1 hour/month
+- Backups: Automated (0 hours)
+- **Total**: ~3 hours/month
+
+---
+
+## 11. Appendix
+
+### 11.1 Port Mapping
+
+| Service | Internal Port | External Access | Notes |
+|---------|---------------|-----------------|-------|
+| Nginx | 80, 443 | Public | SSL termination |
+| AdonisJS | 3333 | localhost only | Via Nginx proxy |
+| PostgreSQL | 5432 | localhost only | Internal access |
+| Redis | 6379 | localhost only | Internal access |
+| ClickHouse | 8123, 9000 | localhost only | Internal access |
+| Prometheus | 9090 | localhost only | Via Nginx auth |
+| Grafana | 3000 | localhost only | Via Nginx auth |
+
+### 11.2 Environment Variables
+
+```bash
+# Application
+NODE_ENV=production
+APP_KEY=<random-32-char-key>
+APP_URL=https://api.certfast.io
+
+# Database
+DB_HOST=postgres
+DB_PORT=5432
+DB_USER=certfast
+DB_PASSWORD=<secure-password>
+DB_DATABASE=certfast
+
+# Redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# Cloudflare R2
+R2_ENDPOINT=https://<account>.r2.cloudflarestorage.com
+R2_ACCESS_KEY_ID=<access-key>
+R2_SECRET_ACCESS_KEY=<secret-key>
+R2_BUCKET=certfast-evidence-prod
+
+# ClickHouse
+CLICKHOUSE_URL=http://clickhouse:8123
+CLICKHOUSE_DB=certfast
+
+# Email (Postmark/Resend)
+SMTP_HOST=smtp.postmarkapp.com
+SMTP_PORT=587
+SMTP_USER=<api-key>
+SMTP_PASSWORD=<api-key>
+```
+
+### 11.3 Document History
+
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0 | 2024-03-15 | System Architect | Initial bare metal architecture |
+| 1.1 | 2024-03-15 | System Architect | Migrated from AWS to bare metal |
+
+---
+
+## 12. Approval
+
+**Architecture Owner**: Technical Pipeline  
+**Review Date**: 2024-03-15  
+**Status**: Approved for Implementation
