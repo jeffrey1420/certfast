@@ -112,7 +112,8 @@ Format: `strategy/product-strategist: created investor pitch deck outline`
 - **Role**: product-strategist
 - **Type**: Standard (30 min)
 - **Priority**: Critical
-- **Depends on**: STR-011
+- **Status**: ACTIVE - EXECUTE NOW
+- **Depends on**: STR-011 ✅
 
 **Description:**
 Define Beta program structure for first 50 customers.
