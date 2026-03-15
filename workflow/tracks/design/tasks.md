@@ -5,174 +5,115 @@
 
 ---
 
-## Sprint #1 - Foundation (COMPLETE)
+## ✅ Sprint #1 - Foundation (COMPLETE)
 
-### DSG-001: Brand Identity ✅
-**Role**: brand-designer  
-**Type**: Deep (60 min)  
-**Status**: ✅ COMPLETE  
-**Quality Score**: 4/5
-
-### DSG-002: UX Research ✅
-**Role**: ux-researcher  
-**Status**: ✅ COMPLETE  
-**Quality Score**: 4/5
-
-### DSG-003: User Flows ✅
-**Role**: ux-researcher  
-**Status**: ✅ COMPLETE  
-**Quality Score**: 4/5
-
-### DSG-004: Design System Tokens ✅
-**Role**: ui-designer  
-**Status**: ✅ COMPLETE  
-**Quality Score**: 4/5
-
-### DSG-005: Wireframes ✅
-**Role**: ui-designer  
-**Status**: ✅ COMPLETE  
-**Quality Score**: 4/5
-
-### DSG-006: High-Fidelity Mockups ✅
-**Role**: ui-designer  
-**Status**: ✅ COMPLETE  
-**Quality Score**: 4/5
+| Task | Status | Quality |
+|------|--------|---------|
+| DSG-001: Brand Identity | ✅ | 4/5 |
+| DSG-002: UX Research | ✅ | 4/5 |
+| DSG-003: User Flows | ✅ | 4/5 |
+| DSG-004: Design System Tokens | ✅ | 4/5 |
+| DSG-005: Wireframes | ✅ | 4/5 |
+| DSG-006: High-Fidelity Mockups | ✅ | 4/5 |
 
 ---
 
-## Sprint #2 - Frontend Development
+## 🚀 Sprint #2 - Frontend Development (IN PROGRESS)
+
+### ✅ DSG-007: React Setup - COMPLETE
+
+**Status**: ✅ DONE (commit `df732ee`)
+
+**Créé dans :** `apps/web/`
+- React 18 + TypeScript
+- Vite 5
+- Tailwind CSS
+- shadcn/ui components
+- Zustand stores
+- React Query setup
+
+---
 
 ### Active Task (CURRENT)
 
-**Task ID**: DSG-007
+**Task ID**: DSG-008
 **Type**: Standard (30 min)
 **Assigned Role**: `frontend-developer`
 **Status**: ACTIVE - EXECUTE NOW
 **Priority**: Critical
-**Sprint**: #2
 
 #### Description
-React + Vite Project Setup
+Auth Pages Implementation
 
-**Context:**
-Backend will be AdonisJS on bare metal with Docker Compose. API base URL will be configurable via environment variable.
+**Pages à créer :**
+1. **Login** (`/login`) - Email + password, erreurs, loading
+2. **Register** (`/register`) - Email, password, org name
+3. **Forgot Password** (`/forgot-password`) - Email input
+4. **Reset Password** (`/reset-password`) - New password form
 
-**Tech Stack:**
-- **Framework**: React 18 + TypeScript
-- **Build**: Vite 5
-- **Styling**: Tailwind CSS 3.4
-- **UI Components**: shadcn/ui
-- **State**: Zustand
-- **Query**: TanStack Query (React Query)
-- **Forms**: React Hook Form + Zod
-- **Router**: React Router v6
-- **Icons**: Lucide React
-- **Charts**: Recharts
-- **Notifications**: Sonner
+**API :** `POST /api/v1/auth/login`, etc.
 
-**Setup checklist:**
-```bash
-npm create vite@latest certfast-web -- --template react-ts
-cd certfast-web
-npm install
-
-# Core packages
-npm install react-router-dom zustand @tanstack/react-query axios
-
-# Forms & validation
-npm install react-hook-form @hookform/resolvers zod
-
-# UI (shadcn/ui will handle most)
-npx shadcn-ui@latest init
-
-# Additional
-npm install lucide-react recharts sonner clsx tailwind-merge
-npm install -D tailwindcss postcss autoprefixer
+**Fichiers à créer :**
+```
+apps/web/src/routes/auth/
+├── login.tsx
+├── register.tsx
+├── forgot-password.tsx
+└── reset-password.tsx
 ```
 
-**Deliverables:**
-```
-/work/certfast/apps/web/
-├── src/
-│   ├── components/
-│   │   └── ui/           # shadcn components
-│   ├── lib/
-│   │   ├── api.ts        # Axios instance with env-based baseURL
-│   │   ├── utils.ts      # cn() helper
-│   │   └── constants.ts  # App constants
-│   ├── hooks/
-│   ├── stores/           # Zustand stores
-│   ├── types/            # TypeScript types
-│   ├── routes/           # Route components
-│   ├── App.tsx
-│   └── main.tsx
-├── public/
-├── index.html
-├── .env.example          # VITE_API_URL=http://localhost:3333
-├── vite.config.ts
-├── tsconfig.json
-├── tailwind.config.js
-└── package.json
-```
+**Composants shadcn à utiliser :**
+- `Button`, `Input`, `Label`, `Card`
+- `Form` (avec React Hook Form + Zod)
 
-**Configuration:**
-- Tailwind with custom colors from design tokens
-- Path aliases (`@/components`, `@/lib`, etc.)
-- Environment variables (`.env.example`) with `VITE_API_URL`
-- ESLint + Prettier config
-- **API client configured for bare metal backend**
+**Pattern :**
+```typescript
+// stores/auth.ts existe déjà
+import { useAuthStore } from '@/stores/auth'
+
+// API call
+const response = await fetch('/api/v1/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email, password })
+})
+```
 
 **Quality Gates:**
-- [ ] Project starts with `npm run dev`
-- [ ] TypeScript compiles without errors
-- [ ] Tailwind styles apply correctly
-- [ ] shadcn/ui components render
-- [ ] Build succeeds (`npm run build`)
-- [ ] `.env.example` includes API URL configuration
+- [ ] 4 pages créées
+- [ ] Formulaires validés (Zod)
+- [ ] États loading/erreur gérés
+- [ ] Redirection après login
+- [ ] Commit + push
 
-**Output Location:**
-- `/work/certfast/apps/web/` - Complete React project
-
-**Git Commit:**
-Format: `design/frontend-developer: initialized React + Vite project with Tailwind and shadcn/ui`
+**Commit:** `design/frontend-developer: created auth pages (login, register, forgot, reset)`
 
 ---
 
 ## Backlog - Sprint #2
 
-### DSG-008: Auth Pages Implementation
-- **Role**: frontend-developer
-- **Type**: Standard (30 min)
-- **Depends on**: DSG-007 ✅
-- **Priority**: Critical
-
-**Pages:**
-1. **Login** (`/login`)
-2. **Register** (`/register`)
-3. **Forgot Password** (`/forgot-password`)
-4. **Reset Password** (`/reset-password`)
-
-**Note:** Backend auth endpoints will be at `/api/v1/auth/*`
-
----
-
 ### DSG-009: Layout Components
 - **Role**: frontend-developer
-- **Type**: Standard (30 min)
+- **Type**: Quick (15 min)
 - **Depends on**: DSG-008
-- **Priority**: High
 
-**Components:** AppShell, Sidebar, Header, MainContent
+**Components :** Sidebar, Header, MainContent
+**Responsive :** Menu mobile hamburger
 
 ---
 
 ### DSG-010: Dashboard Page
 - **Role**: frontend-developer
-- **Type**: Deep (60 min)
+- **Type**: Standard (30 min)
 - **Depends on**: DSG-009
-- **Priority**: High
 
-**Features:** Metrics cards, progress, recent activity, quick actions
+**Features :**
+- 4 metric cards (Compliance Score, Assessments, Evidence, Days)
+- Progress bar
+- Recent activity list
+- Quick actions buttons
+
+**API :** `GET /api/v1/dashboard/metrics`
 
 ---
 
@@ -180,59 +121,82 @@ Format: `design/frontend-developer: initialized React + Vite project with Tailwi
 - **Role**: frontend-developer
 - **Type**: Standard (30 min)
 - **Depends on**: DSG-009
-- **Priority**: High
 
-**Features:** Table, filters, search, create button
+**Features :**
+- Table avec pagination
+- Filters (status, framework)
+- Search
+- Create button
 
 ---
 
 ### DSG-012: Assessment Detail Page
 - **Role**: frontend-developer
-- **Type**: Deep (60 min)
+- **Type**: Standard (30 min)
 - **Depends on**: DSG-011
-- **Priority**: High
 
-**Features:** Controls list, evidence upload, checklist
-
-**Note:** Evidence upload uses Cloudflare R2 (S3-compatible)
+**Features :**
+- Header avec status
+- Controls list (expandable)
+- Evidence upload (drag & drop)
+- Checklist
 
 ---
 
 ### DSG-013: Settings Pages
 - **Role**: frontend-developer
-- **Type**: Standard (30 min)
+- **Type**: Quick (15 min)
 - **Depends on**: DSG-009
-- **Priority**: Medium
 
-**Pages:** Organization, Profile, Integrations
+**Pages :** Organization, Profile, Integrations (simple forms)
 
 ---
 
-### DSG-014: UI Polish & Responsive
+### DSG-014: UI Polish
 - **Role**: frontend-developer
-- **Type**: Standard (30 min)
+- **Type**: Quick (15 min)
 - **Depends on**: DSG-013
-- **Priority**: Medium
 
-**Tasks:** Mobile responsive, dark mode, loading states, error boundaries
+**Tâches :**
+- Mobile responsive check
+- Loading skeletons
+- Empty states
+- Error boundaries
 
 ---
 
 ## Track Status
 | Metric | Value |
 |--------|-------|
-| Sprint #1 Complete | 6/6 tasks |
-| Sprint #2 Progress | 0/8 tasks |
+| Sprint #1 | 6/6 ✅ |
+| Sprint #2 | 1/8 (DSG-007 ✅) |
 | Quality Average | 4.0/5 |
 
 ---
 
-## Cross-Track Dependencies
+## 🎨 Stack Frontend
 
-| Design Task | Depends On | Status |
-|-------------|-----------|--------|
-| DSG-008 Auth Pages | Tech TEC-009 (Auth API) | Can develop with mocks |
-| DSG-010 Dashboard | Tech TEC-010 (Users/Orgs API) | Can develop with mocks |
-| DSG-012 Assessment Detail | Tech TEC-012 (Evidence API) | Can develop with mocks |
+```
+React 18 + TypeScript
+Vite 5
+Tailwind CSS 3.4
+shadcn/ui (components)
+Zustand (state)
+React Query (server state)
+React Hook Form + Zod (forms)
+React Router v6
+```
 
-**Note:** Frontend can be developed against mock API responses. Integration happens when backend is ready.
+**Déjà setup dans :** `apps/web/`
+
+---
+
+## ⚡ Instructions Anti-Rate-Limit
+
+1. **Copie les patterns** de shadcn/ui existants
+2. **Utilise les stores** déjà créés dans `src/stores/`
+3. **Mock l'API** si besoin (type les réponses)
+4. **1 commit par page** - Push rapidement
+5. **Responsive ?** Mobile-first avec Tailwind
+
+**Guide agents :** `/work/certfast/workflow/AGENT_GUIDE.md`
