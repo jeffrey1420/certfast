@@ -1,168 +1,226 @@
 # Security Architecture Review - Core Components
 
-This document outlines the security architecture for CertFast's core systems, covering authentication, authorization, data protection, and API security.
+This document outlines the security measures implemented across the CertFast platform to protect sensitive certification data, user information, and ensure compliance with industry security standards.
 
 ---
 
 ## 1. Authentication
 
 ### JWT-Based Authentication
-- **Token Structure**: JSON Web Tokens (JWT) are used for stateless authentication
-- **Token Components**:
-  - Header: Algorithm (HS256/RS256) and token type
-  - Payload: User ID, email, role, issued at (iat), expiration (exp)
-  - Signature: Cryptographic signature for integrity verification
-- **Access Token Lifetime**: 15 minutes (short-lived for security)
-- **Refresh Token Lifetime**: 7 days with rotation on every use
-- **Token Storage**: Access tokens in memory; refresh tokens in HTTP-only secure cookies
+
+The CertFast platform implements JSON Web Token (JWT) based authentication to securely verify user identities and maintain session state.
+
+**Token Structure:**
+- **Access Token**: Short-lived tokens (15 minutes) containing user claims
+- **Refresh Token**: Long-lived tokens (7 days) for obtaining new access tokens
+- **Token Format**: Signed RS256 JWTs with 2048-bit RSA keys
+
+**Token Claims:**
+```json
+{
+  "sub": "user-uuid",
+  "email": "user@example.com",
+  "role": "org_admin",
+  "org_id": "org-uuid",
+  "iat": 1647321600,
+  "exp": 1647322500,
+  "jti": "unique-token-id"
+}
+```
+
+**Implementation Notes:**
+- Tokens are transmitted via HTTP-only cookies with Secure and SameSite=Strict flags
+- Token rotation is enforced on every refresh to prevent replay attacks
+- Failed authentication attempts are rate-limited to prevent brute force attacks
+- JWT secrets are rotated monthly with zero-downtime key rollover
 
 ### Session Management
-- **Session Binding**: Tokens are bound to device fingerprint (user-agent + IP hash)
-- **Concurrent Session Control**: Maximum 5 active sessions per user
-- **Session Invalidation**: Immediate revocation capability via token blacklist
-- **Idle Timeout**: Sessions expire after 30 minutes of inactivity
-- **Force Logout**: Admin capability to terminate all user sessions
 
-### Multi-Factor Authentication (MFA)
-- **TOTP Support**: Time-based One-Time Passwords via authenticator apps
-- **Backup Codes**: 10 single-use recovery codes generated at MFA setup
-- **MFA Enforcement**: Required for admin roles; optional for standard users
-- **Remember Device**: 30-day device trust option (skips MFA on trusted devices)
+**Session Lifecycle:**
+- Sessions are created upon successful authentication
+- Active sessions are tracked in a distributed cache (Redis)
+- Users can view and terminate active sessions from their profile
+- Sessions automatically expire after 7 days of inactivity
+
+**Security Measures:**
+- Session binding to IP address and user agent fingerprint
+- Concurrent session limits per user (maximum 5 active sessions)
+- Immediate session invalidation on password change or suspicious activity
+- Audit logging for all session events (login, logout, refresh)
 
 ---
 
 ## 2. Authorization
 
 ### Role-Based Access Control (RBAC)
-- **Role Hierarchy**:
-  - `super_admin`: Full system access
-  - `org_admin`: Organization-wide management
-  - `assessor`: Can create and manage assessments
-  - `auditor`: Read-only access to assessments and reports
-  - `viewer`: Limited read access to assigned resources
 
-### Permission System
-- **Granular Permissions**: 50+ fine-grained permissions across resources
-- **Permission Examples**:
-  - `users:read` - View user profiles
-  - `users:write` - Create and modify users
-  - `assessments:full` - Complete assessment control
-  - `evidence:submit` - Upload evidence files
-  - `reports:export` - Generate and download reports
+CertFast implements a hierarchical RBAC system to ensure users only access resources they are authorized to view or modify.
 
-### Resource-Level Access Control
-- **Organization Isolation**: Users can only access resources within their organization
-- **Project-Based Access**: Fine-grained access within organizations via project membership
-- **Ownership Checks**: Resource creators have implicit management rights
-- **Sharing Controls**: Explicit sharing with audit logging for cross-team access
+**Role Hierarchy:**
+| Role | Description | Scope |
+|------|-------------|-------|
+| `platform_admin` | Full system access | Global |
+| `org_admin` | Organization management | Organization |
+| `compliance_officer` | Assessment and control management | Organization |
+| `auditor` | Read-only access to assessments | Organization |
+| `user` | Basic access to assigned resources | Limited |
 
-### Access Control Implementation
-- **Middleware Enforcement**: All API routes protected by authorization middleware
-- **Policy Engine**: Centralized policy evaluation service
-- **Audit Logging**: All authorization decisions logged with context
-- **Deny-by-Default**: Unspecified permissions default to denied
+**Permission Granularity:**
+- Permissions are defined as fine-grained actions (e.g., `assessment:create`, `control:read`)
+- Each role is assigned a set of permissions via policy definitions
+- Custom roles can be created within organizations with specific permission sets
+
+### Resource-Level Permissions
+
+**Organization Isolation:**
+- All data is scoped to an organization
+- Users cannot access data from other organizations
+- Database queries automatically filter by organization_id
+
+**Assessment Access Control:**
+- Assessments can be assigned to specific users or teams
+- Evidence uploads are restricted to assigned assessors
+- Control status changes require `control:update` permission
+
+**Implementation Notes:**
+- Authorization checks occur at the API gateway and service layer
+- Middleware validates permissions before controller execution
+- Denied access attempts are logged for security auditing
 
 ---
 
 ## 3. Data Protection
 
 ### Encryption at Rest
-- **Database Encryption**: AES-256 encryption for all database storage
-- **Field-Level Encryption**: Sensitive fields (PII, credentials) encrypted individually
-- **Key Management**: Hardware Security Module (HSM) for encryption key storage
-- **Key Rotation**: Automatic key rotation every 90 days
-- **Backup Encryption**: All backups encrypted with separate keys
+
+**Database Encryption:**
+- All database files are encrypted using AES-256
+- Encryption keys are managed by a hardware security module (HSM)
+- Key rotation occurs automatically every 90 days
+- Encrypted backups are stored in geographically distributed locations
+
+**Sensitive Field Encryption:**
+- PII fields (SSN, tax IDs) are encrypted at the application layer
+- Encryption uses AES-256-GCM with unique keys per organization
+- Searchable encryption enables querying without decryption
+
+**File Storage Encryption:**
+- Evidence files are encrypted before storage
+- Each file uses a unique encryption key
+- Keys are stored separately from encrypted data
 
 ### Encryption in Transit
-- **TLS 1.3**: Minimum TLS version for all connections
-- **Certificate Pinning**: Public key pinning for mobile applications
-- **HSTS**: HTTP Strict Transport Security enforced
-- **Perfect Forward Secrecy**: ECDHE key exchange for session keys
 
-### Data Classification
-- **Public**: Marketing materials, documentation
-- **Internal**: System configurations, non-sensitive logs
-- **Confidential**: User profiles, organization data
-- **Restricted**: Assessment evidence, compliance reports, PII
+**Transport Layer Security:**
+- All API communications use TLS 1.3
+- Certificate pinning enforced for mobile applications
+- HSTS headers configured with 1-year max-age
+- Weak cipher suites are explicitly disabled
 
-### Data Retention and Deletion
-- **Retention Policies**:
-  - Audit logs: 7 years (compliance requirement)
-  - User activity: 2 years
-  - Deleted assessments: 30-day soft delete, then permanent removal
-- **Right to Erasure**: GDPR-compliant user data deletion within 30 days
-- **Secure Deletion**: Cryptographic erasure for sensitive data
-
-### File Storage Security
-- **Virus Scanning**: All uploads scanned before storage
-- **File Type Validation**: Whitelist-based MIME type verification
-- **Size Limits**: Maximum 50MB per file with configurable quotas
-- **Storage Isolation**: Per-organization file isolation with unique paths
-- **Signed URLs**: Time-limited access URLs for file downloads
+**Internal Service Communication:**
+- Service-to-service calls use mutual TLS (mTLS)
+- Certificates are automatically rotated every 30 days
+- Internal traffic is isolated within a private VPC
 
 ---
 
 ## 4. API Security
 
 ### Rate Limiting
-- **Tiered Limits**:
-  - Anonymous: 10 requests per minute
-  - Authenticated: 100 requests per minute
-  - Premium: 1000 requests per minute
-- **Burst Allowance**: Short-term burst capacity (2x base limit)
-- **Endpoint-Specific Limits**: Stricter limits on expensive operations
-- **Rate Limit Headers**: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
+
+**Tiered Rate Limiting Strategy:**
+
+| Tier | Requests/Minute | Burst | Scope |
+|------|-----------------|-------|-------|
+| Anonymous | 10 | 20 | IP Address |
+| Authenticated | 100 | 150 | User ID |
+| Premium | 500 | 750 | API Key |
+| Internal | 2000 | 3000 | Service |
+
+**Rate Limit Headers:**
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 87
+X-RateLimit-Reset: 1647323400
+```
+
+**Implementation:**
+- Rate limiting is enforced at the API gateway layer
+- Distributed counter using Redis to handle horizontal scaling
+- Exceeding limits returns HTTP 429 with Retry-After header
+- Critical endpoints have stricter limits (authentication, password reset)
 
 ### Input Validation
-- **Schema Validation**: JSON Schema validation for all request bodies
-- **Type Enforcement**: Strict type checking for all parameters
-- **Sanitization**: HTML sanitization for text fields
-- **Length Limits**: Maximum field lengths enforced at API layer
-- **SQL Injection Prevention**: Parameterized queries; ORM usage mandatory
 
-### Output Encoding
-- **Content-Type Enforcement**: Strict content-type validation
-- **JSON Encoding**: Proper escaping of special characters
-- **Error Sanitization**: Internal error details never exposed to clients
+**Validation Layers:**
+1. **Schema Validation**: JSON Schema validation for all request bodies
+2. **Type Validation**: Strict type checking for all parameters
+3. **Business Logic Validation**: Domain-specific validation rules
+4. **Sanitization**: Output encoding to prevent injection attacks
 
-### API Authentication
-- **Bearer Token**: Authorization: Bearer {token} header format
-- **API Keys**: Separate API keys for service-to-service communication
-- **Scope Enforcement**: Tokens scoped to specific operations
-- **Token Binding**: Tokens validated against request origin
+**Security Validations:**
+- SQL injection prevention through parameterized queries
+- XSS prevention via input sanitization and CSP headers
+- File upload restrictions (type, size, content validation)
+- UUID format validation for all resource identifiers
 
-### Security Headers
-- **CORS Policy**: Whitelist-based origin validation
-- **Content Security Policy**: Strict CSP for web interface
-- **X-Frame-Options**: DENY to prevent clickjacking
-- **X-Content-Type-Options**: nosniff to prevent MIME sniffing
+**Error Handling:**
+- Validation errors return HTTP 400 with detailed messages
+- Error messages do not expose internal system details
+- Failed validations are logged for security monitoring
 
-### Request Validation
-- **Timestamp Validation**: Requests with timestamps >5 minutes rejected
-- **Signature Verification**: HMAC signatures for webhook payloads
-- **Replay Prevention**: Nonce tracking for critical operations
+### Additional API Security Measures
+
+**CORS Policy:**
+- Strict CORS configuration allowing only registered origins
+- Credentials are only sent to trusted domains
+- Preflight requests are cached appropriately
+
+**API Versioning:**
+- Breaking changes are introduced in new API versions
+- Deprecated versions receive security updates for 12 months
+- Clients are notified of version deprecation via response headers
+
+**Security Headers:**
+```
+Content-Security-Policy: default-src 'self'
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: strict-origin-when-cross-origin
+```
 
 ---
 
-## Implementation Notes
+## Security Monitoring
 
-### Security Monitoring
-- Real-time alerting for suspicious patterns
-- Automated blocking of IPs with anomalous behavior
-- Integration with SIEM for centralized logging
+### Audit Logging
+- All security events are logged with user context and timestamps
+- Logs are immutable and forwarded to a SIEM system
+- Retention period: 7 years for compliance requirements
+
+### Anomaly Detection
+- Failed login attempts trigger alerts after 5 consecutive failures
+- Unusual access patterns are flagged for review
+- Automated blocking of known malicious IP addresses
 
 ### Incident Response
-- Documented security incident procedures
-- Automated containment for detected threats
-- Regular security drills and penetration testing
-
-### Compliance Alignment
-- SOC 2 Type II controls implemented
-- GDPR data protection measures
-- ISO 27001 security framework alignment
+- Documented procedures for security incident handling
+- 24/7 security operations center (SOC) monitoring
+- Regular penetration testing and vulnerability assessments
 
 ---
 
-## Summary
+## Compliance Considerations
 
-This security architecture provides defense in depth across all layers of the application. Regular security reviews, automated scanning, and continuous monitoring ensure ongoing protection of CertFast's systems and data.
+The security architecture is designed to meet requirements for:
+- SOC 2 Type II certification
+- ISO 27001 compliance
+- GDPR data protection requirements
+- Industry-specific regulations (as applicable)
+
+---
+
+*Document Version: 1.0*
+*Last Updated: March 2026*
+*Owner: Security Architecture Team*
