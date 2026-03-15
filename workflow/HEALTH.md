@@ -14,6 +14,14 @@
 
 ## Previous Issues
 
+### Issue: Stale remote-tracking branch
+**Detected**: 2026-03-15 10:46 AM (Asia/Shanghai)
+**Root cause**: Local `origin/main` ref was stale (pointing to a0ea0d3 instead of ff783af)
+**Resolution**: `git fetch origin` updated tracking branch
+**Impact**: Monitor falsely reported unpushed commits (4 commits appeared "unpushed" locally but were already on GitHub)
+**Status**: ✅ Resolved
+**Lesson**: Always run `git fetch` before diagnosing push issues; GitHub API is source of truth
+
 ### Issue: Agents commit but don't push
 **Detected**: 2026-03-15 06:40 CET
 **Root cause**: Git push command formatting in agent prompts
@@ -30,7 +38,7 @@
 
 | Component | Status | Last Check |
 |-----------|--------|------------|
-| GitHub Push | 🚨 ALERT | 2026-03-15 07:46 |
+| GitHub Push | ✅ OK | 2026-03-15 10:46 |
 | Strategy Track | 🔄 Active | STR-MAINT-001 |
 | Design Track | 🔄 Active | DSG-005 Wireframes |
 | Tech Track | 🔄 Active | TEC-003 API Spec |
