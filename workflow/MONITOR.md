@@ -1,93 +1,39 @@
-# Workflow Monitor Protocol (Auto-Recovery Enabled)
+# CertFast Workflow Monitor - Lessons Learned
 
-## Purpose
-Detect and automatically recover from workflow blockages.
+## 2026-03-15: Stale Remote Reference Detection
 
-## Critical Threshold
-🚨 **Alert if no push in 40 minutes**
+### Problem
+The git-push-monitor.sh script detected 3 "unpushed" commits:
+- cabec17 tech/security-architect
+- f8b9709 design/ui-designer  
+- af59d36 monitor incident report
 
-## Auto-Recovery Capabilities
+But `git push` returned "Everything up-to-date".
 
-The monitor can now:
-1. **Detect** the exact root cause using `git-push-monitor.sh`
-2. **Auto-fix** common issues:
-   - Unpushed commits → Push them
-   - Uncommitted changes → Commit and push
-   - Git config issues → Fix config
-3. **Alert** only when auto-recovery fails
+### Root Cause Analysis
+Git works with **remote tracking branches**. When `git push` succeeds:
+1. Commits go to GitHub
+2. Local `origin/main` should update to match
 
-## Diagnostic Script
+However, in some cases (especially with token-based pushes), the local reference doesn't update. This causes `git log origin/main..HEAD` to show commits that ARE on remote but appear unpushed locally.
 
+### Solution
+Run `git fetch origin main` before checking divergence:
 ```bash
-/work/certfast/workflow/scripts/git-push-monitor.sh
+git fetch origin main --quiet
+git log --oneline origin/main..HEAD
 ```
 
-Exit codes:
-- 0: All good
-- 1: GitHub API issue (check token/network)
-- 2: No push in 40+ min (action required)
+This ensures local references match remote before checking.
 
-## Response Matrix
+### Monitor Script Improvement
+Updated `/work/certfast/workflow/scripts/git-push-monitor.sh` to include fetch before divergence check.
 
-| Scenario | Auto-Action | Alert? |
-|----------|-------------|--------|
-| Unpushed commits | Auto-push | No (if success) |
-| Uncommitted changes | Auto-commit + push | No (if success) |
-| No agent activity | Investigate, then alert | Yes |
-| Git config broken | Auto-fix + retry | Only if fails |
-| GitHub API down | Alert immediately | Yes |
+### Verification
+After fix:
+```
+git status → "Your branch is up to date with 'origin/main'"
+```
 
-## Manual Override
-
-If you want to pause auto-recovery and investigate manually:
-1. Create `/work/certfast/workflow/.pause-monitor`
-2. Monitor will skip auto-recovery and just alert
-3. Delete file to resume auto-recovery
-
-## Success Metrics
-
-Monitor should achieve:
-- >95% of push issues auto-resolved
-- <5% requiring manual intervention
-- Zero data loss (commits always recovered)
-
-## History
-
-### 2026-03-15 16:46 - Stale Remote Refs Auto-Recovered (Recurring)
-**Issue**: Monitor detected 7 "unpushed commits" due to stale origin/main tracking refs
-**Auto-recovery**: ✅ Success
-- Used `git fetch origin main` to resolve stale refs
-- All 7 commits were already on GitHub (false positive)
-- No actual data loss
-**Alert sent**: No (successful recovery)
-**Pattern**: 3rd occurrence today - may need fetch-before-check in monitor script
-**Tracks**: STR-010, DSG-006, TEC-004 all ACTIVE and progressing
-
-### 2026-03-15 15:16 - Stale Remote Refs Auto-Recovered
-**Issue**: Monitor detected 4 "unpushed commits" due to stale origin/main tracking refs
-**Auto-recovery**: ✅ Success
-- Used `git fetch origin` to resolve stale refs
-- Verified all commits were already synced with GitHub
-- No actual data loss or push failure
-**Alert sent**: No (successful recovery)
-**Note**: Stale refs are common after external pushes; fetch-first strategy works reliably
-
-### 2026-03-15 13:46 - Uncommitted Changes Auto-Recovered
-**Issue**: 112 lines of security documentation uncommitted; 2 stale unpushed commits
-**Auto-recovery**: ✅ Success
-- Used `git fetch origin` first to resolve stale refs
-- Auto-committed pending changes
-- Pushed successfully
-**Alert sent**: No (successful recovery)
-**Note**: No active agents running despite ACTIVE tasks - guardian may need review
-
-### 2026-03-15 07:46 - Silent Agent Failure Detected
-**Issue**: Agents scheduled but not producing commits
-**Auto-recovery**: Failed - requires manual investigation
-**Alert sent**: Yes
-**Action**: Updated HEALTH.md, committed incident report
-
-2026-03-15: Implemented auto-recovery system
-- Added `git-push-monitor.sh` diagnostic script
-- Updated monitor agent with auto-recovery protocol
-- Reduced alert noise by fixing issues automatically
+### Key Takeaway
+Always sync remote refs before checking sync status. Git's distributed nature means local caches can drift.
