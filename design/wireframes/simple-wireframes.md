@@ -1,192 +1,236 @@
-# CertFast - Simple Wireframes
+# CertFast - High-Fidelity Wireframes
 
 ## Overview
-This document contains ASCII/text-based wireframes for three core screens of the CertFast ISO 42001 compliance platform. These wireframes illustrate the layout, structure, and key UI elements for each screen.
+
+This document contains detailed ASCII/text-based high-fidelity mockups for the core screens of the CertFast compliance management platform. These wireframes incorporate the design system tokens including color, typography, and spacing guidelines to create a cohesive visual experience.
 
 ---
 
 ## Screen 1: Landing Page
 
-The landing page serves as the primary entry point for potential customers. It features a clean, professional design that establishes trust and communicates CertFast's value proposition for ISO 42001 compliance. The header provides consistent navigation across the site, while the hero section immediately captures attention with a compelling headline and clear call-to-action. The three feature cards highlight the platform's core benefits: streamlined compliance, automated evidence collection, and expert guidance. The footer contains essential links and legal information, completing the professional presentation that encourages visitors to sign up or learn more about the platform.
+### Visual Wireframe
 
 ```
-+--------------------------------------------------------------------------+
-|                                                                          |
-|   [CERTFAST LOGO]        Products    Pricing    Resources    [Sign In]   |
-|                                                                          |
-+--------------------------------------------------------------------------+
-|                                                                          |
-|                                                                          |
-|                    Achieve ISO 42001 Compliance                          |
-|                         With Confidence                                  |
-|                                                                          |
-|          Streamline your AI governance certification journey with        |
-|              automated evidence collection and expert guidance           |
-|                                                                          |
-|                        [  Get Started Free  ]                            |
-|                                                                          |
-|                                                                          |
-+--------------------------------------------------------------------------+
-|                                                                          |
-|   +-------------------+  +-------------------+  +-------------------+   |
-|   |                   |  |                   |  |                   |   |
-|   |   [ICON]          |  |   [ICON]          |  |   [ICON]          |   |
-|   |                   |  |                   |  |                   |   |
-|   |   Streamlined     |  |   Automated       |  |   Expert          |   |
-|   |   Compliance      |  |   Evidence        |  |   Guidance        |   |
-|   |                   |  |   Collection      |  |                   |   |
-|   |   Simplify your   |  |   Gather and      |  |   Access to       |   |
-|   |   certification   |  |   organize all    |  |   compliance      |   |
-|   |   process with    |  |   required        |  |   experts and     |   |
-|   |   step-by-step    |  |   documentation   |  |   best practices  |   |
-|   |   guidance        |  |   automatically   |  |                   |   |
-|   |                   |  |                   |  |                   |   |
-|   +-------------------+  +-------------------+  +-------------------+   |
-|                                                                          |
-+--------------------------------------------------------------------------+
-|                                                                          |
-|   About Us   |   Privacy Policy   |   Terms of Service   |   Contact    |
-|                                                                          |
-|                    © 2024 CertFast. All rights reserved.                 |
-|                                                                          |
-+--------------------------------------------------------------------------+
++================================================================================+
+|                                                                                |
+|   [CERTFAST LOGO]          Product   Solutions   Pricing   Resources   [Login] |
+|                                                                                |
++================================================================================+
+|                                                                                |
+|                                                                                |
+|                        +----------------------------------+                    |
+|                        |                                  |                    |
+|                        |   ACHIEVE ISO 27001              |                    |
+|                        |   COMPLIANCE WITH                |                    |
+|                        |   CONFIDENCE                     |                    |
+|                        |                                  |                    |
+|                        |   Streamline your certification  |                    |
+|                        |   journey. Automate evidence     |                    |
+|                        |   collection, track assessments, |                    |
+|                        |   and pass audits faster.        |                    |
+|                        |                                  |                    |
+|                        |   [      Start Free Trial      ] |                    |
+|                        |   No credit card required        |                    |
+|                        |                                  |                    |
+|                        +----------------------------------+                    |
+|                                                                                |
+|                                                                                |
++--------------------------------------------------------------------------------+
+|                                                                                |
+|   +-------------------+  +-------------------+  +-------------------+         |
+|   |   [ICON]          |  |   [ICON]          |  |   [ICON]          |         |
+|   |                   |  |                   |  |                   |         |
+|   |   Automated       |  |   Smart           |  |   Audit-Ready     |         |
+|   |   Evidence        |  |   Assessments     |  |   Reports         |         |
+|   |   Collection      |  |                   |  |                   |         |
+|   |                   |  |   Get personalized|  |   Generate        |         |
+|   |   Connect your    |  |   assessment      |  |   auditor-friendly|         |
+|   |   cloud services  |  |   plans based on  |  |   documentation   |         |
+|   |   and let us      |  |   your specific   |  |   with one click. |         |
+|   |   gather evidence |  |   compliance      |  |                   |         |
+|   |   automatically.  |  |   requirements.   |  |                   |         |
+|   |                   |  |                   |  |                   |         |
+|   +-------------------+  +-------------------+  +-------------------+         |
+|                                                                                |
++================================================================================+
+|                                                                                |
+|   © 2026 CertFast   |   Privacy   |   Terms   |   Security   |   Contact       |
+|                                                                                |
++================================================================================+
 ```
+
+### Description
+
+The Landing Page serves as the primary entry point for potential customers, designed to communicate CertFast's value proposition immediately and drive conversions through a clear call-to-action. The layout follows a classic SaaS landing page structure with a fixed navigation header containing the logo, primary navigation links (Product, Solutions, Pricing, Resources), and a Login button aligned to the right. The hero section dominates the viewport with a compelling headline emphasizing ISO 27001 compliance achievement, supported by descriptive subtext that highlights key benefits including automated evidence collection and faster audit completion. The primary CTA button "Start Free Trial" is prominently displayed with reassuring microcopy below it stating "No credit card required" to reduce friction. Below the fold, three feature cards are arranged horizontally to showcase the platform's core capabilities: Automated Evidence Collection, Smart Assessments, and Audit-Ready Reports. Each card includes an icon placeholder, bold title, and descriptive paragraph explaining the feature's value. The footer provides essential links including copyright information, privacy policy, terms of service, security details, and contact options. The color scheme utilizes the primary brand blue (#2563EB) for the CTA button and accent elements, with neutral grays for text hierarchy and white backgrounds for clean readability.
 
 ---
 
 ## Screen 2: Dashboard
 
-The dashboard is the central hub where users monitor their compliance progress and access all platform features. The sidebar navigation provides quick access to different sections including assessments, evidence management, documentation, and settings. The top header displays the user's profile and notification center. The main content area features four metric cards that give an at-a-glance overview of compliance health: Compliance Score shows overall readiness, Assessments tracks active evaluation items, Evidence displays the count of uploaded documentation, and Days to Audit counts down to the certification deadline. Below the metrics, a prominent progress bar visualizes the certification journey, showing completed, in-progress, and pending milestones. This dashboard design prioritizes clarity and actionable insights, enabling compliance managers to quickly identify areas requiring attention.
+### Visual Wireframe
 
 ```
-+--------------------------------------------------------------------------+
-|                                                                          |
-|  [LOGO]                                           [🔔]  [👤 User ▼]      |
-|                                                                          |
-+------+-------------------------------------------------------------------+
-|      |                                                                   |
-|  📊  |   COMPLIANCE DASHBOARD                                            |
-|      |                                                                   |
-|  📋  |   +----------------+  +----------------+  +----------------+     |
-|      |   |                |  |                |  |                |     |
-| Assess|   |  COMPLIANCE    |  |  ASSESSMENTS   |  |    EVIDENCE    |     |
-|      |   |    SCORE       |  |                |  |                |     |
-|  📁  |   |                |  |                |  |                |     |
-|      |   |      78%       |  |      24        |  |      156       |     |
-| Evid.|   |                |  |                |  |                |     |
-|      |   |   [████░░░░]   |  |   In Progress  |  |    Uploaded    |     |
-|  📄  |   |                |  |                |  |                |     |
-|      |   +----------------+  +----------------+  +----------------+     |
-| Docs |                                                                   |
-|      |   +----------------+                                                |
-|  ⚙️  |   |                |                                                |
-|      |   |  DAYS TO AUDIT |                                                |
-| Sett.|   |                |                                                |
-|      |   |      45        |                                                |
-|      |   |                |                                                |
-|      |   |     days       |                                                |
-|      |   |   remaining    |                                                |
-|      |   |                |                                                |
-|      |   +----------------+                                                |
-|      |                                                                   |
-|      |   CERTIFICATION PROGRESS                                            |
-|      |                                                                   |
-|      |   +--------------------------------------------------------+      |
-|      |   |  [✓] Account Setup  →  [✓] Initial Assessment  →         |      |
-|      |   |  [●] Gap Analysis  →  [○] Evidence Collection  →         |      |
-|      |   |  [○] Documentation  →  [○] Final Audit                   |      |
-|      |   +--------------------------------------------------------+      |
-|      |                                                                   |
-|      |   [View Detailed Roadmap]                                         |
-|      |                                                                   |
-+------+-------------------------------------------------------------------+
++================================================================================+
+|                                                                                |
+|   [LOGO]                      CertFast Dashboard                    [?] [Bell] |
+|                                                                    [Avatar JD] |
++================================================================================+
+|                                                                                |
+|  +----------------+  +------------------------------------------------------+  |
+|  |                |  |                                                      |  |
+|  |  [ICON]        |  |   ISO 27001 Certification Progress                   |  |
+|  |  Dashboard     |  |                                                      |  |
+|  |                |  |   [████████████████████░░░░░░░░░░░░░░░░░░░░░░] 42%   |  |
+|  |  [ICON]        |  |                                                      |  |
+|  |  Assessments   |  |   On track - 45 days remaining until target audit    |  |
+|  |                |  |                                                      |  |
+|  |  [ICON]        |  +------------------------------------------------------+  |
+|  |  Evidence      |                                                      |  |
+|  |                |  +------------------+  +------------------+           |  |
+|  |  [ICON]        |  |                  |  |                  |           |  |
+|  |  Reports       |  |  [Shield Icon]   |  |  [Clipboard]     |           |  |
+|  |                |  |                  |  |                  |           |  |
+|  |  [ICON]        |  |  Compliance      |  |  Assessments     |           |  |
+|  |  Settings      |  |  Score           |  |                  |           |  |
+|  |                |  |                  |  |  12 Active       |           |  |
+|  |                |  |  78/100          |  |  3 Completed     |           |  |
+|  |                |  |                  |  |  2 Overdue       |           |  |
+|  |                |  |  [+5 this month] |  |                  |           |  |
+|  |                |  |                  |  |  [View All →]    |           |  |
+|  |                |  +------------------+  +------------------+           |  |
+|  |                |                                                      |  |
+|  |                |  +------------------+  +------------------+           |  |
+|  |                |  |                  |  |                  |           |  |
+|  |                |  |  [Folder Icon]   |  |  [Calendar]      |           |  |
+|  |                |  |                  |  |                  |           |  |
+|  |                |  |  Evidence        |  |  Days to Audit   |           |  |
+|  |                |  |  Items           |  |                  |           |  |
+|  |                |  |                  |  |                  |           |  |
+|  |                |  |  247 Total       |  |  45 Days         |           |  |
+|  |                |  |  189 Approved    |  |                  |           |  |
+|  |                |  |  58 Pending      |  |  Mar 30, 2026    |           |  |
+|  |                |  |                  |  |                  |           |  |
+|  |                |  |  [Manage →]      |  |  [View Timeline] |           |  |
+|  |                |  |                  |  |                  |           |  |
+|  |                |  +------------------+  +------------------+           |  |
+|  |                |                                                      |  |
+|  +----------------+  +------------------------------------------------------+  |
+|                                                                                |
++================================================================================+
 ```
+
+### Description
+
+The Dashboard represents the central command center for compliance managers, providing at-a-glance visibility into the organization's ISO 27001 certification status through a well-organized interface with clear information hierarchy. The layout features a fixed top header containing the CertFast logo, dashboard title, and utility icons including a help button, notification bell, and user avatar with initials "JD". A persistent left sidebar enables quick navigation between core platform sections: Dashboard (active), Assessments, Evidence, Reports, and Settings, each accompanied by distinctive icons for visual recognition. The main content area prioritizes the certification progress through a prominent progress bar showing 42% completion, providing users with immediate context about their compliance journey and noting "45 days remaining until target audit" to create urgency awareness. Below the progress section, four metric cards are arranged in a responsive 2x2 grid layout displaying critical KPIs: Compliance Score (78/100 with positive trend indicator), Assessments summary (12 Active, 3 Completed, 2 Overdue), Evidence Items count (247 Total with breakdown of approved and pending items), and Days to Audit countdown (45 days with target date March 30, 2026). Each card follows consistent styling with appropriate icons, large metric numbers, supporting details, and actionable links. The design employs the success green (#10B981) for positive indicators, warning amber (#F59E0B) for the overdue count, and maintains generous whitespace between elements to prevent cognitive overload while ensuring all essential information is accessible within a single viewport.
 
 ---
 
 ## Screen 3: Assessment Detail
 
-The assessment detail page provides a focused view for completing individual compliance requirements. The page header includes a back button for easy navigation to the assessment list, followed by the assessment title that clearly identifies which requirement is being evaluated. The status badge prominently displays the current state—either "In Progress" or "Completed"—using distinct colors for quick visual recognition. The evidence upload zone offers a drag-and-drop interface where users can attach supporting documentation, with visual feedback showing the upload area. Below that, the checklist of requirements breaks down the assessment into actionable items that can be marked complete as the user works through them. Each checklist item has a checkbox and descriptive text explaining what needs to be addressed. This design ensures compliance officers have all necessary information and tools in one place to efficiently complete assessments and gather the required evidence for ISO 42001 certification.
+### Visual Wireframe
 
 ```
-+--------------------------------------------------------------------------+
-|                                                                          |
-|  [LOGO]                                           [🔔]  [👤 User ▼]      |
-|                                                                          |
-+------+-------------------------------------------------------------------+
-|      |                                                                   |
-|  📊  |   [← Back to Assessments]                                         |
-|      |                                                                   |
-|  📋  |                                                                   |
-|      |   AI Risk Assessment - Governance Control 4.2.1                   |
-| Assess|                                                                   |
-|      |   [IN PROGRESS]                                                   |
-|  📁  |                                                                   |
-|      |   +--------------------------------------------------------+      |
-| Evid.|   |                                                        |      |
-|      |   |              EVIDENCE UPLOAD ZONE                      |      |
-|  📄  |   |                                                        |      |
-|      |   |              [    📤    ]                              |      |
-| Docs |   |                                                        |      |
-|      |   |         Drag & drop files here                         |      |
-|  ⚙️  |   |         or click to browse                             |      |
-|      |   |                                                        |      |
-| Sett.|   |         Supported: PDF, DOCX, PNG, JPG (max 50MB)      |      |
-|      |   |                                                        |      |
-|      |   +--------------------------------------------------------+      |
-|      |                                                                   |
-|      |   UPLOADED EVIDENCE                                               |
-|      |   +--------------------------------------------------------+      |
-|      |   | [📄] Risk_Assessment_Matrix_v2.pdf      [✓] Verified  |      |
-|      |   | [📄] Governance_Framework.docx          [⏳] Pending  |      |
-|      |   +--------------------------------------------------------+      |
-|      |                                                                   |
-|      |   REQUIREMENTS CHECKLIST                                          |
-|      |                                                                   |
-|      |   +--------------------------------------------------------+      |
-|      |   |                                                        |      |
-|      |   |   ☐ Establish AI governance framework documentation    |      |
-|      |   |     Define roles, responsibilities, and accountability |      |
-|      |                                                        |      |
-|      |   |   ☐ Document AI risk assessment methodology            |      |
-|      |   |     Include risk scoring and mitigation strategies     |      |
-|      |                                                        |      |
-|      |   |   ☑ Define AI system inventory and categorization      |      |
-|      |   |     List all AI systems with risk classifications        |      |
-|      |                                                        |      |
-|      |   |   ☐ Implement stakeholder consultation process         |      |
-|      |   |     Document feedback collection and integration         |      |
-|      |                                                        |      |
-|      |   |   ☐ Establish monitoring and review procedures         |      |
-|      |   |     Define KPIs and periodic review schedule             |      |
-|      |                                                        |      |
-|      |   +--------------------------------------------------------+      |
-|      |                                                                   |
-|      |   [Save Progress]              [Mark Complete]                    |
-|      |                                                                   |
-+------+-------------------------------------------------------------------+
++================================================================================+
+|                                                                                |
+|   [← Back]                      Access Control Assessment           [Save] [X] |
+|                                                                                |
++================================================================================+
+|                                                                                |
+|  +----------------------------------------------------------------------------+  |
+|  |                                                                            |  |
+|  |  A.8.1 - User Access Control                                               |  |
+|  |                                                                            |  |
+|  |  Status: [IN PROGRESS                    ]  Priority: High | Due: Mar 20   |  |
+|  |         [Yellow badge with pulsing dot animation indication]               |  |
+|  |                                                                            |  |
+|  |  ─────────────────────────────────────────────────────────────────────     |  |
+|  |                                                                            |  |
+|  |  DESCRIPTION                                                               |  |
+|  |  ─────────────────────────────────────────────────────────────────────     |  |
+|  |                                                                            |  |
+|  |  Ensure that authorized users have access to systems and services, while   |  |
+|  |  preventing unauthorized access. This includes user registration,          |  |
+|  |  provisioning, and access privilege management.                            |  |
+|  |                                                                            |  |
+|  |  ─────────────────────────────────────────────────────────────────────     |  |
+|  |                                                                            |  |
+|  |  EVIDENCE UPLOAD                                                           |  |
+|  |  ─────────────────────────────────────────────────────────────────────     |  |
+|  |                                                                            |  |
+|  |  +------------------------------------------------------+                  |  |
+|  |  |                                                      |                  |  |
+|  |  |              [Cloud Upload Icon]                     |                  |  |
+|  |  |                                                      |                  |  |
+|  |  |         Drag and drop files here                     |                  |  |
+|  |  |                                                      |                  |  |
+|  |  |              or click to browse                      |                  |  |
+|  |  |                                                      |                  |  |
+|  |  |    Supported: PDF, DOCX, XLSX, PNG (max 50MB)        |                  |  |
+|  |  |                                                      |                  |  |
+|  |  +------------------------------------------------------+                  |  |
+|  |                                                                            |  |
+|  |  Uploaded Files:                                                           |  |
+|  |  ┌─────────────────────────────────────────────────────────────────────┐   |  |
+|  |  | [PDF] Access_Control_Policy_v2.3.pdf        2.4 MB  ✓ Verified   |   |  |
+|  |  | [XLS] User_Access_Matrix_Q1_2026.xlsx       156 KB  ✓ Verified   |   |  |
+|  |  | [DOC] Onboarding_Procedure_Draft.docx       845 KB  ⏳ Pending   |   |  |
+|  |  └─────────────────────────────────────────────────────────────────────┘   |  |
+|  |                                                                            |  |
+|  |  ─────────────────────────────────────────────────────────────────────     |  |
+|  |                                                                            |  |
+|  |  REQUIREMENTS CHECKLIST                                                    |  |
+|  |  ─────────────────────────────────────────────────────────────────────     |  |
+|  |                                                                            |  |
+|  |  ☐ A.8.1.1 - Inventory of assets associated with information             |  |
+|  |       and information processing facilities                                |  |
+|  |                                                                            |  |
+|  |  ☑ A.8.1.2 - Ownership of assets                                         |  |
+|  |       [Reviewed by: John Doe on Mar 10, 2026]                              |  |
+|  |                                                                            |  |
+|  |  ☐ A.8.1.3 - Acceptable use of assets                                    |  |
+|  |       [Requires evidence: acceptable_use_policy.pdf]                       |  |
+|  |                                                                            |  |
+|  |  ☑ A.8.1.4 - Return of assets                                            |  |
+|  |       [Reviewed by: Jane Smith on Mar 12, 2026]                            |  |
+|  |                                                                            |  |
+|  |  ☐ A.8.1.5 - Classification of information                               |  |
+|  |       [Due date approaching - 5 days remaining]                            |  |
+|  |                                                                            |  |
+|  |  ─────────────────────────────────────────────────────────────────────     |  |
+|  |                                                                            |  |
+|  |  [+ Add Requirement]              [Mark Complete]  [Request Review →]      |  |
+|  |                                                                            |  |
+|  +----------------------------------------------------------------------------+  |
+|                                                                                |
++================================================================================+
 ```
+
+### Description
+
+The Assessment Detail page provides compliance officers with a comprehensive workspace for managing individual ISO 27001 control assessments, featuring a focused layout that surfaces all relevant information and action items in a single scrollable view. The fixed header contains navigation elements including a back button for returning to the assessments list, the control identifier and title (A.8.1 - User Access Control), and action buttons for saving progress or closing the view. A prominent status badge displays "IN PROGRESS" with yellow styling and a visual pulse indicator to denote active status, accompanied by priority level (High) and due date (March 20) to establish urgency context. The page content is organized into clearly delineated sections separated by horizontal rules: the Description section provides the formal control definition and scope, explaining that this control ensures authorized users have appropriate access while preventing unauthorized entry. The Evidence Upload section features a large drag-and-drop zone with cloud upload icon, supporting multiple file formats (PDF, DOCX, XLSX, PNG) with a 50MB size limit, accompanied by a file list showing uploaded documents with verification status indicators including green checkmarks for verified files and pending status for items under review. The Requirements Checklist section presents a scannable list of sub-controls with checkbox states, completed items showing reviewer attribution and timestamps, while incomplete items may include contextual notes about required evidence or approaching deadlines. Action buttons at the bottom enable adding new requirements, marking the assessment complete, or requesting peer review. The visual design emphasizes task completion progress through the checked/unchecked states, uses color coding (green for verified, yellow for pending/warnings) to guide attention, and maintains consistent spacing to support extended work sessions without visual fatigue.
 
 ---
 
-## Design Notes
+## Design System Application
 
-### Visual Hierarchy
-Each wireframe follows a consistent visual hierarchy: header at the top for branding and primary navigation, main content area in the center for key information and actions, and supporting elements arranged by importance. This ensures users can quickly locate critical functions.
+### Color Usage
+- **Primary Blue (#2563EB)**: Used for primary buttons, active navigation states, and links
+- **Success Green (#10B981)**: Applied to positive indicators, verified status, and completion states
+- **Warning Amber (#F59E0B)**: Reserved for in-progress badges, overdue items, and attention-needed elements
+- **Neutral Grays**: Text hierarchy, borders, and background separators
 
-### Navigation Patterns
-- **Landing Page**: Horizontal top navigation for marketing flow
-- **Dashboard**: Vertical sidebar for persistent access to tools
-- **Assessment Detail**: Breadcrumb-style back button for context preservation
+### Typography Hierarchy
+- **Headings**: Bold, large size for section titles and metric values
+- **Body Text**: Regular weight for descriptions and supporting content
+- **Captions**: Smaller size for timestamps, file sizes, and metadata
 
-### Responsive Considerations
-While these wireframes show desktop layouts, the designs are intended to be responsive. The card-based layouts and modular components will stack vertically on mobile devices, maintaining usability across screen sizes.
-
-### Accessibility
-All wireframes include clear labels, sufficient spacing between interactive elements, and status indicators that don't rely solely on color. The checklist items have clear hit targets, and the upload zone provides multiple interaction methods.
+### Spacing & Layout
+- Consistent 16px-24px padding between major sections
+- Card-based layout with subtle shadows for depth
+- Responsive grid system accommodating sidebar + main content structure
 
 ---
 
 *Document Version: 1.0*  
-*Last Updated: March 15, 2026*  
-*Design Track: CertFast Wireframes*
+*Created: March 15, 2026*  
+*Track: Design - UI Designer*
