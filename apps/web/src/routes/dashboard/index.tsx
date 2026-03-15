@@ -3,6 +3,7 @@ import { MetricCard } from './components/MetricCard'
 import { ProgressBar } from './components/ProgressBar'
 import { ActivityList } from './components/ActivityList'
 import { QuickActions } from './components/QuickActions'
+import { Layout } from '@/components/layout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Activity, TrendingUp, Shield, FileCheck, Loader2 } from 'lucide-react'
 
@@ -71,29 +72,34 @@ export function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </Layout>
     )
   }
 
   if (error || !metrics) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-destructive mb-2">{error || 'Failed to load dashboard'}</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="text-primary hover:underline text-sm"
-          >
-            Try again
-          </button>
+      <Layout>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-destructive mb-2">{error || 'Failed to load dashboard'}</p>
+            <button 
+              onClick={() => window.location.reload()}
+              className="text-primary hover:underline text-sm"
+            >
+              Try again
+            </button>
+          </div>
         </div>
-      </div>
+      </Layout>
     )
   }
 
   return (
+    <Layout>
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
@@ -170,6 +176,7 @@ export function DashboardPage() {
         <QuickActions />
       </div>
     </div>
+    </Layout>
   )
 }
 
