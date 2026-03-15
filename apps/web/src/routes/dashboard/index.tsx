@@ -81,7 +81,7 @@ export function DashboardPage() {
             trend={{ value: 2, label: 'new this week' }}
           />
           
-003cMetricCard
+<MetricCard
             title="Evidence Items"
             value={metrics.evidenceCount}
             icon={FileCheck}
