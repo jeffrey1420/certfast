@@ -1,55 +1,55 @@
-# Security Architecture - Core Components
+# Core Security Architecture
 
-## Overview
-
-This document outlines the core security architecture for CertFast, covering authentication, authorization, data protection, and API security. These measures ensure the confidentiality, integrity, and availability of certification assessment data.
+This document outlines the comprehensive security measures implemented across the CertFast platform to protect user data, ensure secure access, and maintain compliance with industry standards.
 
 ---
 
 ## 1. Authentication
 
-### JWT-Based Authentication
+### JWT Token Authentication
 
-CertFast uses JSON Web Tokens (JWT) for stateless authentication across all services.
+CertFast utilizes JSON Web Tokens (JWT) for stateless authentication across all API endpoints. The JWT implementation follows industry best practices with short-lived access tokens and refresh token rotation.
+
+**Access Token Configuration:**
+- Algorithm: RS256 (asymmetric signing)
+- Access token expiration: 15 minutes
+- Refresh token expiration: 7 days
+- Token issuer: `certfast.io`
+- Token audience: `api.certfast.io`
 
 **Token Structure:**
-- **Access Token**: Short-lived (15 minutes), contains user claims
-- **Refresh Token**: Long-lived (7 days), used to obtain new access tokens
-- **Algorithm**: RS256 (RSA with SHA-256) for asymmetric signing
+The JWT payload contains essential claims including:
+- `sub`: User unique identifier (UUID)
+- `org`: Organization identifier
+- `roles`: Array of assigned roles
+- `iat`: Issued at timestamp
+- `exp`: Expiration timestamp
+- `jti`: Unique token identifier for revocation tracking
 
-**Token Claims:**
-```json
-{
-  "sub": "user-uuid",
-  "email": "user@example.com",
-  "role": "assessor",
-  "org_id": "org-uuid",
-  "iat": 1710508800,
-  "exp": 1710509700,
-  "jti": "unique-token-id"
-}
-```
+**Refresh Token Rotation:**
+Upon access token expiration, refresh tokens are used to obtain new access tokens. Each refresh token can only be used once, and a new refresh token pair is issued with each successful refresh request. This mechanism prevents replay attacks and ensures that stolen refresh tokens cannot be used indefinitely.
 
 ### Session Management
 
+CertFast maintains secure session management with the following mechanisms:
+
 **Session Lifecycle:**
-- Sessions are created upon successful login
-- Each session has a unique identifier tracked server-side
-- Concurrent session limits per user (max 5 active sessions)
-- Automatic session termination on password change
+- Sessions are created upon successful authentication
+- Sessions tracked in secure, HTTP-only cookies for web clients
+- API clients use Bearer token authentication in the Authorization header
+- Sessions automatically terminate after 30 minutes of inactivity
+- Concurrent session limits enforced per user account
 
-**Security Measures:**
-- Secure, HttpOnly cookies for web clients
-- SameSite=Strict cookie attribute to prevent CSRF
-- Session binding to IP address and user agent fingerprinting
-- Idle timeout: 30 minutes of inactivity
-- Absolute timeout: 8 hours maximum session duration
+**Session Security Measures:**
+- Session IDs generated using cryptographically secure random bytes
+- Session data stored server-side with Redis caching
+- Session binding to client IP address and User-Agent fingerprinting
+- Automatic session invalidation on password change or suspicious activity detection
 
-**Logout Handling:**
-- Client-side token deletion
-- Server-side token blacklisting (Redis)
-- Immediate revocation of refresh tokens
-- Cascade logout option (terminate all sessions)
+**Logout and Token Revocation:**
+- Immediate token blacklisting upon logout
+- Token revocation list cached in Redis with TTL matching token expiration
+- Bulk revocation capability for account compromise scenarios
 
 ---
 
@@ -57,38 +57,47 @@ CertFast uses JSON Web Tokens (JWT) for stateless authentication across all serv
 
 ### Role-Based Access Control (RBAC)
 
-CertFast implements a hierarchical RBAC system with the following roles:
+CertFast implements a hierarchical RBAC system with clearly defined roles and permissions.
 
-| Role | Permissions |
-|------|-------------|
-| **Super Admin** | Full system access, user management, configuration |
-| **Organization Admin** | Manage org settings, users, assessments within org |
-| **Assessor** | Create, edit assessments, review evidence, assign controls |
-| **Auditor** | View assessments, read-only access to evidence |
-| **Contributor** | Submit evidence, update assigned controls |
-| **Viewer** | Read-only access to permitted resources |
+**Role Hierarchy:**
+1. **Super Admin**: Platform-level access, user management across all organizations
+2. **Organization Admin**: Full access within assigned organization, member management
+3. **Compliance Manager**: Assessment creation, control configuration, reporting
+4. **Auditor**: Read-only access to assessments and evidence, audit trail viewing
+5. **User**: Limited access to assigned assessments, evidence upload capability
 
-### Permission Model
-
-**Resource-Level Permissions:**
+**Permission Matrix:**
+Permissions are granular and scoped to resources:
 - `users:read`, `users:write`, `users:delete`
-- `organizations:read`, `organizations:write`, `organizations:delete`
-- `assessments:read`, `assessments:write`, `assessments:delete`, `assessments:execute`
-- `controls:read`, `controls:write`, `controls:update-status`
+- `organizations:read`, `organizations:write`
+- `assessments:read`, `assessments:write`, `assessments:delete`
+- `controls:read`, `controls:write`
 - `evidence:read`, `evidence:write`, `evidence:delete`
+- `reports:read`, `reports:generate`
 
-**Scope-Based Access:**
-- Organization-scoped: Users can only access resources within their organization
-- Assessment-scoped: Fine-grained access to specific assessments
-- Control-scoped: Access limited to assigned controls
+**Permission Inheritance:**
+- Higher roles inherit permissions from lower roles
+- Custom roles can be created within organizations with specific permission combinations
+- Role assignments are auditable and logged
 
-### Implementation Notes
+### Resource-Level Access Control
 
-- Middleware validates JWT and extracts claims on every request
-- Policy engine evaluates permissions against resource ownership
-- Database queries automatically filter by organization ID
-- API responses exclude fields user lacks permission to view
-- Permission caching with 5-minute TTL for performance
+Beyond role-based permissions, CertFast enforces resource-level access controls:
+
+**Organization Isolation:**
+- Users can only access resources within their assigned organizations
+- Cross-organization access requires explicit multi-organization membership
+- Data queries automatically filtered by organization ID
+
+**Ownership and Sharing:**
+- Resource creators have implicit ownership permissions
+- Resources can be shared with specific users or groups
+- Public/private visibility settings for assessments and controls
+
+**Access Control Lists (ACLs):**
+- Fine-grained permissions for individual resources
+- Support for read, write, delete, and admin permissions per resource
+- Inheritance from parent resources (e.g., assessment permissions extend to associated evidence)
 
 ---
 
@@ -96,50 +105,51 @@ CertFast implements a hierarchical RBAC system with the following roles:
 
 ### Encryption at Rest
 
+All sensitive data stored in CertFast databases is encrypted using industry-standard algorithms.
+
 **Database Encryption:**
-- AES-256 encryption for sensitive fields (PII, credentials)
-- Field-level encryption for: email addresses, phone numbers, API keys
-- Transparent Data Encryption (TDE) for database files
-- Encrypted backups with separate key management
+- AES-256 encryption for all database storage
+- Transparent Data Encryption (TDE) enabled for PostgreSQL
+- Encrypted backups with separate encryption keys
+
+**Sensitive Field Encryption:**
+- Additional application-level encryption for highly sensitive fields:
+  - Personal Identifiable Information (PII)
+  - Evidence file metadata
+  - Audit log details
+- Field-level encryption uses AES-256-GCM with unique keys per organization
+
+**Key Management:**
+- Encryption keys managed by AWS KMS (Key Management Service)
+- Automatic key rotation every 90 days
+- Separate encryption keys per environment (production, staging, development)
+- Hardware Security Module (HSM) integration for master key protection
 
 **File Storage Encryption:**
-- Evidence files encrypted using AES-256-GCM
-- Unique encryption keys per organization
-- Key rotation every 90 days
-- Secure key storage in hardware security module (HSM) or cloud KMS
-
-**Encryption Key Management:**
-- Master keys stored in AWS KMS / Azure Key Vault / GCP Cloud KMS
-- Data encryption keys (DEKs) encrypted by master keys
-- Automatic key rotation policy
-- Key access logging and audit trail
+- All uploaded evidence files encrypted before storage
+- S3 bucket encryption with SSE-KMS
+- Client-side encryption option for highly sensitive files
+- File integrity verification using SHA-256 checksums
 
 ### Encryption in Transit
 
-**TLS Configuration:**
-- TLS 1.3 required for all connections
-- TLS 1.2 supported with secure cipher suites only
-- HSTS headers with 1-year max-age
+All data transmitted to and from CertFast services is protected:
+
+**Transport Layer Security:**
+- TLS 1.3 enforced for all API communications
+- TLS 1.2 minimum for backward compatibility with older clients
+- Strong cipher suites only (no weak ciphers like RC4 or 3DES)
+- HSTS (HTTP Strict Transport Security) headers enforced
+
+**API Security:**
+- mTLS (mutual TLS) for service-to-service communication
 - Certificate pinning for mobile applications
+- Secure WebSocket connections (WSS) for real-time features
 
-**Internal Service Communication:**
-- mTLS (mutual TLS) between microservices
-- Service mesh with automatic certificate rotation
-- Internal traffic encrypted even within VPC
-
-**API Communication:**
-- HTTPS enforced on all endpoints
-- Strict-Transport-Security headers
-- Secure cookie flags (Secure, HttpOnly, SameSite)
-
-### Data Classification
-
-| Classification | Examples | Handling |
-|----------------|----------|----------|
-| **Critical** | Passwords, API secrets, encryption keys | Hashed/encrypted, never logged, strict access |
-| **Confidential** | PII, assessment data, evidence | Encrypted at rest, audit logging, need-to-know |
-| **Internal** | Org settings, user roles | Access controlled, internal use only |
-| **Public** | Published frameworks, public docs | No special handling required |
+**Internal Communication:**
+- All internal service communication encrypted
+- VPC peering with encrypted traffic between services
+- Database connections encrypted using SSL/TLS
 
 ---
 
@@ -147,128 +157,116 @@ CertFast implements a hierarchical RBAC system with the following roles:
 
 ### Rate Limiting
 
-**Tiered Rate Limiting Strategy:**
+CertFast implements comprehensive rate limiting to prevent abuse and ensure service availability.
 
-| Tier | Requests/Minute | Requests/Hour | Scope |
-|------|-----------------|---------------|-------|
-| Anonymous | 10 | 100 | IP address |
-| Authenticated | 100 | 5,000 | User ID |
-| Premium | 1,000 | 50,000 | API key |
-| Internal | 10,000 | Unlimited | Service account |
+**Tiered Rate Limiting:**
+1. **Global Rate Limits**: Applied to all requests regardless of authentication
+   - 1000 requests per minute per IP address
+   - Burst allowance of 200 requests
+
+2. **Authenticated Rate Limits**: Applied to authenticated users
+   - 5000 requests per minute per user
+   - Higher limits available for enterprise customers
+
+3. **Endpoint-Specific Limits**: Applied to resource-intensive endpoints
+   - File upload endpoints: 50 requests per minute
+   - Report generation: 10 requests per minute
+   - Bulk operations: 5 requests per minute
 
 **Rate Limit Headers:**
-```
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 87
-X-RateLimit-Reset: 1710509400
-X-RateLimit-Retry-After: 45
-```
+All API responses include rate limit information:
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Remaining requests in current window
+- `X-RateLimit-Reset`: Unix timestamp when limit resets
 
-**Throttling Behavior:**
-- 429 Too Many Requests response when limit exceeded
-- Exponential backoff recommended for clients
-- Burst allowance for authenticated users (10x limit for 10 seconds)
+**Throttle Response:**
+When rate limits are exceeded, API returns HTTP 429 (Too Many Requests) with:
+- `Retry-After` header indicating when to retry
+- Error message with limit details
 
 ### Input Validation
 
+All API inputs undergo strict validation to prevent injection attacks and data corruption.
+
 **Validation Layers:**
-1. **Schema validation** - JSON Schema for request bodies
-2. **Type validation** - Strict typing with runtime checks
-3. **Format validation** - Regex patterns for emails, UUIDs, dates
-4. **Range validation** - Min/max values, length limits
-5. **Semantic validation** - Business logic validation
+1. **Schema Validation**: JSON Schema validation for request bodies
+2. **Type Validation**: Strict type checking for all parameters
+3. **Range Validation**: Min/max constraints for numeric values
+4. **Format Validation**: Regex patterns for emails, UUIDs, dates
+5. **Content Validation**: File type and size validation for uploads
 
-**Security-Focused Validations:**
-- SQL injection prevention: Parameterized queries only
-- NoSQL injection prevention: Input sanitization for MongoDB queries
-- XSS prevention: Output encoding, Content-Type enforcement
-- Command injection: Input whitelist approach
-- Path traversal: Canonical path validation
+**Security-Focused Validation:**
+- SQL injection prevention through parameterized queries
+- NoSQL injection prevention through MongoDB driver protections
+- XSS prevention through output encoding
+- Command injection prevention by avoiding shell execution
+- Path traversal prevention through filename sanitization
 
-**Validation Examples:**
-```yaml
-User Creation:
-  email:
-    type: string
-    format: email
-    maxLength: 255
-    required: true
-  password:
-    type: string
-    minLength: 12
-    pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$"
-    required: true
-  role:
-    type: string
-    enum: [viewer, contributor, assessor, admin]
-    required: true
-```
+**Request Size Limits:**
+- JSON payload limit: 10MB
+- File upload limit: 100MB per file
+- Header size limit: 16KB
+- URL length limit: 8KB
 
 ### Additional API Security Measures
 
-**CORS Policy:**
-- Whitelist-based origin validation
-- Credentials allowed only from trusted origins
-- Strict allowed methods and headers
-- No wildcards in production
-
-**Security Headers:**
-```
-Content-Security-Policy: default-src 'self'
-X-Content-Type-Options: nosniff
-X-Frame-Options: DENY
-X-XSS-Protection: 1; mode=block
-Referrer-Policy: strict-origin-when-cross-origin
-Permissions-Policy: geolocation=(), microphone=(), camera=()
-```
+**CORS (Cross-Origin Resource Sharing):**
+- Strict CORS policy with whitelist of approved domains
+- Credentials only allowed from trusted origins
+- Preflight request handling for complex requests
 
 **API Versioning:**
-- Version in URL path (/api/v1/, /api/v2/)
-- Deprecation notices 6 months in advance
-- Sunset headers for deprecated endpoints
+- Versioned API paths (`/api/v1/`, `/api/v2/`)
+- Deprecated versions supported for 6 months with warnings
+- Breaking changes only introduced in new major versions
 
-**Audit Logging:**
-- All API requests logged with user ID, timestamp, IP
-- Sensitive actions (delete, permission change) logged separately
-- Failed authentication attempts tracked for brute force detection
-- 90-day log retention minimum
-
----
-
-## Security Incident Response
-
-**Detection:**
-- Real-time monitoring of authentication anomalies
-- Rate limit violation alerts
-- Failed authorization attempt tracking
-- Automated threat detection rules
-
-**Response:**
-- Automatic account lockout after 5 failed login attempts
-- IP blocking for sustained attack patterns
-- Incident escalation to security team
-- Forensic log preservation
+**Security Headers:**
+All API responses include security headers:
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `X-XSS-Protection: 1; mode=block`
+- `Content-Security-Policy`: Strict policy definition
+- `Referrer-Policy: strict-origin-when-cross-origin`
 
 ---
 
-## Compliance Considerations
+## Implementation Notes
 
-- **SOC 2**: Access controls, audit logging, encryption standards
-- **ISO 27001**: Security policies, risk management, controls
-- **GDPR**: Data protection, right to erasure, data portability
-- **HIPAA**: Where applicable, PHI protection measures
+### Security Monitoring
+
+CertFast implements continuous security monitoring:
+- Real-time anomaly detection for authentication patterns
+- Automated alerting for suspicious activities
+- Integration with SIEM (Security Information and Event Management) systems
+- Regular penetration testing and vulnerability assessments
+
+### Compliance Alignment
+
+Security measures align with major compliance frameworks:
+- SOC 2 Type II
+- ISO 27001
+- GDPR data protection requirements
+- HIPAA (for healthcare implementations)
+
+### Incident Response
+
+Documented incident response procedures:
+1. Detection through automated monitoring
+2. Containment through automated and manual interventions
+3. Investigation with comprehensive audit logs
+4. Recovery with minimal service disruption
+5. Post-incident analysis and improvements
+
+### Security Training
+
+All team members undergo regular security training:
+- Secure coding practices
+- Phishing awareness
+- Incident response procedures
+- Compliance requirement updates
 
 ---
 
-## Implementation Checklist
-
-- [ ] JWT middleware deployed
-- [ ] RBAC policy engine configured
-- [ ] Database encryption enabled
-- [ ] TLS 1.3 configured
-- [ ] Rate limiting middleware active
-- [ ] Input validation schemas defined
-- [ ] Security headers set
-- [ ] Audit logging enabled
-- [ ] Penetration testing completed
-- [ ] Security documentation reviewed
+*Document Version: 1.0*
+*Last Updated: March 2026*
+*Owner: Security Architecture Team*
