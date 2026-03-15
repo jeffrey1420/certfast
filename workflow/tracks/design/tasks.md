@@ -1,109 +1,71 @@
 # Design Track - Task Queue
 
 **Track Owner**: Design Pipeline
-**Current Focus**: UX Research & Personas
+**Current Focus**: Wireframes
 
 ---
 
-## Completed Tasks
+## Active Task (CURRENT) - NO CONTEXT READING REQUIRED
 
-### DSG-002: UX Research & Personas ✅
-**Role**: ux-researcher  
-**Type**: Deep (60 min)  
-**Status**: ✅ COMPLETE  
-**Quality Score**: 4/5  
-**Commit**: `design/ux-researcher: completed user personas and journey maps`  
-**Deliverables**:
-- `/work/certfast/design/research/synthesis.md` - Research synthesis (~6,600 words)
-- `/work/certfast/design/research/personas.md` - 4 detailed personas (~7,800 words)
-- `/work/certfast/design/research/journey-maps.md` - Journey maps for key workflows (~6,400 words)
-- `/work/certfast/design/research/insights.md` - Insights & recommendations (~6,700 words)
-
----
-
-## Completed Tasks
-
-### DSG-004: Design System Tokens ✅
-**Role**: ui-designer  
-**Type**: Deep (60 min)  
-**Status**: ✅ COMPLETE  
-**Quality Score**: 4/5  
-**Commit**: `design/ui-designer: created comprehensive design system tokens`  
-**Deliverables**:
-- `/work/certfast/design/system/tokens.md` - Complete design token system (~2,400 words)
-  - Color tokens (brand, semantic, functional, tier colors)
-  - Typography tokens (font families, sizes, weights, presets)
-  - Spacing tokens (base scale, semantic, layout)
-  - Sizing tokens (icons, avatars, inputs, buttons)
-  - Border radius tokens
-  - Shadow and elevation tokens
-  - Border tokens
-  - Z-index tokens
-  - Transition tokens
-  - Breakpoint tokens
-  - Component-specific tokens
-  - Dark mode overrides
-  - Implementation examples (CSS, Tailwind, Figma)
-
-### DSG-003: User Flow Mapping ✅
-**Role**: ux-researcher  
-**Type**: Standard (30 min)  
-**Status**: ✅ COMPLETE  
-**Quality Score**: 4/5  
-**Commit**: `design/ux-researcher: created user flow diagrams`  
-**Deliverables**:
-- `/work/certfast/design/flows/user-flows.md` - Comprehensive user flows (~1,500 words)
-  - Flow 1: Trial Onboarding - First Value
-  - Flow 2: Compliance Achievement (90-Day Journey)
-  - Flow 3: Non-Technical Founder Journey
-  - Flow 4: Continuous Compliance
-  - Flow 5: Cross-Functional Team Coordination
-  - Decision points and branching logic tables
-  - Error state handling summary
-
----
-
-## Active Task (CURRENT) - ASSIGN THIS TASK
-
-**Task ID**: DSG-005
-**Type**: Standard (30 min) - *Reduced from Deep due to API rate limits*
+**Task ID**: DSG-005-SIMPLE
+**Type**: Quick (15 min)
 **Assigned Role**: `ui-designer`
 **Status**: ACTIVE - EXECUTE NOW
 **Priority**: High
-**Depends on**: DSG-003 ✅, DSG-004 ✅
 
 ### Description
-Wireframes - Core Flows (Desktop Only)
+Simple Wireframe Sketches (ASCII/Text-based)
 
-Create low-fidelity wireframes for 2-3 core screens:
-1. Trial onboarding flow (landing → signup → first value)
-2. Main dashboard (key metrics, progress, actions)
-3. Assessment detail view (evidence upload, status)
+Create 3 simple wireframes using text/ASCII art. NO need to read external files - use the description below.
 
-Focus on layout, information hierarchy, and key interactions. Skip mobile for now.
+**Screen 1: Landing Page**
+- Header with logo + nav
+- Hero section: headline + CTA button
+- 3 feature cards
+- Footer
 
-### Deliverables
-- [ ] Wireframe for trial onboarding flow
-- [ ] Wireframe for main dashboard
-- [ ] Wireframe for assessment detail view
-- [ ] Navigation structure diagram (simplified)
+**Screen 2: Dashboard**
+- Sidebar navigation
+- Top header with user menu
+- Main area: 4 metric cards (Compliance Score, Assessments, Evidence, Days to Audit)
+- Progress bar showing certification progress
 
-### Context
-- User flows: `/work/certfast/design/flows/user-flows.md`
-- Design tokens: `/work/certfast/design/system/tokens.md`
+**Screen 3: Assessment Detail**
+- Back button + title
+- Status badge (In Progress/Done)
+- Evidence upload zone
+- Checklist of requirements
 
-### Output Location
-- `/work/certfast/design/wireframes/core-flows.md`
+### Output
+Create `/work/certfast/design/wireframes/simple-wireframes.md` with:
+- ASCII/text wireframes for the 3 screens above
+- Brief description (50 words per screen)
+
+### Example Format
+```
+## Screen 1: Landing
++------------------+
+|  Logo    Nav     |
++------------------+
+|                  |
+|   HEADLINE       |
+|   subtext        |
+|   [CTA Button]   |
+|                  |
++------------------+
+| Card1 | Card2    |
+| Card3            |
++------------------+
+```
 
 ### Quality Gates
-- [ ] 3 core wireframes created
-- [ ] Uses design tokens
-- [ ] Word Count: Min 800 words (including annotations)
-- [ ] ASCII/text-based wireframes acceptable
+- [ ] 3 wireframes created
+- [ ] ASCII/text format
+- [ ] Min 600 words total
 - [ ] English Only
 
 ### Git Commit
-Format: `design/ui-designer: created wireframes for core flows`
+Format: `design/ui-designer: created simple ASCII wireframes`
 
 ---
 
@@ -113,8 +75,22 @@ Format: `design/ui-designer: created wireframes for core flows`
 **Role**: brand-designer  
 **Type**: Deep (60 min)  
 **Status**: ✅ COMPLETE  
-**Quality Score**: 4/5  
-**Commit**: `design/brand-designer: created complete brand identity system`
+**Quality Score**: 4/5
+
+### DSG-002: UX Research ✅
+**Role**: ux-researcher  
+**Status**: ✅ COMPLETE  
+**Quality Score**: 4/5
+
+### DSG-003: User Flows ✅
+**Role**: ux-researcher  
+**Status**: ✅ COMPLETE  
+**Quality Score**: 4/5
+
+### DSG-004: Design System Tokens ✅
+**Role**: ui-designer  
+**Status**: ✅ COMPLETE  
+**Quality Score**: 4/5
 
 ---
 
@@ -122,13 +98,8 @@ Format: `design/ui-designer: created wireframes for core flows`
 
 ### DSG-006: High-Fidelity Mockups
 - **Role**: ui-designer
-- **Type**: Deep (60 min)
-- **Depends on**: DSG-004 ✅, DSG-005
-
-### DSG-007: Prototype & Interaction Design
-- **Role**: ui-designer
 - **Type**: Standard (30 min)
-- **Depends on**: DSG-006
+- **Depends on**: DSG-004 ✅, DSG-005
 
 ---
 
