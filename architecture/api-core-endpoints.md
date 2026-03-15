@@ -1,6 +1,6 @@
-# CertFast Core API Endpoints
+# Core API Endpoints Documentation
 
-This document describes the core REST API endpoints for the CertFast compliance platform. All endpoints require authentication via Bearer token.
+This document provides comprehensive documentation for the CertFast core API endpoints. All endpoints require authentication via Bearer token.
 
 ---
 
@@ -9,172 +9,237 @@ This document describes the core REST API endpoints for the CertFast compliance 
 All API requests must include an Authorization header with a Bearer token:
 
 ```
-Authorization: Bearer {access_token}
+Authorization: Bearer {token}
 ```
 
-The access token is obtained through the OAuth 2.0 authentication flow or API key management.
+Tokens are obtained through the OAuth2 authentication flow and expire after 24 hours. Refresh tokens can be used to obtain new access tokens without requiring re-authentication.
 
 ---
 
 ## Users API
 
-The Users API manages user accounts within the CertFast platform, including administrators, auditors, and organization members.
+The Users API manages user accounts within the CertFast platform. Users can be assigned different roles (admin, auditor, assessor, viewer) that determine their permissions.
 
 ### GET /api/v1/users
-
-Returns a paginated list of users in the authenticated user's organization.
+Returns a paginated list of users in the organization.
 
 **Request Headers:**
-```
-Authorization: Bearer {token}
-Content-Type: application/json
-```
+- `Authorization`: Bearer {token}
+- `Content-Type`: application/json
 
 **Query Parameters:**
 - `page` (optional): Page number for pagination (default: 1)
 - `limit` (optional): Number of results per page (default: 20, max: 100)
-- `role` (optional): Filter by user role (admin, auditor, member)
-- `status` (optional): Filter by account status (active, inactive, pending)
+- `role` (optional): Filter by user role
+- `status` (optional): Filter by user status (active, inactive, pending)
 
 **Response 200 OK:**
 ```json
 {
-  "data": [
+  "users": [
     {
-      "id": "usr-550e8400-e29b-41d4-a716-446655440000",
-      "email": "john.doe@example.com",
-      "first_name": "John",
-      "last_name": "Doe",
+      "id": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+      "email": "john.doe@company.com",
+      "firstName": "John",
+      "lastName": "Doe",
       "role": "admin",
       "status": "active",
-      "organization_id": "org-550e8400-e29b-41d4-a716-446655440001",
-      "last_login_at": "2024-03-15T09:30:00Z",
-      "created_at": "2024-01-10T14:22:00Z",
-      "updated_at": "2024-03-15T09:30:00Z"
+      "organizationId": "org_5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+      "lastLoginAt": "2026-03-14T09:30:00Z",
+      "createdAt": "2026-01-15T14:22:10Z",
+      "updatedAt": "2026-03-14T09:30:00Z"
+    },
+    {
+      "id": "usr_9e3c0d5e-b2f7-5a4c-9d8e-0f1a2b3c4d5e",
+      "email": "jane.smith@company.com",
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "role": "assessor",
+      "status": "active",
+      "organizationId": "org_5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+      "lastLoginAt": "2026-03-13T16:45:22Z",
+      "createdAt": "2026-02-01T11:15:33Z",
+      "updatedAt": "2026-03-13T16:45:22Z"
     }
   ],
   "pagination": {
     "page": 1,
     "limit": 20,
-    "total": 45,
-    "total_pages": 3
+    "total": 47,
+    "totalPages": 3
   }
 }
 ```
 
-### GET /api/v1/users/{id}
+**Response 401 Unauthorized:**
+```json
+{
+  "error": "unauthorized",
+  "message": "Invalid or expired authentication token"
+}
+```
 
-Retrieves detailed information about a specific user.
+### GET /api/v1/users/{id}
+Returns detailed information about a specific user.
+
+**Request Headers:**
+- `Authorization`: Bearer {token}
 
 **Path Parameters:**
-- `id` (required): Unique identifier of the user
+- `id`: Unique user identifier (UUID format)
 
 **Response 200 OK:**
 ```json
 {
-  "id": "usr-550e8400-e29b-41d4-a716-446655440000",
-  "email": "john.doe@example.com",
-  "first_name": "John",
-  "last_name": "Doe",
+  "id": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+  "email": "john.doe@company.com",
+  "firstName": "John",
+  "lastName": "Doe",
   "role": "admin",
   "status": "active",
-  "organization_id": "org-550e8400-e29b-41d4-a716-446655440001",
+  "organizationId": "org_5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
   "phone": "+1-555-0123",
   "timezone": "America/New_York",
-  "mfa_enabled": true,
-  "last_login_at": "2024-03-15T09:30:00Z",
-  "created_at": "2024-01-10T14:22:00Z",
-  "updated_at": "2024-03-15T09:30:00Z"
+  "preferences": {
+    "notifications": {
+      "email": true,
+      "sms": false,
+      "inApp": true
+    },
+    "theme": "dark"
+  },
+  "lastLoginAt": "2026-03-14T09:30:00Z",
+  "createdAt": "2026-01-15T14:22:10Z",
+  "updatedAt": "2026-03-14T09:30:00Z"
 }
 ```
 
 **Response 404 Not Found:**
 ```json
 {
-  "error": "user_not_found",
-  "message": "The requested user does not exist or you do not have permission to view it"
+  "error": "not_found",
+  "message": "User not found"
 }
 ```
 
 ### POST /api/v1/users
-
 Creates a new user account in the organization.
+
+**Request Headers:**
+- `Authorization`: Bearer {token}
+- `Content-Type`: application/json
 
 **Request Body:**
 ```json
 {
-  "email": "jane.smith@example.com",
-  "first_name": "Jane",
-  "last_name": "Smith",
-  "role": "auditor",
-  "phone": "+1-555-0456"
+  "email": "new.user@company.com",
+  "firstName": "New",
+  "lastName": "User",
+  "role": "assessor",
+  "phone": "+1-555-0456",
+  "sendWelcomeEmail": true
 }
 ```
 
 **Response 201 Created:**
 ```json
 {
-  "id": "usr-660f9511-f30c-52e5-b827-557766551111",
-  "email": "jane.smith@example.com",
-  "first_name": "Jane",
-  "last_name": "Smith",
-  "role": "auditor",
+  "id": "usr_1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+  "email": "new.user@company.com",
+  "firstName": "New",
+  "lastName": "User",
+  "role": "assessor",
   "status": "pending",
-  "organization_id": "org-550e8400-e29b-41d4-a716-446655440001",
-  "invite_sent_at": "2024-03-15T09:50:00Z",
-  "created_at": "2024-03-15T09:50:00Z",
-  "updated_at": "2024-03-15T09:50:00Z"
+  "organizationId": "org_5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+  "invitationSentAt": "2026-03-15T10:35:00Z",
+  "createdAt": "2026-03-15T10:35:00Z",
+  "updatedAt": "2026-03-15T10:35:00Z"
 }
 ```
 
-**Response 422 Validation Error:**
+**Response 400 Bad Request:**
 ```json
 {
   "error": "validation_error",
-  "message": "Email address is already in use",
+  "message": "Email address is already registered",
   "field": "email"
 }
 ```
 
 ### PUT /api/v1/users/{id}
-
 Updates an existing user's information.
+
+**Request Headers:**
+- `Authorization`: Bearer {token}
+- `Content-Type`: application/json
+
+**Path Parameters:**
+- `id`: Unique user identifier
 
 **Request Body:**
 ```json
 {
-  "first_name": "Johnny",
-  "last_name": "Doe-Smith",
-  "role": "member",
-  "status": "active"
+  "firstName": "John",
+  "lastName": "Doe-Updated",
+  "role": "auditor",
+  "phone": "+1-555-0789",
+  "preferences": {
+    "notifications": {
+      "email": true,
+      "sms": true,
+      "inApp": true
+    },
+    "theme": "light"
+  }
 }
 ```
 
 **Response 200 OK:**
 ```json
 {
-  "id": "usr-550e8400-e29b-41d4-a716-446655440000",
-  "email": "john.doe@example.com",
-  "first_name": "Johnny",
-  "last_name": "Doe-Smith",
-  "role": "member",
+  "id": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+  "email": "john.doe@company.com",
+  "firstName": "John",
+  "lastName": "Doe-Updated",
+  "role": "auditor",
   "status": "active",
-  "organization_id": "org-550e8400-e29b-41d4-a716-446655440001",
-  "updated_at": "2024-03-15T10:00:00Z"
+  "organizationId": "org_5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+  "phone": "+1-555-0789",
+  "preferences": {
+    "notifications": {
+      "email": true,
+      "sms": true,
+      "inApp": true
+    },
+    "theme": "light"
+  },
+  "lastLoginAt": "2026-03-14T09:30:00Z",
+  "createdAt": "2026-01-15T14:22:10Z",
+  "updatedAt": "2026-03-15T10:35:45Z"
 }
 ```
 
 ### DELETE /api/v1/users/{id}
+Deactivates a user account. This is a soft delete - the user record is preserved but marked as inactive.
 
-Deactivates and removes a user account from the organization.
+**Request Headers:**
+- `Authorization`: Bearer {token}
 
-**Response 204 No Content**
+**Path Parameters:**
+- `id`: Unique user identifier
+
+**Query Parameters:**
+- `hard` (optional): If true, permanently deletes the user (default: false)
+- `reassignTo` (optional): User ID to reassign owned resources to
+
+**Response 204 No Content:**
+(No response body on successful deletion)
 
 **Response 403 Forbidden:**
 ```json
 {
-  "error": "cannot_delete_last_admin",
-  "message": "Cannot delete the last administrator of the organization"
+  "error": "forbidden",
+  "message": "Cannot delete the last admin user in organization"
 }
 ```
 
@@ -182,310 +247,462 @@ Deactivates and removes a user account from the organization.
 
 ## Organizations API
 
-The Organizations API manages organizational entities and their configurations.
+The Organizations API manages organizational units within CertFast. Organizations represent companies or business units that are undergoing compliance certification.
 
 ### GET /api/v1/orgs
-
 Returns a list of organizations accessible to the authenticated user.
 
 **Request Headers:**
-```
-Authorization: Bearer {token}
-Content-Type: application/json
-```
+- `Authorization`: Bearer {token}
 
 **Query Parameters:**
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Results per page (default: 20)
-- `industry` (optional): Filter by industry sector
+- `status` (optional): Filter by status (active, suspended, trial)
 
 **Response 200 OK:**
 ```json
 {
-  "data": [
+  "organizations": [
     {
-      "id": "org-550e8400-e29b-41d4-a716-446655440001",
+      "id": "org_5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
       "name": "Acme Corporation",
-      "slug": "acme-corp",
-      "industry": "technology",
-      "size": "201-500",
-      "plan": "enterprise",
+      "slug": "acme-corporation",
       "status": "active",
-      "created_at": "2024-01-10T14:22:00Z",
-      "updated_at": "2024-03-15T09:30:00Z"
+      "plan": "enterprise",
+      "settings": {
+        "timezone": "America/New_York",
+        "dateFormat": "MM/DD/YYYY",
+        "currency": "USD"
+      },
+      "memberCount": 47,
+      "assessmentCount": 12,
+      "createdAt": "2025-08-10T09:00:00Z",
+      "updatedAt": "2026-03-10T14:30:00Z"
     }
   ],
   "pagination": {
     "page": 1,
     "limit": 20,
     "total": 1,
-    "total_pages": 1
+    "totalPages": 1
   }
 }
 ```
 
 ### GET /api/v1/orgs/{id}
+Returns detailed information about a specific organization.
 
-Retrieves detailed information about a specific organization.
+**Request Headers:**
+- `Authorization`: Bearer {token}
 
 **Response 200 OK:**
 ```json
 {
-  "id": "org-550e8400-e29b-41d4-a716-446655440001",
+  "id": "org_5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
   "name": "Acme Corporation",
-  "slug": "acme-corp",
-  "description": "Leading provider of compliance automation solutions",
-  "industry": "technology",
-  "size": "201-500",
-  "website": "https://acme.example.com",
-  "plan": "enterprise",
+  "slug": "acme-corporation",
+  "description": "Leading provider of enterprise software solutions",
+  "website": "https://www.acme.com",
+  "industry": "Technology",
+  "size": "500-1000",
   "status": "active",
+  "plan": "enterprise",
+  "billingEmail": "billing@acme.com",
   "settings": {
     "timezone": "America/New_York",
-    "date_format": "MM/DD/YYYY",
-    "mfa_required": true,
-    "audit_logging": true
+    "dateFormat": "MM/DD/YYYY",
+    "currency": "USD",
+    "language": "en",
+    "notifications": {
+      "assessmentDue": true,
+      "controlExpiry": true,
+      "weeklyDigest": true
+    }
   },
-  "address": {
-    "street": "123 Business Ave",
-    "city": "New York",
-    "state": "NY",
-    "postal_code": "10001",
-    "country": "US"
-  },
-  "created_at": "2024-01-10T14:22:00Z",
-  "updated_at": "2024-03-15T09:30:00Z"
+  "complianceFrameworks": ["SOC2", "ISO27001", "GDPR"],
+  "memberCount": 47,
+  "assessmentCount": 12,
+  "controlCount": 156,
+  "createdAt": "2025-08-10T09:00:00Z",
+  "updatedAt": "2026-03-10T14:30:00Z"
 }
 ```
 
 ### POST /api/v1/orgs
+Creates a new organization. Requires platform admin privileges.
 
-Creates a new organization. Typically used during initial onboarding.
+**Request Headers:**
+- `Authorization`: Bearer {token}
+- `Content-Type`: application/json
 
 **Request Body:**
 ```json
 {
-  "name": "New Ventures Inc",
-  "slug": "new-ventures",
-  "industry": "finance",
-  "size": "51-200",
-  "website": "https://newventures.example.com",
-  "address": {
-    "street": "456 Finance Street",
-    "city": "San Francisco",
-    "state": "CA",
-    "postal_code": "94105",
-    "country": "US"
-  }
+  "name": "NewCorp Inc",
+  "slug": "newcorp-inc",
+  "description": "Emerging fintech startup",
+  "website": "https://www.newcorp.io",
+  "industry": "Financial Services",
+  "size": "50-100",
+  "billingEmail": "admin@newcorp.io",
+  "plan": "professional",
+  "adminEmail": "ceo@newcorp.io"
 }
 ```
 
 **Response 201 Created:**
 ```json
 {
-  "id": "org-770g0622-g41d-63f6-c938-668877662222",
-  "name": "New Ventures Inc",
-  "slug": "new-ventures",
-  "industry": "finance",
-  "size": "51-200",
-  "plan": "trial",
-  "status": "pending_verification",
-  "created_at": "2024-03-15T10:15:00Z",
-  "updated_at": "2024-03-15T10:15:00Z"
+  "id": "org_9c8d7e6f-5a4b-3c2d-1e0f-9a8b7c6d5e4f",
+  "name": "NewCorp Inc",
+  "slug": "newcorp-inc",
+  "description": "Emerging fintech startup",
+  "website": "https://www.newcorp.io",
+  "industry": "Financial Services",
+  "size": "50-100",
+  "status": "trial",
+  "plan": "professional",
+  "billingEmail": "admin@newcorp.io",
+  "settings": {
+    "timezone": "UTC",
+    "dateFormat": "YYYY-MM-DD",
+    "currency": "USD",
+    "language": "en"
+  },
+  "createdAt": "2026-03-15T10:40:00Z",
+  "updatedAt": "2026-03-15T10:40:00Z",
+  "trialEndsAt": "2026-04-14T10:40:00Z"
 }
 ```
 
 ### PUT /api/v1/orgs/{id}
+Updates an organization's information.
 
-Updates an organization's information and settings.
+**Request Headers:**
+- `Authorization`: Bearer {token}
+- `Content-Type`: application/json
 
 **Request Body:**
 ```json
 {
-  "name": "Acme Corporation Global",
-  "size": "501-1000",
+  "name": "Acme Corporation Updated",
+  "description": "Leading global provider of enterprise solutions",
+  "website": "https://www.acmeglobal.com",
+  "billingEmail": "finance@acmeglobal.com",
   "settings": {
-    "timezone": "UTC",
-    "mfa_required": true
+    "timezone": "America/Los_Angeles",
+    "notifications": {
+      "weeklyDigest": false
+    }
   }
 }
 ```
 
 **Response 200 OK:**
-Returns the updated organization object with all fields.
+```json
+{
+  "id": "org_5a6b7c8d-9e0f-1a2b-3c4d-5e6f7a8b9c0d",
+  "name": "Acme Corporation Updated",
+  "slug": "acme-corporation",
+  "description": "Leading global provider of enterprise solutions",
+  "website": "https://www.acmeglobal.com",
+  "industry": "Technology",
+  "status": "active",
+  "plan": "enterprise",
+  "billingEmail": "finance@acmeglobal.com",
+  "settings": {
+    "timezone": "America/Los_Angeles",
+    "dateFormat": "MM/DD/YYYY",
+    "currency": "USD",
+    "language": "en",
+    "notifications": {
+      "assessmentDue": true,
+      "controlExpiry": true,
+      "weeklyDigest": false
+    }
+  },
+  "updatedAt": "2026-03-15T10:42:30Z"
+}
+```
 
 ---
 
 ## Assessments API
 
-The Assessments API manages compliance assessments, audits, and their associated evidence.
+The Assessments API manages compliance assessments within organizations. Assessments track the evaluation of security controls against compliance frameworks.
 
 ### GET /api/v1/assessments
-
 Returns a list of assessments for the organization.
 
 **Request Headers:**
-```
-Authorization: Bearer {token}
-Content-Type: application/json
-```
+- `Authorization`: Bearer {token}
 
 **Query Parameters:**
 - `page` (optional): Page number (default: 1)
 - `limit` (optional): Results per page (default: 20)
-- `status` (optional): Filter by status (draft, in_progress, completed, archived)
-- `framework` (optional): Filter by compliance framework (soc2, iso27001, gdpr, etc.)
+- `status` (optional): Filter by status (draft, in_progress, under_review, approved, rejected)
+- `framework` (optional): Filter by compliance framework (SOC2, ISO27001, GDPR, etc.)
 - `assignee` (optional): Filter by assigned user ID
 
 **Response 200 OK:**
 ```json
 {
-  "data": [
+  "assessments": [
     {
-      "id": "asm-880i1733-h52e-74g7-d049-779988773333",
-      "title": "SOC 2 Type II Annual Assessment",
-      "description": "Annual SOC 2 Type II compliance assessment",
-      "framework": "soc2",
+      "id": "asm_2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e",
+      "title": "Q1 2026 SOC 2 Type II Assessment",
+      "description": "Quarterly assessment for SOC 2 Type II compliance",
+      "framework": "SOC2",
       "status": "in_progress",
-      "progress": 65,
-      "assignee_id": "usr-550e8400-e29b-41d4-a716-446655440000",
-      "organization_id": "org-550e8400-e29b-41d4-a716-446655440001",
-      "start_date": "2024-01-15",
-      "target_date": "2024-06-30",
-      "completed_at": null,
-      "created_at": "2024-01-10T14:22:00Z",
-      "updated_at": "2024-03-15T09:30:00Z"
+      "progress": 67,
+      "priority": "high",
+      "assigneeId": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+      "assigneeName": "John Doe",
+      "dueDate": "2026-03-31T23:59:59Z",
+      "startedAt": "2026-01-15T09:00:00Z",
+      "completedAt": null,
+      "controlCount": 45,
+      "evidenceCount": 128,
+      "createdAt": "2026-01-10T11:30:00Z",
+      "updatedAt": "2026-03-14T16:45:00Z"
+    },
+    {
+      "id": "asm_3c4d5e6f-7a8b-9c0d-1e2f-3a4b5c6d7e8f",
+      "title": "ISO 27001 Annual Audit",
+      "framework": "ISO27001",
+      "status": "under_review",
+      "progress": 100,
+      "priority": "critical",
+      "assigneeId": "usr_9e3c0d5e-b2f7-5a4c-9d8e-0f1a2b3c4d5e",
+      "assigneeName": "Jane Smith",
+      "dueDate": "2026-02-28T23:59:59Z",
+      "startedAt": "2026-01-01T00:00:00Z",
+      "completedAt": "2026-02-25T14:20:00Z",
+      "controlCount": 114,
+      "evidenceCount": 342,
+      "createdAt": "2025-12-15T10:00:00Z",
+      "updatedAt": "2026-02-25T14:20:00Z"
     }
   ],
   "pagination": {
     "page": 1,
     "limit": 20,
-    "total": 5,
-    "total_pages": 1
+    "total": 12,
+    "totalPages": 1
   }
 }
 ```
 
 ### GET /api/v1/assessments/{id}
+Returns detailed information about a specific assessment.
 
-Retrieves detailed information about a specific assessment.
+**Request Headers:**
+- `Authorization`: Bearer {token}
 
 **Response 200 OK:**
 ```json
 {
-  "id": "asm-880i1733-h52e-74g7-d049-779988773333",
-  "title": "SOC 2 Type II Annual Assessment",
-  "description": "Annual SOC 2 Type II compliance assessment covering security, availability, and confidentiality trust service criteria",
-  "framework": "soc2",
-  "framework_version": "2017",
+  "id": "asm_2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e",
+  "title": "Q1 2026 SOC 2 Type II Assessment",
+  "description": "Quarterly assessment for SOC 2 Type II compliance",
+  "framework": "SOC2",
   "status": "in_progress",
-  "progress": 65,
-  "assignee_id": "usr-550e8400-e29b-41d4-a716-446655440000",
+  "progress": 67,
+  "priority": "high",
   "assignee": {
-    "id": "usr-550e8400-e29b-41d4-a716-446655440000",
-    "email": "john.doe@example.com",
-    "first_name": "John",
-    "last_name": "Doe"
+    "id": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+    "name": "John Doe",
+    "email": "john.doe@company.com"
   },
-  "organization_id": "org-550e8400-e29b-41d4-a716-446655440001",
-  "start_date": "2024-01-15",
-  "target_date": "2024-06-30",
-  "completed_at": null,
-  "control_count": 24,
-  "completed_controls": 16,
-  "evidence_count": 156,
-  "created_at": "2024-01-10T14:22:00Z",
-  "updated_at": "2024-03-15T09:30:00Z"
+  "reviewer": {
+    "id": "usr_9e3c0d5e-b2f7-5a4c-9d8e-0f1a2b3c4d5e",
+    "name": "Jane Smith",
+    "email": "jane.smith@company.com"
+  },
+  "dueDate": "2026-03-31T23:59:59Z",
+  "startedAt": "2026-01-15T09:00:00Z",
+  "targetCompletionDate": "2026-03-25T23:59:59Z",
+  "completedAt": null,
+  "controlSummary": {
+    "total": 45,
+    "implemented": 30,
+    "partiallyImplemented": 8,
+    "notImplemented": 4,
+    "notApplicable": 3
+  },
+  "evidenceSummary": {
+    "total": 128,
+    "verified": 89,
+    "pending": 28,
+    "rejected": 11
+  },
+  "tags": ["quarterly", "audit-prep", "external-audit"],
+  "notes": "Focus on access control improvements this quarter",
+  "createdAt": "2026-01-10T11:30:00Z",
+  "updatedAt": "2026-03-14T16:45:00Z"
 }
 ```
 
 ### POST /api/v1/assessments
+Creates a new assessment.
 
-Creates a new compliance assessment.
+**Request Headers:**
+- `Authorization`: Bearer {token}
+- `Content-Type`: application/json
 
 **Request Body:**
 ```json
 {
-  "title": "ISO 27001 Initial Certification",
-  "description": "Initial certification assessment for ISO 27001:2022",
-  "framework": "iso27001",
-  "framework_version": "2022",
-  "assignee_id": "usr-550e8400-e29b-41d4-a716-446655440000",
-  "start_date": "2024-04-01",
-  "target_date": "2024-09-30"
+  "title": "GDPR Compliance Review 2026",
+  "description": "Annual GDPR compliance assessment including data mapping review",
+  "framework": "GDPR",
+  "priority": "high",
+  "assigneeId": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+  "dueDate": "2026-05-25T23:59:59Z",
+  "targetCompletionDate": "2026-05-20T23:59:59Z",
+  "controlIds": ["ctl_1a2b3c4d", "ctl_5e6f7a8b", "ctl_9c0d1e2f"],
+  "tags": ["annual", "gdpr", "data-privacy"]
 }
 ```
 
 **Response 201 Created:**
 ```json
 {
-  "id": "asm-990j2844-i63f-85h8-e150-880099884444",
-  "title": "ISO 27001 Initial Certification",
-  "description": "Initial certification assessment for ISO 27001:2022",
-  "framework": "iso27001",
-  "framework_version": "2022",
+  "id": "asm_4d5e6f7a-8b9c-0d1e-2f3a-4b5c6d7e8f9a",
+  "title": "GDPR Compliance Review 2026",
+  "description": "Annual GDPR compliance assessment including data mapping review",
+  "framework": "GDPR",
   "status": "draft",
   "progress": 0,
-  "assignee_id": "usr-550e8400-e29b-41d4-a716-446655440000",
-  "organization_id": "org-550e8400-e29b-41d4-a716-446655440001",
-  "start_date": "2024-04-01",
-  "target_date": "2024-09-30",
-  "completed_at": null,
-  "created_at": "2024-03-15T10:30:00Z",
-  "updated_at": "2024-03-15T10:30:00Z"
+  "priority": "high",
+  "assignee": {
+    "id": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+    "name": "John Doe",
+    "email": "john.doe@company.com"
+  },
+  "dueDate": "2026-05-25T23:59:59Z",
+  "targetCompletionDate": "2026-05-20T23:59:59Z",
+  "controlCount": 3,
+  "evidenceCount": 0,
+  "tags": ["annual", "gdpr", "data-privacy"],
+  "createdAt": "2026-03-15T10:45:00Z",
+  "updatedAt": "2026-03-15T10:45:00Z"
 }
 ```
 
 ### PUT /api/v1/assessments/{id}
+Updates an assessment. Can be used to change status, assignee, or other properties.
 
-Updates an assessment's details or status.
+**Request Headers:**
+- `Authorization`: Bearer {token}
+- `Content-Type`: application/json
 
 **Request Body:**
 ```json
 {
-  "title": "SOC 2 Type II Annual Assessment - Updated",
-  "status": "in_progress",
-  "progress": 75,
-  "target_date": "2024-07-15"
+  "title": "Q1 2026 SOC 2 Type II Assessment - Updated",
+  "status": "under_review",
+  "priority": "critical",
+  "progress": 85,
+  "assigneeId": "usr_9e3c0d5e-b2f7-5a4c-9d8e-0f1a2b3c4d5e",
+  "dueDate": "2026-04-05T23:59:59Z",
+  "notes": "Extended timeline due to additional scope requirements"
 }
 ```
 
 **Response 200 OK:**
-Returns the updated assessment object.
+```json
+{
+  "id": "asm_2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e",
+  "title": "Q1 2026 SOC 2 Type II Assessment - Updated",
+  "framework": "SOC2",
+  "status": "under_review",
+  "progress": 85,
+  "priority": "critical",
+  "assignee": {
+    "id": "usr_9e3c0d5e-b2f7-5a4c-9d8e-0f1a2b3c4d5e",
+    "name": "Jane Smith",
+    "email": "jane.smith@company.com"
+  },
+  "dueDate": "2026-04-05T23:59:59Z",
+  "notes": "Extended timeline due to additional scope requirements",
+  "updatedAt": "2026-03-15T10:50:00Z"
+}
+```
 
 ### GET /api/v1/assessments/{id}/evidence
+Returns all evidence associated with an assessment.
 
-Retrieves all evidence collected for a specific assessment.
+**Request Headers:**
+- `Authorization`: Bearer {token}
+
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Results per page (default: 50)
+- `status` (optional): Filter by status (pending, verified, rejected)
+- `controlId` (optional): Filter by specific control
 
 **Response 200 OK:**
 ```json
 {
-  "data": [
+  "evidence": [
     {
-      "id": "evd-aa0k3955-j74g-96i9-f261-991100995555",
-      "assessment_id": "asm-880i1733-h52e-74g7-d049-779988773333",
-      "control_id": "ctrl-cc2m6177-l96i-18k1-h483-113322117777",
-      "title": "Firewall Configuration Audit",
-      "description": "Quarterly firewall configuration audit report",
-      "evidence_type": "document",
-      "file_url": "https://storage.certfast.io/evidence/firewall-audit-q1-2024.pdf",
-      "file_name": "firewall-audit-q1-2024.pdf",
-      "file_size": 2457600,
-      "mime_type": "application/pdf",
-      "uploaded_by": "usr-550e8400-e29b-41d4-a716-446655440000",
-      "uploaded_at": "2024-03-10T14:30:00Z",
-      "review_status": "approved",
-      "reviewed_by": "usr-660f9511-f30c-52e5-b827-557766551111",
-      "reviewed_at": "2024-03-12T09:15:00Z",
-      "created_at": "2024-03-10T14:30:00Z",
-      "updated_at": "2024-03-12T09:15:00Z"
+      "id": "evd_5e6f7a8b-9c0d-1e2f-3a4b-5c6d7e8f9a0b",
+      "controlId": "ctl_1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+      "controlName": "Access Control Policy",
+      "title": "Access Control Policy Document v2.3",
+      "description": "Updated access control policy with MFA requirements",
+      "type": "document",
+      "fileName": "access_control_policy_v2.3.pdf",
+      "fileSize": 245760,
+      "mimeType": "application/pdf",
+      "status": "verified",
+      "submittedBy": {
+        "id": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+        "name": "John Doe"
+      },
+      "verifiedBy": {
+        "id": "usr_9e3c0d5e-b2f7-5a4c-9d8e-0f1a2b3c4d5e",
+        "name": "Jane Smith"
+      },
+      "submittedAt": "2026-03-01T14:30:00Z",
+      "verifiedAt": "2026-03-05T10:15:00Z",
+      "expiresAt": "2027-03-01T14:30:00Z",
+      "tags": ["policy", "access-control", "mfa"]
+    },
+    {
+      "id": "evd_6f7a8b9c-0d1e-2f3a-4b5c-6d7e8f9a0b1c",
+      "controlId": "ctl_2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e",
+      "controlName": "Background Check Records",
+      "title": "Q1 2026 Background Check Verification",
+      "type": "screenshot",
+      "fileName": "background_checks_q1_2026.png",
+      "fileSize": 512000,
+      "mimeType": "image/png",
+      "status": "pending",
+      "submittedBy": {
+        "id": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+        "name": "John Doe"
+      },
+      "verifiedBy": null,
+      "submittedAt": "2026-03-14T16:45:00Z",
+      "verifiedAt": null,
+      "expiresAt": null,
+      "tags": ["hr", "background-checks", "q1-2026"]
     }
   ],
   "pagination": {
     "page": 1,
-    "limit": 20,
-    "total": 156,
-    "total_pages": 8
+    "limit": 50,
+    "total": 128,
+    "totalPages": 3
+  },
+  "summary": {
+    "total": 128,
+    "verified": 89,
+    "pending": 28,
+    "rejected": 11
   }
 }
 ```
@@ -494,192 +711,247 @@ Retrieves all evidence collected for a specific assessment.
 
 ## Controls API
 
-The Controls API manages security controls and their compliance status within assessments.
+The Controls API manages security and compliance controls. Controls represent specific security requirements that must be implemented and evidenced.
 
 ### GET /api/v1/controls
-
-Returns a list of security controls.
+Returns a list of controls available in the organization.
 
 **Request Headers:**
-```
-Authorization: Bearer {token}
-Content-Type: application/json
-```
+- `Authorization`: Bearer {token}
 
 **Query Parameters:**
 - `page` (optional): Page number (default: 1)
-- `limit` (optional): Results per page (default: 20)
-- `assessment_id` (optional): Filter by assessment
+- `limit` (optional): Results per page (default: 50)
+- `framework` (optional): Filter by compliance framework
+- `status` (optional): Filter by implementation status
 - `category` (optional): Filter by control category
-- `status` (optional): Filter by compliance status (compliant, non_compliant, partially_compliant, not_applicable)
+- `search` (optional): Search in control name or description
 
 **Response 200 OK:**
 ```json
 {
-  "data": [
+  "controls": [
     {
-      "id": "ctrl-cc2m6177-l96i-18k1-h483-113322117777",
-      "assessment_id": "asm-880i1733-h52e-74g7-d049-779988773333",
-      "control_id": "CC6.1",
-      "title": "Logical Access Security",
-      "description": "The entity implements logical access security measures to protect against threats",
-      "category": "access_control",
-      "status": "compliant",
+      "id": "ctl_1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+      "name": "Access Control Policy",
+      "description": "The organization maintains an access control policy that defines user access requirements",
+      "framework": "SOC2",
+      "category": "Logical and Physical Access Controls",
+      "referenceId": "CC6.1",
+      "status": "implemented",
       "priority": "high",
-      "evidence_count": 5,
-      "assigned_to": "usr-550e8400-e29b-41d4-a716-446655440000",
-      "due_date": "2024-03-31",
-      "completed_at": "2024-03-10T14:30:00Z",
-      "created_at": "2024-01-10T14:22:00Z",
-      "updated_at": "2024-03-15T09:30:00Z"
+      "automationEnabled": false,
+      "lastAssessedAt": "2026-03-05T10:15:00Z",
+      "nextAssessmentDue": "2026-06-05T10:15:00Z",
+      "evidenceCount": 5,
+      "createdAt": "2025-08-15T09:00:00Z",
+      "updatedAt": "2026-03-05T10:15:00Z"
+    },
+    {
+      "id": "ctl_2b3c4d5e-6f7a-8b9c-0d1e-2f3a4b5c6d7e",
+      "name": "Background Check Verification",
+      "description": "Background checks are performed for all employees prior to employment",
+      "framework": "SOC2",
+      "category": "Risk Assessment",
+      "referenceId": "CC1.4",
+      "status": "implemented",
+      "priority": "medium",
+      "automationEnabled": true,
+      "automationConfig": {
+        "integration": "bamboohr",
+        "syncFrequency": "daily"
+      },
+      "lastAssessedAt": "2026-03-14T16:45:00Z",
+      "nextAssessmentDue": "2026-06-14T16:45:00Z",
+      "evidenceCount": 12,
+      "createdAt": "2025-08-15T09:00:00Z",
+      "updatedAt": "2026-03-14T16:45:00Z"
     }
   ],
   "pagination": {
     "page": 1,
-    "limit": 20,
-    "total": 24,
-    "total_pages": 2
+    "limit": 50,
+    "total": 156,
+    "totalPages": 4
   }
 }
 ```
 
 ### GET /api/v1/controls/{id}
+Returns detailed information about a specific control.
 
-Retrieves detailed information about a specific control.
+**Request Headers:**
+- `Authorization`: Bearer {token}
 
 **Response 200 OK:**
 ```json
 {
-  "id": "ctrl-cc2m6177-l96i-18k1-h483-113322117777",
-  "assessment_id": "asm-880i1733-h52e-74g7-d049-779988773333",
-  "control_id": "CC6.1",
-  "title": "Logical Access Security",
-  "description": "The entity implements logical access security measures to protect against threats to system resources",
-  "category": "access_control",
-  "subcategory": "authentication",
-  "status": "compliant",
+  "id": "ctl_1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Access Control Policy",
+  "description": "The organization maintains an access control policy that defines user access requirements including authentication, authorization, and access review procedures.",
+  "framework": "SOC2",
+  "category": "Logical and Physical Access Controls",
+  "referenceId": "CC6.1",
+  "controlType": "preventive",
+  "status": "implemented",
+  "implementationStatus": {
+    "design": "implemented",
+    "operating": "implemented",
+    "testing": "completed"
+  },
   "priority": "high",
-  "implementation_details": "Multi-factor authentication implemented across all critical systems. Access reviews conducted quarterly.",
-  "test_plan": "Verify MFA is enforced for all admin accounts. Review access logs for unauthorized attempts.",
-  "evidence_count": 5,
-  "notes": "Control fully implemented as of Q4 2023",
-  "assigned_to": "usr-550e8400-e29b-41d4-a716-446655440000",
-  "due_date": "2024-03-31",
-  "completed_at": "2024-03-10T14:30:00Z",
-  "created_at": "2024-01-10T14:22:00Z",
-  "updated_at": "2024-03-15T09:30:00Z"
+  "riskLevel": "high",
+  "automationEnabled": false,
+  "owner": {
+    "id": "usr_8f2b9c4d-a1e6-4f3b-8c7d-9e0a1b2c3d4e",
+    "name": "John Doe",
+    "email": "john.doe@company.com"
+  },
+  "implementationDetails": {
+    "summary": "Access control policy documented and approved by management. Annual access reviews scheduled.",
+    "procedures": [
+      "User access requests require manager approval",
+      "Quarterly access reviews performed",
+      "Privileged access requires additional MFA"
+    ],
+    "systems": ["Okta", "AWS IAM", "Active Directory"]
+  },
+  "evidenceRequirements": [
+    {
+      "type": "document",
+      "description": "Current version of access control policy",
+      "frequency": "annual",
+      "required": true
+    },
+    {
+      "type": "screenshot",
+      "description": "Access review completion records",
+      "frequency": "quarterly",
+      "required": true
+    }
+  ],
+  "lastAssessedAt": "2026-03-05T10:15:00Z",
+  "nextAssessmentDue": "2026-06-05T10:15:00Z",
+  "evidenceCount": 5,
+  "tags": ["access-control", "policy", "soc2", "cc6"],
+  "createdAt": "2025-08-15T09:00:00Z",
+  "updatedAt": "2026-03-05T10:15:00Z"
 }
 ```
 
 ### PUT /api/v1/controls/{id}
+Updates a control's implementation status and details.
 
-Updates a control's status and compliance information.
+**Request Headers:**
+- `Authorization`: Bearer {token}
+- `Content-Type`: application/json
 
 **Request Body:**
 ```json
 {
-  "status": "compliant",
-  "implementation_details": "MFA has been rolled out to all user accounts. Quarterly access reviews are scheduled.",
-  "notes": "Evidence collected and reviewed by security team",
-  "assigned_to": "usr-550e8400-e29b-41d4-a716-446655440000",
-  "due_date": "2024-04-15"
+  "status": "implemented",
+  "implementationStatus": {
+    "design": "implemented",
+    "operating": "implemented",
+    "testing": "in_progress"
+  },
+  "implementationDetails": {
+    "summary": "Updated access control policy with enhanced MFA requirements",
+    "procedures": [
+      "User access requests require manager approval",
+      "Quarterly access reviews performed",
+      "All privileged access requires hardware MFA keys"
+    ],
+    "systems": ["Okta", "AWS IAM", "Active Directory", "YubiKey"]
+  },
+  "ownerId": "usr_9e3c0d5e-b2f7-5a4c-9d8e-0f1a2b3c4d5e",
+  "notes": "Enhanced MFA requirements added per Q1 2026 security review"
 }
 ```
 
 **Response 200 OK:**
 ```json
 {
-  "id": "ctrl-cc2m6177-l96i-18k1-h483-113322117777",
-  "assessment_id": "asm-880i1733-h52e-74g7-d049-779988773333",
-  "control_id": "CC6.1",
-  "title": "Logical Access Security",
-  "category": "access_control",
-  "status": "compliant",
+  "id": "ctl_1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+  "name": "Access Control Policy",
+  "framework": "SOC2",
+  "referenceId": "CC6.1",
+  "status": "implemented",
+  "implementationStatus": {
+    "design": "implemented",
+    "operating": "implemented",
+    "testing": "in_progress"
+  },
   "priority": "high",
-  "implementation_details": "MFA has been rolled out to all user accounts. Quarterly access reviews are scheduled.",
-  "notes": "Evidence collected and reviewed by security team",
-  "assigned_to": "usr-550e8400-e29b-41d4-a716-446655440000",
-  "due_date": "2024-04-15",
-  "updated_at": "2024-03-15T10:45:00Z"
-}
-```
-
-**Response 400 Bad Request:**
-```json
-{
-  "error": "invalid_status",
-  "message": "Status must be one of: compliant, non_compliant, partially_compliant, not_applicable",
-  "valid_values": ["compliant", "non_compliant", "partially_compliant", "not_applicable"]
+  "owner": {
+    "id": "usr_9e3c0d5e-b2f7-5a4c-9d8e-0f1a2b3c4d5e",
+    "name": "Jane Smith",
+    "email": "jane.smith@company.com"
+  },
+  "implementationDetails": {
+    "summary": "Updated access control policy with enhanced MFA requirements",
+    "procedures": [
+      "User access requests require manager approval",
+      "Quarterly access reviews performed",
+      "All privileged access requires hardware MFA keys"
+    ],
+    "systems": ["Okta", "AWS IAM", "Active Directory", "YubiKey"]
+  },
+  "notes": "Enhanced MFA requirements added per Q1 2026 security review",
+  "updatedAt": "2026-03-15T11:00:00Z"
 }
 ```
 
 ---
 
-## Error Handling
+## Error Codes
 
-All API endpoints return consistent error responses:
+The API uses standard HTTP response codes:
 
-### Standard Error Format
+| Code | Meaning | Description |
+|------|---------|-------------|
+| 200 | OK | Request successful |
+| 201 | Created | Resource created successfully |
+| 204 | No Content | Request successful, no body returned |
+| 400 | Bad Request | Invalid request parameters |
+| 401 | Unauthorized | Missing or invalid authentication |
+| 403 | Forbidden | Insufficient permissions |
+| 404 | Not Found | Resource not found |
+| 409 | Conflict | Resource conflict (e.g., duplicate) |
+| 422 | Unprocessable Entity | Validation error |
+| 429 | Too Many Requests | Rate limit exceeded |
+| 500 | Internal Server Error | Server error |
 
-```json
-{
-  "error": "error_code",
-  "message": "Human-readable error description",
-  "details": {},
-  "request_id": "req-unique-identifier"
-}
-```
+---
 
-### Common HTTP Status Codes
+## Rate Limiting
 
-| Status Code | Description |
-|-------------|-------------|
-| 200 OK | Request successful |
-| 201 Created | Resource created successfully |
-| 204 No Content | Request successful, no body returned |
-| 400 Bad Request | Invalid request parameters |
-| 401 Unauthorized | Missing or invalid authentication |
-| 403 Forbidden | Insufficient permissions |
-| 404 Not Found | Resource does not exist |
-| 422 Unprocessable Entity | Validation error |
-| 429 Too Many Requests | Rate limit exceeded |
-| 500 Internal Server Error | Server error |
+API requests are rate-limited based on your organization plan:
 
-### Rate Limiting
-
-API requests are rate-limited per organization:
-- Standard tier: 1000 requests/hour
-- Professional tier: 5000 requests/hour
-- Enterprise tier: 20000 requests/hour
+- **Starter**: 100 requests/minute
+- **Professional**: 500 requests/minute
+- **Enterprise**: 2000 requests/minute
 
 Rate limit headers are included in all responses:
-```
-X-RateLimit-Limit: 5000
-X-RateLimit-Remaining: 4992
-X-RateLimit-Reset: 1710505800
-```
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Remaining requests in window
+- `X-RateLimit-Reset`: Unix timestamp when limit resets
 
 ---
 
 ## Pagination
 
-All list endpoints support cursor-based and offset pagination using the following query parameters:
+List endpoints support pagination using `page` and `limit` query parameters. The response includes a `pagination` object with navigation metadata.
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `page` | integer | Page number (1-indexed) |
-| `limit` | integer | Items per page (max: 100) |
-| `cursor` | string | Cursor for cursor-based pagination (optional) |
-
-All paginated responses include a `pagination` object with total counts and navigation information.
+For large datasets, consider using cursor-based pagination by including `cursor` parameter from previous response's `pagination.nextCursor`.
 
 ---
 
 ## Versioning
 
-The current API version is **v1**. Version is specified in the URL path:
-```
-/api/v1/{resource}
-```
+The current API version is **v1**. Version is specified in the URL path (`/api/v1/`). When new versions are released, previous versions remain supported for at least 12 months with deprecation notices.
 
-When breaking changes are introduced, a new version will be released with advance notice to all API consumers.
+---
+
+*Document Version: 1.0.0*
+*Last Updated: March 15, 2026*
