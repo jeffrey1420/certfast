@@ -1,7 +1,7 @@
 # Tech Track - Task Queue
 
 **Track Owner**: Technical Pipeline
-**Current Phase**: Sprint #2 - Development Setup
+**Current Phase**: Sprint #1.5 - Architecture Realignment (bare metal)
 
 ---
 
@@ -9,7 +9,7 @@
 
 ### TEC-001: System Architecture ✅
 **Role**: system-architect  
-**Status**: ✅ COMPLETE  
+**Status**: ✅ COMPLETE (AWS-based - needs update)  
 **Quality Score**: 5/5
 
 ### TEC-002: Database Schema ✅
@@ -29,106 +29,169 @@
 
 ### TEC-005: DevOps & Infrastructure ✅
 **Role**: devops-engineer  
-**Status**: ✅ COMPLETE  
+**Status**: ✅ COMPLETE (AWS-based - needs update)  
 **Quality Score**: 5/5
 
 ---
 
-## Sprint #2 - Development Setup
+## Sprint #1.5 - Architecture Realignment (CRITICAL)
 
-### Active Task (CURRENT)
+### ⚠️ MANDATORY: Update Architecture for Bare Metal
 
-**Task ID**: TEC-006
-**Type**: Standard (30 min)
-**Assigned Role**: `devops-engineer`
-**Status**: ACTIVE - EXECUTE NOW
-**Priority**: Critical
-**Sprint**: #2
-
-#### Description
-Docker Compose Infrastructure Setup
-
-Create production-ready Docker Compose setup for bare metal deployment.
-
-**Services Required:**
-1. **App (AdonisJS)** - Node.js 20, healthcheck, graceful shutdown
-2. **PostgreSQL** - v15, persistent volume, backups
-3. **Redis** - v7, cache + sessions
-4. **ClickHouse** - v23, analytics/events storage
-5. **MinIO OR Cloudflare R2** - S3-compatible object storage for evidence files
-6. **Nginx** - reverse proxy, SSL termination
-
-**Deliverables:**
-- `docker-compose.yml` - All services configured
-- `docker-compose.prod.yml` - Production overrides (replicas, resources)
-- `.env.example` - Environment variables template
-- `docker/` folder with:
-  - `app/Dockerfile` - Multi-stage build
-  - `nginx/nginx.conf` - Reverse proxy config
-  - `postgres/init.sql` - Initial schema if needed
-
-**Technical Requirements:**
-- Healthchecks on all services
-- Restart policies (unless-stopped for dev, always for prod)
-- Network isolation (frontend/backend/database networks)
-- Volume persistence for data
-- Resource limits (mem_limit, cpus)
-
-**Quality Gates:**
-- [ ] All 6 services defined
-- [ ] Services start with `docker-compose up`
-- [ ] Healthchecks configured
-- [ ] Networks isolated
-- [ ] Volumes persistent
-- [ ] Min 400 lines or comprehensive setup
-
-**Output Location:**
-- `/work/certfast/infrastructure/docker-compose.yml`
-- `/work/certfast/infrastructure/docker-compose.prod.yml`
-- `/work/certfast/infrastructure/.env.example`
-- `/work/certfast/infrastructure/docker/`
-
-**Git Commit:**
-Format: `tech/devops-engineer: created Docker Compose infrastructure with all services`
+The existing architecture documents (TEC-001, TEC-005) are AWS-focused. They MUST be updated for bare metal deployment before any coding begins.
 
 ---
 
-## Backlog - Sprint #2
+### Active Task (CURRENT)
+
+**Task ID**: TEC-001-UPDATE
+**Type**: Deep (60 min)
+**Assigned Role**: `system-architect`
+**Status**: ACTIVE - EXECUTE NOW
+**Priority**: CRITICAL
+**Blocking**: All Sprint #2 development tasks
+
+#### Description
+Update System Architecture for Bare Metal Deployment
+
+**Current State:**
+- `/work/certfast/architecture/system-architecture.md` - AWS-based (EKS, RDS, ElastiCache)
+- `/work/certfast/architecture/infrastructure-plan.md` - AWS-focused
+
+**Required Changes:**
+Replace AWS services with bare metal equivalents:
+
+| AWS Service | Bare Metal Equivalent |
+|-------------|----------------------|
+| EKS (Kubernetes) | Docker Compose + single node deployment |
+| RDS Aurora | Self-hosted PostgreSQL 15 |
+| ElastiCache | Self-hosted Redis 7 |
+| S3 | Cloudflare R2 (S3-compatible) OR MinIO |
+| CloudFront | Nginx reverse proxy + caching |
+| ALB | Nginx load balancing |
+| Route53 | DNS handled by domain provider |
+| AWS WAF | Nginx rate limiting + fail2ban |
+
+**Deliverables:**
+Update `/work/certfast/architecture/system-architecture.md` with:
+1. **New Architecture Diagram** - Bare metal stack
+2. **Component Changes** - Remove AWS references, add self-hosted
+3. **Data Flow** - Update for single-node deployment
+4. **Security Model** - Nginx + fail2ban instead of AWS WAF
+5. **Backup Strategy** - Local backups + R2 offsite
+6. **Monitoring** - Prometheus/Grafana instead of CloudWatch
+
+**Key Sections to Rewrite:**
+- Section 1.1 Architecture Diagram
+- Section 2 (Application Layer) - Remove EKS references
+- Section 3 (Data Layer) - Self-hosted PostgreSQL/Redis
+- Section 4 (Storage) - R2 instead of S3
+- Section 5 (Security) - Nginx + certbot SSL
+- Section 6 (Deployment) - Docker Compose deployment
+
+**Quality Gates:**
+- [ ] No AWS-specific references remaining
+- [ ] Bare metal architecture clearly documented
+- [ ] Cloudflare R2 documented as primary storage
+- [ ] Docker Compose deployment described
+- [ ] 1500+ words
+
+**Output Location:**
+- `/work/certfast/architecture/system-architecture.md` (overwrite with updated version)
+
+**Git Commit:**
+Format: `tech/system-architect: updated architecture for bare metal deployment with Docker Compose and Cloudflare R2`
+
+---
+
+## Backlog - Architecture Realignment
+
+### TEC-005-UPDATE: Update Infrastructure Plan
+- **Role**: devops-engineer
+- **Type**: Deep (60 min)
+- **Priority**: CRITICAL
+- **Depends on**: TEC-001-UPDATE
+- **Blocking**: Sprint #2
+
+**Description:**
+Update `/work/certfast/architecture/infrastructure-plan.md` for bare metal.
+
+**Changes Required:**
+1. **Remove**: AWS account structure, EKS setup, RDS configuration
+2. **Add**: 
+   - Bare metal server specs (CPU, RAM, disk)
+   - Docker Compose service definitions
+   - Nginx configuration for reverse proxy
+   - Cloudflare R2 setup guide
+   - SSL/TLS with Let's Encrypt (certbot)
+   - Backup scripts (local + R2)
+   - Monitoring stack (Prometheus + Grafana)
+
+**Deliverables:**
+- Updated infrastructure-plan.md
+- Server requirements document
+- Deployment runbook
+
+---
+
+### TEC-006: Docker Compose Infrastructure
+- **Role**: devops-engineer
+- **Type**: Standard (30 min)
+- **Priority**: CRITICAL
+- **Depends on**: TEC-001-UPDATE, TEC-005-UPDATE
+- **Note**: Only AFTER architecture docs are updated
+
+**Description:**
+Create Docker Compose setup (was previously defined, now aligns with updated architecture).
+
+**Services:**
+1. **app** - AdonisJS API
+2. **postgres** - PostgreSQL 15
+3. **redis** - Redis 7
+4. **clickhouse** - ClickHouse 23
+5. **nginx** - Reverse proxy + SSL
+6. **minio** (optional) - Local S3-compatible storage
+
+**Files:**
+- `docker-compose.yml`
+- `docker-compose.prod.yml`
+- `.env.example`
+- `docker/app/Dockerfile`
+- `docker/nginx/nginx.conf`
+- `scripts/setup.sh` - Initial setup script
+- `scripts/backup.sh` - Backup to R2
+
+---
+
+## Sprint #2 - Development (BLOCKED until 1.5 complete)
+
+### ⚠️ DEPENDENCY CHAIN
+
+```
+TEC-001-UPDATE (system-architecture.md)
+    ↓
+TEC-005-UPDATE (infrastructure-plan.md)
+    ↓
+TEC-006 (Docker Compose)
+    ↓
+TEC-007 (Backend Setup) - CAN START
+```
 
 ### TEC-007: Backend Project Setup
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
-- **Depends on**: TEC-006 ✅
 - **Priority**: Critical
+- **Depends on**: TEC-006
+- **Status**: BLOCKED
 
 **Description:**
-Initialize AdonisJS v6 project with core dependencies.
+Initialize AdonisJS v6 project.
 
-**Setup checklist:**
-```bash
-npm init adonis-ts-app certfast-api
-cd certfast-api
-# Install packages:
-# - @adonisjs/auth (JWT)
-# - @adonisjs/lucid (ORM)
-# - @adonisjs/redis
-# - @adonisjs/mail
-# - luxon (datetime)
-# - @aws-sdk/client-s3 (for R2 compatibility)
-# - clickhouse (official client)
-```
-
-**Configuration:**
-- `config/database.ts` - PostgreSQL + ClickHouse config
-- `config/redis.ts` - Redis sessions/cache
-- `config/auth.ts` - JWT setup
-- `config/mail.ts` - SMTP config
-- `.env.example` - All required env vars
-
-**Deliverables:**
-- `/work/certfast/apps/api/` - Full Adonis project
-- All config files properly typed
-- README with setup instructions
+**Key Points:**
+- Must reference updated architecture (not AWS)
+- Use Cloudflare R2 for storage (not S3)
+- PostgreSQL config for Docker (not RDS)
+- Redis config for Docker (not ElastiCache)
 
 ---
 
@@ -136,23 +199,7 @@ cd certfast-api
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
 - **Depends on**: TEC-007
-- **Priority**: High
-
-**Description:**
-Create Lucid migrations for all entities.
-
-**Migrations needed:**
-1. `users` - id, email, password, role, timestamps
-2. `organizations` - id, name, plan, settings, timestamps
-3. `organization_users` - pivot table with roles
-4. `assessments` - id, org_id, name, framework, status, target_date
-5. `controls` - id, assessment_id, code, name, status
-6. `evidence` - id, control_id, file_key, file_name, status
-7. `audit_logs` - id, user_id, action, entity, metadata
-
-**Deliverables:**
-- `/work/certfast/apps/api/database/migrations/*.ts`
-- Migration rollback tested
+- **Status**: BLOCKED
 
 ---
 
@@ -160,32 +207,7 @@ Create Lucid migrations for all entities.
 - **Role**: backend-developer
 - **Type**: Deep (60 min)
 - **Depends on**: TEC-008
-- **Priority**: Critical
-
-**Description:**
-Implement complete authentication system.
-
-**Endpoints:**
-- `POST /api/v1/auth/register` - Email/password registration
-- `POST /api/v1/auth/login` - JWT token generation
-- `POST /api/v1/auth/refresh` - Token refresh
-- `POST /api/v1/auth/logout` - Token revocation
-- `POST /api/v1/auth/forgot-password` - Password reset email
-- `POST /api/v1/auth/reset-password` - Reset with token
-- `GET /api/v1/auth/me` - Current user profile
-
-**Features:**
-- JWT access tokens (15min expiry)
-- Refresh tokens (7 days, stored in Redis)
-- Password hashing (Argon2)
-- Email verification required
-- Rate limiting on auth endpoints
-
-**Deliverables:**
-- Auth controller + validators
-- Auth middleware
-- Mail templates (verify email, reset password)
-- Tests for all endpoints
+- **Status**: BLOCKED
 
 ---
 
@@ -193,21 +215,7 @@ Implement complete authentication system.
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
 - **Depends on**: TEC-009
-- **Priority**: High
-
-**Endpoints:**
-Users:
-- `GET /api/v1/users` - List (admin only)
-- `GET /api/v1/users/:id` - Get one
-- `PUT /api/v1/users/:id` - Update profile
-- `DELETE /api/v1/users/:id` - Soft delete
-
-Organizations:
-- `GET /api/v1/orgs` - List my orgs
-- `POST /api/v1/orgs` - Create org
-- `GET /api/v1/orgs/:id` - Get org details
-- `PUT /api/v1/orgs/:id` - Update org
-- `DELETE /api/v1/orgs/:id` - Delete org
+- **Status**: BLOCKED
 
 ---
 
@@ -215,15 +223,7 @@ Organizations:
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
 - **Depends on**: TEC-010
-- **Priority**: High
-
-**Endpoints:**
-- `GET /api/v1/assessments` - List by org
-- `POST /api/v1/assessments` - Create assessment
-- `GET /api/v1/assessments/:id` - Get with progress
-- `PUT /api/v1/assessments/:id` - Update
-- `DELETE /api/v1/assessments/:id` - Delete
-- `GET /api/v1/assessments/:id/progress` - Completion stats
+- **Status**: BLOCKED
 
 ---
 
@@ -231,25 +231,9 @@ Organizations:
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
 - **Depends on**: TEC-011
-- **Priority**: High
+- **Status**: BLOCKED
 
-**Endpoints:**
-Controls:
-- `GET /api/v1/assessments/:id/controls` - List controls
-- `PUT /api/v1/controls/:id` - Update status
-- `GET /api/v1/controls/:id` - Get details
-
-Evidence:
-- `POST /api/v1/controls/:id/evidence` - Upload file
-- `GET /api/v1/evidence/:id` - Get evidence details
-- `DELETE /api/v1/evidence/:id` - Remove evidence
-- `GET /api/v1/evidence/:id/download` - Download file
-
-**Storage:**
-- Use Cloudflare R2 (S3-compatible)
-- Signed URLs for downloads
-- File type validation (PDF, images, docs)
-- Size limit: 50MB per file
+**Note:** Evidence storage uses **Cloudflare R2** (not AWS S3)
 
 ---
 
@@ -257,20 +241,7 @@ Evidence:
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
 - **Depends on**: TEC-007
-- **Priority**: Medium
-
-**Description:**
-Setup ClickHouse for analytics and audit logging.
-
-**Tables:**
-- `events` - All user actions
-- `audit_logs` - Compliance audit trail
-- `metrics` - Performance metrics
-
-**Features:**
-- Event tracking middleware
-- Batch inserts for performance
-- Automated partitioning
+- **Status**: BLOCKED
 
 ---
 
@@ -278,19 +249,7 @@ Setup ClickHouse for analytics and audit logging.
 - **Role**: backend-developer
 - **Type**: Deep (60 min)
 - **Depends on**: TEC-012
-- **Priority**: High
-
-**Description:**
-Complete test coverage for all endpoints.
-
-**Tests needed:**
-- Unit tests for models
-- Functional tests for controllers
-- Authentication flow tests
-- File upload/download tests
-- Rate limiting tests
-
-**Coverage target:** 80%+
+- **Status**: BLOCKED
 
 ---
 
@@ -298,5 +257,21 @@ Complete test coverage for all endpoints.
 | Metric | Value |
 |--------|-------|
 | Sprint #1 Complete | 5/5 tasks |
-| Sprint #2 Progress | 0/9 tasks |
+| Sprint #1.5 (Realignment) | 0/3 tasks |
+| Sprint #2 (Development) | 0/8 tasks - **BLOCKED** |
 | Quality Average | 5.0/5 |
+
+---
+
+## ⚠️ CRITICAL NOTICE
+
+**NO DEVELOPMENT SHOULD START** until:
+1. ✅ TEC-001-UPDATE (System Architecture) - COMPLETE
+2. ✅ TEC-005-UPDATE (Infrastructure Plan) - COMPLETE
+
+The existing architecture documents are AWS-based and do not reflect the bare metal + Docker Compose + Cloudflare R2 approach.
+
+**Next Actions:**
+1. System Architect updates system-architecture.md
+2. DevOps Engineer updates infrastructure-plan.md
+3. Then and only then: Docker Compose and development begin

@@ -54,7 +54,8 @@
 #### Description
 React + Vite Project Setup
 
-Initialize modern React frontend with all required tooling.
+**Context:**
+Backend will be AdonisJS on bare metal with Docker Compose. API base URL will be configurable via environment variable.
 
 **Tech Stack:**
 - **Framework**: React 18 + TypeScript
@@ -96,7 +97,7 @@ npm install -D tailwindcss postcss autoprefixer
 │   ├── components/
 │   │   └── ui/           # shadcn components
 │   ├── lib/
-│   │   ├── api.ts        # Axios instance
+│   │   ├── api.ts        # Axios instance with env-based baseURL
 │   │   ├── utils.ts      # cn() helper
 │   │   └── constants.ts  # App constants
 │   ├── hooks/
@@ -107,6 +108,7 @@ npm install -D tailwindcss postcss autoprefixer
 │   └── main.tsx
 ├── public/
 ├── index.html
+├── .env.example          # VITE_API_URL=http://localhost:3333
 ├── vite.config.ts
 ├── tsconfig.json
 ├── tailwind.config.js
@@ -116,8 +118,9 @@ npm install -D tailwindcss postcss autoprefixer
 **Configuration:**
 - Tailwind with custom colors from design tokens
 - Path aliases (`@/components`, `@/lib`, etc.)
-- Environment variables (`.env.example`)
+- Environment variables (`.env.example`) with `VITE_API_URL`
 - ESLint + Prettier config
+- **API client configured for bare metal backend**
 
 **Quality Gates:**
 - [ ] Project starts with `npm run dev`
@@ -125,6 +128,7 @@ npm install -D tailwindcss postcss autoprefixer
 - [ ] Tailwind styles apply correctly
 - [ ] shadcn/ui components render
 - [ ] Build succeeds (`npm run build`)
+- [ ] `.env.example` includes API URL configuration
 
 **Output Location:**
 - `/work/certfast/apps/web/` - Complete React project
@@ -144,31 +148,11 @@ Format: `design/frontend-developer: initialized React + Vite project with Tailwi
 
 **Pages:**
 1. **Login** (`/login`)
-   - Email + password form
-   - "Remember me" checkbox
-   - "Forgot password?" link
-   - Error handling
-
 2. **Register** (`/register`)
-   - Email, password, confirm password
-   - Organization name
-   - Terms acceptance
-   - Email validation
-
 3. **Forgot Password** (`/forgot-password`)
-   - Email input
-   - Success state
-
 4. **Reset Password** (`/reset-password`)
-   - New password form
-   - Token validation
 
-**Deliverables:**
-- `/work/certfast/apps/web/src/routes/auth/`
-- Form validation with Zod
-- API integration with auth endpoints
-- Loading states
-- Error messages
+**Note:** Backend auth endpoints will be at `/api/v1/auth/*`
 
 ---
 
@@ -178,26 +162,7 @@ Format: `design/frontend-developer: initialized React + Vite project with Tailwi
 - **Depends on**: DSG-008
 - **Priority**: High
 
-**Components:**
-1. **AppShell** - Main layout wrapper
-2. **Sidebar** - Navigation menu
-   - Logo
-   - Navigation items (Dashboard, Assessments, Settings)
-   - User menu (profile, logout)
-   - Collapsible on mobile
-
-3. **Header** - Top bar
-   - Page title
-   - Breadcrumbs
-   - Notification bell
-   - User avatar dropdown
-
-4. **MainContent** - Content area with proper padding
-
-**Deliverables:**
-- `/work/certfast/apps/web/src/components/layout/`
-- Responsive design (mobile hamburger menu)
-- Active state for current route
+**Components:** AppShell, Sidebar, Header, MainContent
 
 ---
 
@@ -207,30 +172,7 @@ Format: `design/frontend-developer: initialized React + Vite project with Tailwi
 - **Depends on**: DSG-009
 - **Priority**: High
 
-**Features:**
-1. **Metrics Cards** (4 cards):
-   - Compliance Score (donut chart)
-   - Active Assessments (count)
-   - Evidence Uploaded (count)
-   - Days to Next Audit (countdown)
-
-2. **Progress Section**:
-   - Current assessment progress bar
-   - % completion per framework
-
-3. **Recent Activity**:
-   - Last 5 actions (evidence uploaded, status changed)
-   - Click to view details
-
-4. **Quick Actions**:
-   - "Upload Evidence" button
-   - "View Assessments" button
-
-**Deliverables:**
-- `/work/certfast/apps/web/src/routes/dashboard/`
-- API integration for metrics
-- Loading skeletons
-- Empty states
+**Features:** Metrics cards, progress, recent activity, quick actions
 
 ---
 
@@ -240,27 +182,7 @@ Format: `design/frontend-developer: initialized React + Vite project with Tailwi
 - **Depends on**: DSG-009
 - **Priority**: High
 
-**Features:**
-1. **Table/List** of assessments:
-   - Name
-   - Framework (SOC2, ISO27001, etc.)
-   - Status badge (In Progress, Complete, Overdue)
-   - Progress bar
-   - Target date
-   - Actions (View, Edit)
-
-2. **Filters**:
-   - By status
-   - By framework
-   - Search by name
-
-3. **Create Button** - Opens modal
-
-**Deliverables:**
-- `/work/certfast/apps/web/src/routes/assessments/`
-- Data table component
-- Filter logic
-- Empty state
+**Features:** Table, filters, search, create button
 
 ---
 
@@ -270,36 +192,9 @@ Format: `design/frontend-developer: initialized React + Vite project with Tailwi
 - **Depends on**: DSG-011
 - **Priority**: High
 
-**Features:**
-1. **Header**:
-   - Assessment name + edit
-   - Status badge
-   - Progress bar
-   - Target date
+**Features:** Controls list, evidence upload, checklist
 
-2. **Controls List**:
-   - Expandable sections by category
-   - Control code + name
-   - Status (Implemented, Partial, Not Started)
-   - Evidence count
-
-3. **Control Detail Panel**:
-   - Description
-   - Requirements checklist
-   - Evidence upload zone
-   - Upload history
-
-4. **Evidence Upload**:
-   - Drag & drop zone
-   - File type validation
-   - Progress indicator
-   - Preview for images/PDFs
-
-**Deliverables:**
-- `/work/certfast/apps/web/src/routes/assessments/[id]/`
-- File upload component
-- Progress tracking
-- Real-time updates
+**Note:** Evidence upload uses Cloudflare R2 (S3-compatible)
 
 ---
 
@@ -309,25 +204,7 @@ Format: `design/frontend-developer: initialized React + Vite project with Tailwi
 - **Depends on**: DSG-009
 - **Priority**: Medium
 
-**Pages:**
-1. **Organization Settings** (`/settings/org`):
-   - Org name, logo
-   - Plan details
-   - Member management (invite, remove, change roles)
-
-2. **Profile Settings** (`/settings/profile`):
-   - Personal info
-   - Change password
-   - Notification preferences
-
-3. **Integrations** (`/settings/integrations`):
-   - API keys
-   - Webhook configuration
-
-**Deliverables:**
-- `/work/certfast/apps/web/src/routes/settings/`
-- Form components
-- Member invite flow
+**Pages:** Organization, Profile, Integrations
 
 ---
 
@@ -337,13 +214,7 @@ Format: `design/frontend-developer: initialized React + Vite project with Tailwi
 - **Depends on**: DSG-013
 - **Priority**: Medium
 
-**Tasks:**
-1. Mobile responsiveness check
-2. Dark mode support (if time permits)
-3. Loading states throughout
-4. Error boundaries
-5. Toast notifications for actions
-6. Confirm dialogs for destructive actions
+**Tasks:** Mobile responsive, dark mode, loading states, error boundaries
 
 ---
 
@@ -353,3 +224,15 @@ Format: `design/frontend-developer: initialized React + Vite project with Tailwi
 | Sprint #1 Complete | 6/6 tasks |
 | Sprint #2 Progress | 0/8 tasks |
 | Quality Average | 4.0/5 |
+
+---
+
+## Cross-Track Dependencies
+
+| Design Task | Depends On | Status |
+|-------------|-----------|--------|
+| DSG-008 Auth Pages | Tech TEC-009 (Auth API) | Can develop with mocks |
+| DSG-010 Dashboard | Tech TEC-010 (Users/Orgs API) | Can develop with mocks |
+| DSG-012 Assessment Detail | Tech TEC-012 (Evidence API) | Can develop with mocks |
+
+**Note:** Frontend can be developed against mock API responses. Integration happens when backend is ready.
