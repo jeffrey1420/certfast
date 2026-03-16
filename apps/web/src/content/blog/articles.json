@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "getting-started-with-certfast",
+    "title": "Getting Started with CertFast: Your Complete Compliance Guide",
+    "description": "Learn how to streamline your compliance journey with CertFast's automated assessment platform. A comprehensive guide for beginners.",
+    "author": "CertFast Team",
+    "date": "2024-03-15",
+    "readTime": "8 min read",
+    "tags": ["getting-started", "compliance", "tutorial"],
+    "image": "/blog/images/getting-started.jpg",
+    "featured": true
+  },
+  {
+    "slug": "understanding-soc-2-requirements",
+    "title": "Understanding SOC 2 Requirements: A Practical Breakdown",
+    "description": "Demystify SOC 2 compliance requirements. Learn the five Trust Services Criteria and how to implement them effectively.",
+    "author": "Sarah Chen",
+    "date": "2024-03-12",
+    "readTime": "12 min read",
+    "tags": ["soc2", "compliance", "security"],
+    "image": "/blog/images/soc2-requirements.jpg",
+    "featured": true
+  },
+  {
+    "slug": "automated-evidence-collection",
+    "title": "Automated Evidence Collection: Save 40+ Hours Per Audit",
+    "description": "Discover how automated evidence collection can transform your audit preparation process and reduce manual work significantly.",
+    "author": "Marcus Johnson",
+    "date": "2024-03-10",
+    "readTime": "6 min read",
+    "tags": ["automation", "evidence", "efficiency"],
+    "image": "/blog/images/automation.jpg",
+    "featured": false
+  },
+  {
+    "slug": "iso-27001-vs-soc-2",
+    "title": "ISO 27001 vs SOC 2: Which Framework is Right for You?",
+    "description": "Compare ISO 27001 and SOC 2 frameworks. Understand the differences, overlaps, and which certification fits your organization's needs.",
+    "author": "Elena Rodriguez",
+    "date": "2024-03-08",
+    "readTime": "10 min read",
+    "tags": ["iso27001", "soc2", "comparison"],
+    "image": "/blog/images/comparison.jpg",
+    "featured": false
+  },
+  {
+    "slug": "vendor-risk-management",
+    "title": "Vendor Risk Management: A Step-by-Step Guide",
+    "description": "Master vendor risk management with our comprehensive guide. Learn assessment techniques, monitoring strategies, and best practices.",
+    "author": "David Park",
+    "date": "2024-03-05",
+    "readTime": "9 min read",
+    "tags": ["vendor-management", "risk", "third-party"],
+    "image": "/blog/images/vendor-risk.jpg",
+    "featured": false
+  }
+]

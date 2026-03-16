@@ -1,0 +1,9 @@
+export { Hero } from "./Hero";
+export { SocialProof } from "./SocialProof";
+export { ProblemSolution } from "./ProblemSolution";
+export { Features } from "./Features";
+export { HowItWorks } from "./HowItWorks";
+export { Pricing } from "./Pricing";
+export { FAQ } from "./FAQ";
+export { FinalCTA } from "./FinalCTA";
+export { Footer } from "./Footer";
