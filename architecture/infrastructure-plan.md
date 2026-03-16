@@ -1,9 +1,22 @@
-# CertFast Infrastructure Plan
+# ⚠️ OBSOLETE — AWS Infrastructure Plan (Legacy)
 
-**Document Version**: 1.0  
+> **Status**: ARCHIVED — This document describes the original AWS-based infrastructure.
+> 
+> **Decision Date**: 2026-03-15  
+> **Current Infrastructure**: Bare Metal + Docker + Cloudflare R2  
+> 
+> **See instead**: `/work/certfast/architecture/system-architecture.md` for the current Bare Metal infrastructure.
+> 
+> **Reason for change**: Cost control, data sovereignty, operational simplicity
+
+---
+
+# CertFast Infrastructure Plan (ARCHIVED)
+
+**Document Version**: 1.0 (ARCHIVED)  
 **Date**: March 15, 2026  
 **Architect**: System Architect  
-**Status**: Complete  
+**Status**: ARCHIVED  
 **Classification**: Deep Task (TEC-001)
 
 ---
