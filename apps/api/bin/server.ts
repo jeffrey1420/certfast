@@ -1,8 +1,27 @@
-import { Ignitor } from '@adonisjs/core'
-import { fileURLToPath } from 'node:url'
+import { IgnitorFactory } from '@adonisjs/core/factories'
+import databaseConfig from '../config/database.js'
 
-const ignitor = new Ignitor(fileURLToPath(new URL('./', import.meta.url)))
+const ignitor = new IgnitorFactory()
+  .withCoreProviders()
+  .withCoreConfig()
+  .merge({
+    config: {
+      database: databaseConfig,
+    },
+    rcFileContents: {
+      providers: [
+        () => import('@adonisjs/lucid/database_provider'),
+        () => import('@adonisjs/cors/cors_provider'),
+      ],
+    },
+  })
+  .create(new URL('../', import.meta.url))
 
-ignitor.boot().then(() => {
-  ignitor.startHttpServer()
-})
+const app = await ignitor.createApp('api')
+await app.init()
+await app.boot()
+
+await import('../start/kernel.js')
+await import('../start/routes.js')
+
+await app.start(() => import('../start/kernel.js'))

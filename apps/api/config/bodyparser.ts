@@ -11,12 +11,10 @@ const bodyParserConfig = defineConfig({
   form: {
     encoding: 'utf-8',
     limit: '1mb',
-    queryString: {},
   },
   raw: {
     encoding: 'utf-8',
     limit: '1mb',
-    queryString: {},
     types: ['text/*'],
   },
   multipart: {
