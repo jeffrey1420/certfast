@@ -19,17 +19,6 @@ process.env.DB_DATABASE_TEST ||= 'certfast_test'
 let app: ApplicationService
 let closeServer: (() => Promise<void>) | null = null
 
-async function runAce(commandName: string, args: string[] = []) {
-  const ace = await app.container.make('ace')
-  const command = await ace.exec(commandName, args)
-
-  if (!command.exitCode) {
-    return
-  }
-
-  throw command.error ?? new Error(`\"${commandName}\" failed`)
-}
-
 async function startApp() {
   if (app) return app
 
@@ -59,7 +48,6 @@ async function startApp() {
   await import('../start/routes.ts')
 
   const db = await app.container.make('lucid.db')
-  await runAce('migration:run', ['--compact-output'])
 
   const testUtils = new TestUtils(app)
   await testUtils.boot()
@@ -87,7 +75,6 @@ configure({
       }
 
       if (globalThis.$db) {
-        await runAce('migration:reset', ['--compact-output'])
         await globalThis.$db.manager.closeAll()
       }
 

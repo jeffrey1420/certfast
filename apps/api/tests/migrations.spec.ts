@@ -1,14 +1,19 @@
 import { test } from '@japa/runner'
-import Database from '@adonisjs/lucid/services/db'
+import type { Database } from '@adonisjs/lucid/database'
+
+function schema() {
+  const db = globalThis.$db as Database
+  return db.connection().schema
+}
 
 test.group('Database Migrations', () => {
   test('users table exists with expected columns', async ({ assert }) => {
-    const hasTable = await Database.schema.hasTable('users')
+    const hasTable = await schema().hasTable('users')
     assert.isTrue(hasTable)
 
-    const hasEmailColumn = await Database.schema.hasColumn('users', 'email')
-    const hasPasswordColumn = await Database.schema.hasColumn('users', 'password')
-    const hasRoleColumn = await Database.schema.hasColumn('users', 'role')
+    const hasEmailColumn = await schema().hasColumn('users', 'email')
+    const hasPasswordColumn = await schema().hasColumn('users', 'password')
+    const hasRoleColumn = await schema().hasColumn('users', 'role')
 
     assert.isTrue(hasEmailColumn)
     assert.isTrue(hasPasswordColumn)
@@ -16,12 +21,12 @@ test.group('Database Migrations', () => {
   })
 
   test('organizations table exists with expected columns', async ({ assert }) => {
-    const hasTable = await Database.schema.hasTable('organizations')
+    const hasTable = await schema().hasTable('organizations')
     assert.isTrue(hasTable)
 
-    const hasNameColumn = await Database.schema.hasColumn('organizations', 'name')
-    const hasSlugColumn = await Database.schema.hasColumn('organizations', 'slug')
-    const hasOwnerColumn = await Database.schema.hasColumn('organizations', 'owner_id')
+    const hasNameColumn = await schema().hasColumn('organizations', 'name')
+    const hasSlugColumn = await schema().hasColumn('organizations', 'slug')
+    const hasOwnerColumn = await schema().hasColumn('organizations', 'owner_id')
 
     assert.isTrue(hasNameColumn)
     assert.isTrue(hasSlugColumn)
@@ -29,13 +34,13 @@ test.group('Database Migrations', () => {
   })
 
   test('assessments table exists with expected columns', async ({ assert }) => {
-    const hasTable = await Database.schema.hasTable('assessments')
+    const hasTable = await schema().hasTable('assessments')
     assert.isTrue(hasTable)
 
-    const hasOrgIdColumn = await Database.schema.hasColumn('assessments', 'organization_id')
-    const hasTitleColumn = await Database.schema.hasColumn('assessments', 'title')
-    const hasTypeColumn = await Database.schema.hasColumn('assessments', 'type')
-    const hasStatusColumn = await Database.schema.hasColumn('assessments', 'status')
+    const hasOrgIdColumn = await schema().hasColumn('assessments', 'organization_id')
+    const hasTitleColumn = await schema().hasColumn('assessments', 'title')
+    const hasTypeColumn = await schema().hasColumn('assessments', 'type')
+    const hasStatusColumn = await schema().hasColumn('assessments', 'status')
 
     assert.isTrue(hasOrgIdColumn)
     assert.isTrue(hasTitleColumn)
@@ -44,12 +49,12 @@ test.group('Database Migrations', () => {
   })
 
   test('controls table exists with expected columns', async ({ assert }) => {
-    const hasTable = await Database.schema.hasTable('controls')
+    const hasTable = await schema().hasTable('controls')
     assert.isTrue(hasTable)
 
-    const hasAssessmentIdColumn = await Database.schema.hasColumn('controls', 'assessment_id')
-    const hasNameColumn = await Database.schema.hasColumn('controls', 'name')
-    const hasStatusColumn = await Database.schema.hasColumn('controls', 'status')
+    const hasAssessmentIdColumn = await schema().hasColumn('controls', 'assessment_id')
+    const hasNameColumn = await schema().hasColumn('controls', 'name')
+    const hasStatusColumn = await schema().hasColumn('controls', 'status')
 
     assert.isTrue(hasAssessmentIdColumn)
     assert.isTrue(hasNameColumn)
@@ -57,12 +62,12 @@ test.group('Database Migrations', () => {
   })
 
   test('evidence table exists with expected columns', async ({ assert }) => {
-    const hasTable = await Database.schema.hasTable('evidence')
+    const hasTable = await schema().hasTable('evidence')
     assert.isTrue(hasTable)
 
-    const hasControlIdColumn = await Database.schema.hasColumn('evidence', 'control_id')
-    const hasTypeColumn = await Database.schema.hasColumn('evidence', 'type')
-    const hasStatusColumn = await Database.schema.hasColumn('evidence', 'status')
+    const hasControlIdColumn = await schema().hasColumn('evidence', 'control_id')
+    const hasTypeColumn = await schema().hasColumn('evidence', 'type')
+    const hasStatusColumn = await schema().hasColumn('evidence', 'status')
 
     assert.isTrue(hasControlIdColumn)
     assert.isTrue(hasTypeColumn)
@@ -70,12 +75,12 @@ test.group('Database Migrations', () => {
   })
 
   test('user_tokens table exists with expected columns', async ({ assert }) => {
-    const hasTable = await Database.schema.hasTable('user_tokens')
+    const hasTable = await schema().hasTable('user_tokens')
     assert.isTrue(hasTable)
 
-    const hasUserIdColumn = await Database.schema.hasColumn('user_tokens', 'user_id')
-    const hasTokenColumn = await Database.schema.hasColumn('user_tokens', 'token')
-    const hasExpiresAtColumn = await Database.schema.hasColumn('user_tokens', 'expires_at')
+    const hasUserIdColumn = await schema().hasColumn('user_tokens', 'user_id')
+    const hasTokenColumn = await schema().hasColumn('user_tokens', 'token')
+    const hasExpiresAtColumn = await schema().hasColumn('user_tokens', 'expires_at')
 
     assert.isTrue(hasUserIdColumn)
     assert.isTrue(hasTokenColumn)
@@ -87,9 +92,9 @@ test.group('Database Migrations', () => {
       '../database/migrations/001_create_users_table.ts',
       '../database/migrations/002_create_organizations_table.ts',
       '../database/migrations/003_create_organization_members_table.ts',
-      '../database/migrations/004_create_assessments_table.ts',
-      '../database/migrations/005_create_controls_table.ts',
-      '../database/migrations/006_create_evidence_table.ts',
+      '../database/migrations/004_create_assessments.ts',
+      '../database/migrations/005_create_controls.ts',
+      '../database/migrations/006_create_evidence.ts',
       '../database/migrations/007_create_user_tokens_table.ts',
     ]
 

@@ -1,4 +1,4 @@
-import { BaseCommand } from '@adonisjs/core'
+import { BaseCommand } from '@adonisjs/core/ace'
 
 export default class Serve extends BaseCommand {
   static commandName = 'serve'
