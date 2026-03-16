@@ -1,5 +1,66 @@
 # CertFast Workflow Monitor - Lessons Learned
 
+## 2026-03-16: Agent Execution Failure - Silent Termination
+
+### Problem
+Workflow stalled for **89 minutes** with no git activity. Investigation revealed:
+- Cron jobs ARE spawning agents on schedule
+- Agents are terminating in **15-54 seconds** (way too fast)
+- No git commits produced
+- No error messages visible
+- Tasks remain "ACTIVE" indefinitely
+
+### Agent Execution Times (Abnormal)
+| Agent | Expected | Actual | Status |
+|-------|----------|--------|--------|
+| Tech Track | 30-60 min | 41 sec | ❌ FAILED |
+| Design Track | 30-60 min | 54 sec | ❌ FAILED |
+| Strategy Track | 30-60 min | 26 sec | ❌ FAILED |
+| PM Master | 30-55 min | 27 sec | ❌ FAILED |
+| Backend Watchdog | 15-30 min | 36 sec | ❌ FAILED |
+
+### Root Cause Analysis
+Agents are **spawning but not actually executing** the task work. Possible causes:
+
+1. **API Rate Limiting**: Silent rate limit hits causing immediate termination
+2. **Prompt Parsing Failure**: Agents unable to parse complex task instructions
+3. **Context Window Issues**: Task descriptions too long, causing context overflow
+4. **Timeout Misconfiguration**: Agent hitting internal timeout before starting work
+5. **Dependency Chain Confusion**: Agents unsure how to proceed with TDD/tasks
+
+### Symptoms
+- Cron status shows "ok" (session spawned successfully)
+- Session duration extremely short
+- No subagent processes created (confirmed via `subagents list`)
+- No file system changes
+- No git activity
+- Silent failure - no errors reported to cron
+
+### Failed Recovery
+- Cannot auto-execute agent tasks from monitor (out of scope)
+- Cannot force agent to complete work
+- Cannot diagnose exact failure reason without session logs
+
+### Manual Intervention Required
+**Louis should:**
+1. Check agent session transcripts for error details
+2. Verify API token/rate limit status
+3. Review if agent prompts are being parsed correctly
+4. Consider simplifying task descriptions
+5. May need to manually execute one task to unblock
+
+### Prevention Measures
+1. **Add agent execution validation** - Check that agents actually produce output
+2. **Add minimum execution time alerts** - Alert if agent completes in <5 minutes
+3. **Add commit verification** - Verify git activity within 30 min of agent spawn
+4. **Simplify agent prompts** - Reduce complexity to improve completion rates
+5. **Add session log inspection** - Auto-check for errors in agent transcripts
+
+### Key Takeaway
+**Session spawn ≠ Work completion.** The monitor assumed that if cron spawned an agent, work would be done. This is false - agents can spawn and terminate without producing any output. Need validation that work actually happened.
+
+---
+
 ## 2026-03-16: Stale Local Reference Detection (Opposite Direction)
 
 ### Problem
