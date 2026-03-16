@@ -184,3 +184,40 @@ export interface ActivityItem {
   user: User
   createdAt: string
 }
+
+// Control types (extended)
+export interface ControlDetailed {
+  id: string
+  code: string
+  title: string
+  description: string
+  category: string
+  subCategory?: string
+  frameworkId: string
+  framework?: Framework
+  maturityLevel: 'basic' | 'intermediate' | 'advanced'
+  implementationGuidance?: string
+  testingProcedure?: string
+  createdAt: string
+  updatedAt: string
+}
+
+// Policy types
+export interface Policy {
+  id: string
+  title: string
+  code: string
+  description: string
+  content?: string
+  status: 'draft' | 'published' | 'archived'
+  version: string
+  ownerId?: string
+  owner?: User
+  category: string
+  effectiveDate?: string
+  reviewDate?: string
+  approvedBy?: string
+  approvedAt?: string
+  createdAt: string
+  updatedAt: string
+}

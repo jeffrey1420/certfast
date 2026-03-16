@@ -6,6 +6,7 @@ const TABLES_IN_RESET_ORDER = [
   'user_tokens',
   'organization_members',
   'evidence',
+  'policies',
   'controls',
   'assessments',
   'organizations',

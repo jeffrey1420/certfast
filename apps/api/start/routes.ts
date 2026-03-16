@@ -35,6 +35,18 @@ router
     router.put('/assessments/:id', '#controllers/assessments_controller.update')
     router.delete('/assessments/:id', '#controllers/assessments_controller.destroy')
 
+    router.get('/controls', '#controllers/controls_controller.index')
+    router.post('/controls', '#controllers/controls_controller.store')
+    router.get('/controls/:id', '#controllers/controls_controller.show')
+    router.put('/controls/:id', '#controllers/controls_controller.update')
+    router.delete('/controls/:id', '#controllers/controls_controller.destroy')
+
+    router.get('/policies', '#controllers/policies_controller.index')
+    router.post('/policies', '#controllers/policies_controller.store')
+    router.get('/policies/:id', '#controllers/policies_controller.show')
+    router.put('/policies/:id', '#controllers/policies_controller.update')
+    router.delete('/policies/:id', '#controllers/policies_controller.destroy')
+
     router.get('/dashboard/activity', '#controllers/dashboard_controller.activity')
   })
   .use(middleware.auth())
