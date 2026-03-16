@@ -1,41 +1,49 @@
 import { Progress } from '@/components/ui/progress'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 interface ProgressBarProps {
-  title: string
   value: number
   max?: number
-  description?: string
+  label?: string
+  showPercentage?: boolean
+  size?: 'sm' | 'md' | 'lg'
   className?: string
 }
 
 export function ProgressBar({
-  title,
   value,
   max = 100,
-  description,
+  label,
+  showPercentage = true,
+  size = 'md',
   className,
 }: ProgressBarProps) {
-  const percentage = Math.min(100, Math.max(0, (value / max) * 100))
-  
+  const percentage = Math.round((value / max) * 100)
+
+  const sizeClasses = {
+    sm: 'h-2',
+    md: 'h-4',
+    lg: 'h-6',
+  }
+
   return (
-    <Card className={cn(className)}>
-      <CardHeader>
-        <CardTitle className="text-base font-medium">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="text-3xl font-bold">{value}%</span>
-          <span className="text-sm text-muted-foreground">Target: {max}%</span>
+    <div className={cn('space-y-2', className)}>
+      {(label || showPercentage) && (
+        <div className="flex justify-between items-center">
+          {label && (
+            <span className="text-sm font-medium text-muted-foreground">
+              {label}
+            </span>
+          )}
+          {showPercentage && (
+            <span className="text-sm font-bold">{percentage}%</span>
+          )}
         </div>
-        <Progress value={value} max={max} className="h-3" />
-        {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
-      </CardContent>
-    </Card>
+      )}
+      <Progress
+        value={percentage}
+        className={cn(sizeClasses[size])}
+      />
+    </div>
   )
 }
-
-export default ProgressBar

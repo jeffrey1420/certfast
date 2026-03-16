@@ -9,7 +9,7 @@ interface MetricCardProps {
   icon: LucideIcon
   trend?: {
     value: number
-    isPositive: boolean
+    label: string
   }
   className?: string
 }
@@ -36,21 +36,21 @@ export function MetricCard({
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
         {trend && (
-          <div className="flex items-center gap-1 mt-2">
+          <div className="flex items-center mt-2">
             <span
               className={cn(
                 'text-xs font-medium',
-                trend.isPositive ? 'text-green-600' : 'text-red-600'
+                trend.value >= 0 ? 'text-green-600' : 'text-red-600'
               )}
             >
-              {trend.isPositive ? '+' : ''}{trend.value}%
+              {trend.value >= 0 ? '+' : ''}{trend.value}%
             </span>
-            <span className="text-xs text-muted-foreground">from last month</span>
+            <span className="text-xs text-muted-foreground ml-1">
+              {trend.label}
+            </span>
           </div>
         )}
       </CardContent>
     </Card>
   )
 }
-
-export default MetricCard
