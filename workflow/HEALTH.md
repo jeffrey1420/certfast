@@ -1,5 +1,61 @@
 # CertFast Workflow Health Log
 
+## ✅ INCIDENT #6 RESOLVED: 2026-03-16 21:16-21:17 (AUTO-RECOVERY)
+
+**Type**: Git Push Failure - Unpushed Commits + Uncommitted Work
+
+**Severity**: MEDIUM → AUTO-RESOLVED
+
+### Summary
+Workflow monitor detected **81 minutes** since last push (threshold: 40). Root cause: **3 commits created but not pushed** + **1 uncommitted directory** (assessment detail page work).
+
+### Timeline
+| Time | Event |
+|------|-------|
+| 11:55 | Last GitHub push (from earlier work) |
+| ~13:30 | Assessment detail page created (uncommitted) |
+| 19:46 | Recovery agents pushed commits (3 commits) |
+| 21:16 | Monitor detected 81-minute stall |
+| 21:17 | Auto-recovery: pushed pending commits |
+| 21:17 | Auto-recovery: committed assessment detail page |
+| 21:17 | Verified: all green |
+
+### Recovery Actions Taken
+1. **Identified root cause**: 3 unpushed commits + uncommitted assessment detail route
+2. **Pushed commits**: `bbc7a3b`, `d887882`, `a51d1b9` (recovery agent commits)
+3. **Committed pending work**: `apps/web/src/routes/assessments/detail/` (3 files, 658 lines)
+4. **Verified**: Monitor now shows 0 minutes since push, working directory clean
+
+### Commits Pushed
+1. **72d234d** - monitor/auto-recovery: committed pending assessment detail page work
+   - Assessment detail page route (`index.tsx`)
+   - Control list component (`ControlList.tsx`)
+   - Evidence upload component (`EvidenceUpload.tsx`)
+   - Total: 658 insertions across 3 files
+
+### Files Committed from Uncommitted State
+```
+apps/web/src/routes/assessments/detail/
+├── index.tsx (13.2KB - main page)
+└── components/
+    ├── ControlList.tsx
+    └── EvidenceUpload.tsx
+```
+
+### Verification
+- Git push monitor: ✅ Exit 0 - All green
+- Working directory: ✅ Clean
+- Last push: ✅ 0 minutes ago
+
+### Key Insight
+This incident demonstrates the **auto-recovery system working as designed**:
+- Monitor detected the issue within 30-minute window
+- Automatic push of pending commits
+- Automatic commit of uncommitted work
+- No manual intervention required
+
+---
+
 ## ✅ INCIDENT #5 RESOLVED: 2026-03-16 19:46-19:50
 
 **Type**: Workflow Stall - Agent Execution Failure (FIFTH RECURRENCE → RESOLVED)
