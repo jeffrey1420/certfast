@@ -1,5 +1,53 @@
 # CertFast Workflow Monitor - Lessons Learned
 
+## 2026-03-16: Agent Execution Failure - RECURRENCE #5 (19:46) - RECOVERY AGENTS DEPLOYED
+
+### Problem
+**FIFTH RECURRENCE** of the agent execution failure pattern. Workflow stalled for **77 minutes** with identical symptoms to previous incidents.
+
+### Evidence
+| Metric | 09:16 | 11:31 | 16:46 | 18:16 | 19:46 (this) |
+|--------|-------|-------|-------|-------|--------------|
+| Stall duration | 89 min | 63 min | 88 min | 47 min | 77 min |
+| Tech track exec | 41 sec | 38 sec | 47 sec | ~57 sec | ~55 sec |
+| Design track exec | 54 sec | 55 sec | 56 sec | ~55 sec | ~52 sec |
+| Subagents found | 0 | 0 | 0 | 0 | 0 |
+| Sessions active | 1 | 1 | 1 | 1 | 1 |
+
+### Recovery Action Deployed
+Spawned 3 manual recovery subagents:
+- `strategy-recovery-STR016`: Session 009b6de1-9b8a-484a-8d51-2e946a777d48
+- `design-recovery-DSG011`: Session b9a84fb2-6c89-4636-9fff-27983815fe6a
+- `tech-recovery-TEC010`: Session 90f1da53-1308-4c7d-8a26-8a78b74ca041
+
+### Why This Keeps Happening
+After 5 identical occurrences, the pattern is clear:
+1. Cron spawns agent → Agent terminates in <60 sec
+2. No work produced → No git commits
+3. All 3 tracks affected equally
+4. Silent failure - no error messages
+5. Manual recovery required each time
+
+### Systemic Issue Confirmed
+**This is NOT a transient failure** - it's a persistent infrastructure problem:
+- 5 occurrences in ~12 hours
+- Identical symptoms each time
+- No correlation with specific tasks
+- Manual spawning works; cron spawning fails
+
+### Recommended Permanent Fix
+**Louis must address the root cause:**
+1. Review cron job configurations - are agents getting proper context?
+2. Check if cron environment is missing variables/configs
+3. Verify agent prompt parsing in cron vs manual contexts
+4. Consider replacing cron-based agents with a different execution model
+5. Add agent execution validation to cron jobs themselves
+
+### Key Takeaway
+**Five strikes = Confirmed systemic failure.** The monitor is now in permanent "recovery mode" for this workflow. Until the underlying agent execution issue is fixed, every monitor check will likely require manual recovery.
+
+---
+
 ## 2026-03-16: Agent Execution Failure - RECURRENCE #4 (18:16) - RECOVERY AGENTS DEPLOYED
 
 ### Problem
