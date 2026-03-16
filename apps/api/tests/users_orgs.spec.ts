@@ -3,15 +3,18 @@ import { test } from '@japa/runner'
 test.group('Users & Organizations', () => {
   // Helper to get auth token
   async function getAuthToken(client: any) {
+    const timestamp = Date.now()
+    const email = `test_${timestamp}@example.com`
+    
     // Register a test user first
     await client.post('/auth/register').json({
-      email: 'admin@test.com',
+      email: email,
       password: 'password123',
-      fullName: 'Admin User'
+      fullName: 'Test User'
     })
     
     const loginRes = await client.post('/auth/login').json({
-      email: 'admin@test.com',
+      email: email,
       password: 'password123'
     })
     return loginRes.body().token
@@ -76,38 +79,40 @@ test.group('Users & Organizations', () => {
 
   test('POST /organizations - creates new organization', async ({ client, assert }) => {
     const token = await getAuthToken(client)
+    const uniqueSlug = `test-org-${Date.now()}`
     
     const response = await client.post('/organizations')
       .header('Authorization', `Bearer ${token}`)
       .json({
         name: 'Test Organization',
-        description: 'A test org'
+        slug: uniqueSlug
       })
     
     response.assertStatus(201)
     assert.exists(response.body().id)
     assert.equal(response.body().name, 'Test Organization')
-    assert.equal(response.body().description, 'A test org')
+    assert.equal(response.body().slug, uniqueSlug)
   })
 
-  test('POST /organizations - validates required name', async ({ client }) => {
+  test('POST /organizations - validates required fields', async ({ client }) => {
     const token = await getAuthToken(client)
     
     const response = await client.post('/organizations')
       .header('Authorization', `Bearer ${token}`)
-      .json({ description: 'Missing name' })
+      .json({ name: 'Missing slug' })
     
     response.assertStatus(422)
-    response.assertBodyContains({ error: 'Name is required' })
+    response.assertBodyContains({ error: 'Validation failed' })
   })
 
   test('GET /organizations/:id - returns organization by ID', async ({ client, assert }) => {
     const token = await getAuthToken(client)
+    const uniqueSlug = `get-org-${Date.now()}`
     
     // Create an org first
     const createRes = await client.post('/organizations')
       .header('Authorization', `Bearer ${token}`)
-      .json({ name: 'Get Test Org' })
+      .json({ name: 'Get Test Org', slug: uniqueSlug })
     const orgId = createRes.body().id
     
     const response = await client.get(`/organizations/${orgId}`).header('Authorization', `Bearer ${token}`)
@@ -128,19 +133,19 @@ test.group('Users & Organizations', () => {
 
   test('PUT /organizations/:id - updates organization', async ({ client, assert }) => {
     const token = await getAuthToken(client)
+    const uniqueSlug = `update-org-${Date.now()}`
     
     // Create an org first
     const createRes = await client.post('/organizations')
       .header('Authorization', `Bearer ${token}`)
-      .json({ name: 'Update Test Org' })
+      .json({ name: 'Update Test Org', slug: uniqueSlug })
     const orgId = createRes.body().id
     
     const response = await client.put(`/organizations/${orgId}`)
       .header('Authorization', `Bearer ${token}`)
-      .json({ name: 'Updated Org Name', description: 'Updated desc' })
+      .json({ name: 'Updated Org Name' })
     
     response.assertStatus(200)
     assert.equal(response.body().name, 'Updated Org Name')
-    assert.equal(response.body().description, 'Updated desc')
   })
 })

@@ -10,11 +10,6 @@ const organizations = new Map()
 let userIdCounter = 1
 let orgIdCounter = 1
 
-// Import controllers
-import AuthController from '../app/controllers/auth_controller.js'
-import UsersController from '../app/controllers/users_controller.js'
-import OrganizationsController from '../app/controllers/organizations_controller.js'
-
 // Helper function to extract URL parameters
 function extractParams(url, pattern) {
   const regex = new RegExp('^' + pattern.replace(/:([^/]+)/g, '([^/]+)') + '$')
