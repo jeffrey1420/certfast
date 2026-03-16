@@ -1,5 +1,53 @@
 # CertFast Workflow Monitor - Lessons Learned
 
+## 2026-03-16: Successful Auto-Recovery - Uncommitted Changes (15:16)
+
+### Problem
+Workflow stalled for **109 minutes** with uncommitted UI component files.
+
+### Evidence
+- GitHub last push: 109 minutes ago
+- Local files: select.tsx, table.tsx (uncommitted)
+- No unpushed commits
+- Git config valid
+
+### Root Cause
+Agent created UI components but failed to commit/push. This matches the **Scenario B** pattern from the monitor playbook.
+
+### Auto-Recovery Success
+The monitor successfully:
+1. ✅ Detected uncommitted changes (2 files)
+2. ✅ Auto-committed with descriptive message
+3. ✅ Pushed to GitHub
+4. ✅ Verified fix (exit 0 on re-run)
+
+### Time to Recovery
+- Detection to fix: <2 minutes
+- Commits pushed: 1 (269 insertions)
+- Workflow status: Resumed
+
+### Key Insight
+This was a **clean Scenario B** recovery - no agent execution issues, just a commit/push failure. Contrast this with the 09:16 and 11:31 incidents where agents failed to execute at all.
+
+### Differentiating Incident Types
+| Incident | Scenario | Auto-Recovery | Requires Manual |
+|----------|----------|---------------|-----------------|
+| 15:16 (this) | B - Uncommitted changes | ✅ SUCCESS | No |
+| 11:31 | C - Agent execution failure | ❌ FAILED | Yes |
+| 09:16 | C - Agent execution failure | ❌ FAILED | Yes |
+| 07:46 | B - Uncommitted changes | ✅ SUCCESS | No |
+
+### Monitor Effectiveness
+- Detection: ✅ Working (caught at 109 min)
+- Diagnosis: ✅ Correct (identified as Scenario B)
+- Recovery: ✅ Successful (auto-committed and pushed)
+- Verification: ✅ Confirmed (exit 0)
+
+### Key Takeaway
+**Monitor auto-recovery works for git workflow issues, not agent execution failures.** Scenario B (uncommitted/unpushed changes) is fully automatable. Scenario C (agent not producing work) requires manual intervention.
+
+---
+
 ## 2026-03-16: Agent Execution Failure - RECURRING (11:31)
 
 ### Problem
