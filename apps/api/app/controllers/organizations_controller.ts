@@ -1,29 +1,28 @@
 import { HttpContext } from '@adonisjs/core/http'
+import { tokens } from './auth_controller.js'
 
-// In-memory stores
+// In-memory organizations store
 const organizations: Map<number, any> = new Map()
-const tokens: Map<string, number> = new Map()
-const users: Map<number, any> = new Map()
 let orgIdCounter = 1
+
+export { organizations }
 
 export default class OrganizationsController {
   /**
    * List all organizations
    */
   async index({ request, response }: HttpContext) {
-    // Check authentication
+    // Check auth
     const authHeader = request.header('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return response.status(401).json({ error: 'Unauthorized' })
     }
 
     const token = authHeader.substring(7)
-    const userId = tokens.get(token)
-    if (!userId) {
+    if (!tokens.has(token)) {
       return response.status(401).json({ error: 'Unauthorized' })
     }
 
-    // Return all organizations
     const orgList = Array.from(organizations.values())
     return response.status(200).json(orgList)
   }
@@ -32,116 +31,92 @@ export default class OrganizationsController {
    * Create new organization
    */
   async store({ request, response }: HttpContext) {
-    // Check authentication
+    // Check auth
     const authHeader = request.header('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return response.status(401).json({ error: 'Unauthorized' })
     }
 
     const token = authHeader.substring(7)
-    const userId = tokens.get(token)
-    if (!userId) {
+    if (!tokens.has(token)) {
       return response.status(401).json({ error: 'Unauthorized' })
     }
 
-    const { name, slug, plan, settings } = request.body()
+    const { name, description } = request.body()
 
     // Validation
-    if (!name || !slug) {
-      return response.status(422).json({
-        error: 'Validation failed',
-        message: 'Name and slug are required'
-      })
+    if (!name) {
+      return response.status(422).json({ error: 'Name is required' })
     }
 
-    // Check for duplicate slug
-    for (const org of organizations.values()) {
-      if (org.slug === slug) {
-        return response.status(422).json({
-          error: 'Organization already exists',
-          message: 'Slug must be unique'
-        })
-      }
-    }
-
-    // Create organization
-    const organization = {
+    const org = {
       id: orgIdCounter++,
       name,
-      slug,
-      plan: plan || 'free',
-      settings: settings || {},
+      description: description || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     }
 
-    organizations.set(organization.id, organization)
+    organizations.set(org.id, org)
 
-    return response.status(201).json(organization)
+    return response.status(201).json(org)
   }
 
   /**
-   * Get single organization by ID
+   * Get organization by ID
    */
   async show({ request, response, params }: HttpContext) {
-    // Check authentication
+    // Check auth
     const authHeader = request.header('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return response.status(401).json({ error: 'Unauthorized' })
     }
 
     const token = authHeader.substring(7)
-    const userId = tokens.get(token)
-    if (!userId) {
+    if (!tokens.has(token)) {
       return response.status(401).json({ error: 'Unauthorized' })
     }
 
-    const id = parseInt(params.id)
-    const organization = organizations.get(id)
+    const orgId = parseInt(params.id)
+    const org = organizations.get(orgId)
 
-    if (!organization) {
+    if (!org) {
       return response.status(404).json({ error: 'Organization not found' })
     }
 
-    return response.status(200).json(organization)
+    return response.status(200).json(org)
   }
 
   /**
    * Update organization
    */
   async update({ request, response, params }: HttpContext) {
-    // Check authentication
+    // Check auth
     const authHeader = request.header('authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return response.status(401).json({ error: 'Unauthorized' })
     }
 
     const token = authHeader.substring(7)
-    const userId = tokens.get(token)
-    if (!userId) {
+    if (!tokens.has(token)) {
       return response.status(401).json({ error: 'Unauthorized' })
     }
 
-    const id = parseInt(params.id)
-    const organization = organizations.get(id)
+    const orgId = parseInt(params.id)
+    const org = organizations.get(orgId)
 
-    if (!organization) {
+    if (!org) {
       return response.status(404).json({ error: 'Organization not found' })
     }
 
-    const { name, slug, plan, settings } = request.body()
+    const { name, description } = request.body()
 
-    if (name !== undefined) organization.name = name
-    if (slug !== undefined) organization.slug = slug
-    if (plan !== undefined) organization.plan = plan
-    if (settings !== undefined) organization.settings = settings
-    organization.updatedAt = new Date().toISOString()
+    // Update fields if provided
+    if (name !== undefined) org.name = name
+    if (description !== undefined) org.description = description
+    
+    org.updatedAt = new Date().toISOString()
 
-    return response.status(200).json(organization)
-  }
-
-  // Helper method to sync token with auth controller
-  static addToken(token: string, userId: number) {
-    tokens.set(token, userId)
+    return response.status(200).json(org)
   }
 }

@@ -2,8 +2,8 @@ import { HttpContext } from '@adonisjs/core/http'
 import { createHash, randomBytes } from 'node:crypto'
 
 // Simple in-memory user store for now (will be replaced with DB)
-const users: Map<number, any> = new Map()
-const tokens: Map<string, number> = new Map()
+export const users: Map<number, any> = new Map()
+export const tokens: Map<string, number> = new Map()
 let userIdCounter = 1
 
 export default class AuthController {
