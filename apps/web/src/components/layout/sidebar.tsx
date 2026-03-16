@@ -8,6 +8,8 @@ import {
   Users,
   Building2,
   Shield,
+  ShieldCheck,
+  BookOpen,
   X
 } from 'lucide-react'
 
@@ -19,6 +21,8 @@ interface SidebarProps {
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Assessments', href: '/assessments', icon: ClipboardCheck },
+  { name: 'Controls', href: '/controls', icon: ShieldCheck },
+  { name: 'Policies', href: '/policies', icon: BookOpen },
   { name: 'Evidence', href: '/evidence', icon: FileText },
   { name: 'Organization', href: '/organization', icon: Building2 },
   { name: 'Team', href: '/team', icon: Users },
