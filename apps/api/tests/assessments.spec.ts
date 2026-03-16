@@ -7,13 +7,13 @@ test.group('Assessments', () => {
     const email = `test_${timestamp}@example.com`
     
     // Register a test user first
-    await client.post('/auth/register').json({
+    await client.post('/api/v1/auth/register').json({
       email: email,
       password: 'password123',
       fullName: 'Test User'
     })
     
-    const loginRes = await client.post('/auth/login').json({
+    const loginRes = await client.post('/api/v1/auth/login').json({
       email: email,
       password: 'password123'
     })
@@ -23,7 +23,7 @@ test.group('Assessments', () => {
   // Helper to create an organization
   async function createOrganization(client: any, token: string) {
     const uniqueSlug = `test-org-${Date.now()}-${Math.random().toString(36).substring(7)}`
-    const response = await client.post('/organizations')
+    const response = await client.post('/api/v1/organizations')
       .header('Authorization', `Bearer ${token}`)
       .json({
         name: 'Test Organization',
@@ -35,7 +35,7 @@ test.group('Assessments', () => {
   test('GET /assessments - lists all assessments', async ({ client, assert }) => {
     const token = await getAuthToken(client)
     
-    const response = await client.get('/assessments').header('Authorization', `Bearer ${token}`)
+    const response = await client.get('/api/v1/assessments').header('Authorization', `Bearer ${token}`)
     
     response.assertStatus(200)
     assert.isArray(response.body())
@@ -45,7 +45,7 @@ test.group('Assessments', () => {
     const token = await getAuthToken(client)
     const org = await createOrganization(client, token)
     
-    const response = await client.post('/assessments')
+    const response = await client.post('/api/v1/assessments')
       .header('Authorization', `Bearer ${token}`)
       .json({
         organizationId: org.id,
@@ -65,7 +65,7 @@ test.group('Assessments', () => {
   test('POST /assessments - validates required fields', async ({ client }) => {
     const token = await getAuthToken(client)
     
-    const response = await client.post('/assessments')
+    const response = await client.post('/api/v1/assessments')
       .header('Authorization', `Bearer ${token}`)
       .json({ description: 'Missing title and type' })
     
@@ -77,7 +77,7 @@ test.group('Assessments', () => {
     const token = await getAuthToken(client)
     const org = await createOrganization(client, token)
     
-    const response = await client.post('/assessments')
+    const response = await client.post('/api/v1/assessments')
       .header('Authorization', `Bearer ${token}`)
       .json({
         organizationId: org.id,
@@ -94,7 +94,7 @@ test.group('Assessments', () => {
     const org = await createOrganization(client, token)
     
     // Create assessment first
-    const createRes = await client.post('/assessments')
+    const createRes = await client.post('/api/v1/assessments')
       .header('Authorization', `Bearer ${token}`)
       .json({
         organizationId: org.id,
@@ -103,7 +103,7 @@ test.group('Assessments', () => {
       })
     const assessmentId = createRes.body().id
     
-    const response = await client.get(`/assessments/${assessmentId}`)
+    const response = await client.get(`/api/v1/assessments/${assessmentId}`)
       .header('Authorization', `Bearer ${token}`)
     
     response.assertStatus(200)
@@ -115,7 +115,7 @@ test.group('Assessments', () => {
   test('GET /assessments/:id - returns 404 for non-existent assessment', async ({ client }) => {
     const token = await getAuthToken(client)
     
-    const response = await client.get('/assessments/99999')
+    const response = await client.get('/api/v1/assessments/99999')
       .header('Authorization', `Bearer ${token}`)
     
     response.assertStatus(404)
@@ -127,7 +127,7 @@ test.group('Assessments', () => {
     const org = await createOrganization(client, token)
     
     // Create assessment first
-    const createRes = await client.post('/assessments')
+    const createRes = await client.post('/api/v1/assessments')
       .header('Authorization', `Bearer ${token}`)
       .json({
         organizationId: org.id,
@@ -136,7 +136,7 @@ test.group('Assessments', () => {
       })
     const assessmentId = createRes.body().id
     
-    const response = await client.put(`/assessments/${assessmentId}`)
+    const response = await client.put(`/api/v1/assessments/${assessmentId}`)
       .header('Authorization', `Bearer ${token}`)
       .json({
         title: 'Updated Assessment Title',
@@ -152,7 +152,7 @@ test.group('Assessments', () => {
   test('PUT /assessments/:id - returns 404 for non-existent assessment', async ({ client }) => {
     const token = await getAuthToken(client)
     
-    const response = await client.put('/assessments/99999')
+    const response = await client.put('/api/v1/assessments/99999')
       .header('Authorization', `Bearer ${token}`)
       .json({ title: 'Updated Title' })
     
@@ -165,7 +165,7 @@ test.group('Assessments', () => {
     const org = await createOrganization(client, token)
     
     // Create assessment first
-    const createRes = await client.post('/assessments')
+    const createRes = await client.post('/api/v1/assessments')
       .header('Authorization', `Bearer ${token}`)
       .json({
         organizationId: org.id,
@@ -174,14 +174,14 @@ test.group('Assessments', () => {
       })
     const assessmentId = createRes.body().id
     
-    const response = await client.delete(`/assessments/${assessmentId}`)
+    const response = await client.delete(`/api/v1/assessments/${assessmentId}`)
       .header('Authorization', `Bearer ${token}`)
     
     response.assertStatus(200)
     response.assertBodyContains({ message: 'Assessment deleted successfully' })
     
     // Verify it's deleted
-    const getRes = await client.get(`/assessments/${assessmentId}`)
+    const getRes = await client.get(`/api/v1/assessments/${assessmentId}`)
       .header('Authorization', `Bearer ${token}`)
     getRes.assertStatus(404)
   })
@@ -189,7 +189,7 @@ test.group('Assessments', () => {
   test('DELETE /assessments/:id - returns 404 for non-existent assessment', async ({ client }) => {
     const token = await getAuthToken(client)
     
-    const response = await client.delete('/assessments/99999')
+    const response = await client.delete('/api/v1/assessments/99999')
       .header('Authorization', `Bearer ${token}`)
     
     response.assertStatus(404)
@@ -201,7 +201,7 @@ test.group('Assessments', () => {
     const org = await createOrganization(client, token)
     
     // Create assessment
-    await client.post('/assessments')
+    await client.post('/api/v1/assessments')
       .header('Authorization', `Bearer ${token}`)
       .json({
         organizationId: org.id,
@@ -209,7 +209,7 @@ test.group('Assessments', () => {
         type: 'custom'
       })
     
-    const response = await client.get(`/assessments?organizationId=${org.id}`)
+    const response = await client.get(`/api/v1/assessments?organizationId=${org.id}`)
       .header('Authorization', `Bearer ${token}`)
     
     response.assertStatus(200)
@@ -221,14 +221,14 @@ test.group('Assessments', () => {
   })
 
   test('GET /assessments - requires authentication', async ({ client }) => {
-    const response = await client.get('/assessments')
+    const response = await client.get('/api/v1/assessments')
     
     response.assertStatus(401)
     response.assertBodyContains({ error: 'Unauthorized' })
   })
 
   test('POST /assessments - requires authentication', async ({ client }) => {
-    const response = await client.post('/assessments').json({
+    const response = await client.post('/api/v1/assessments').json({
       organizationId: 1,
       title: 'Test',
       type: 'soc2_type1'

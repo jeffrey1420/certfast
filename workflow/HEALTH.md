@@ -1,5 +1,28 @@
 # CertFast Workflow Health Log
 
+## Run Note: 2026-03-16 21:01 (CertFast 15m Recovery Worker)
+
+- **What changed**: Continued **P0-TEST-001** with minimal scope. Fixed Japa v4 hook API usage in tests (`group.setup.each` -> `group.each.setup` in `apps/api/tests/auth.spec.ts`; also aligned helper wrapper hooks in `apps/api/tests/helpers.ts`).
+- **Tests run**: `cd /work/certfast/apps/api && npm test`
+- **Blockers**: Boot-stage error is resolved, but suite is still red for environment/path issues: API tests fail with DB connection `AggregateError` and migration specs import wrong paths (`/work/certfast/apps/database/...` instead of `apps/api/database/...`).
+- **Next task**: Keep P0 focus and fix one root cause next cycle: correct migration spec import paths, then rerun `npm test` to isolate remaining DB bootstrap/connectivity issue.
+
+## Run Note: 2026-03-16 20:55 (CertFast 15m Recovery Worker)
+
+- **What changed**: Continued P0-TEST-001 in `apps/api`. Reworked `tests/bootstrap.ts` to use `IgnitorFactory` with core+Lucid providers and explicit DB config wiring so container boot no longer crashes on `lucid.db`. Added package import maps in `apps/api/package.json` for `#...` aliases. Installed missing `@adonisjs/tsconfig` (devDependency) to unblock tsx/tsconfig resolution.
+- **Tests run**: `npm test` (multiple runs), and direct `TSX_TSCONFIG_PATH=./tsconfig.json node --import tsx tests/bootstrap.ts`.
+- **Blockers**: Harness boot is now restored and tests are discovered, but suite fails inside spec code: `group.setup.each is not a function` (`tests/auth.spec.ts`, Japa API mismatch). Also migration hooks in bootstrap are currently guarded because legacy `connection().migration` API is absent in current Lucid setup.
+- **Next task**: Finish P0 by updating test suite to current Japa APIs (replace `group.setup.each`, align hooks), then run `npm test` green before unblocking TEC-011.
+
+## Run Note: 2026-03-16 20:40 (CertFast 15m Recovery Worker)
+
+- **What changed**: Prioritized P0 stability. Fixed invalid Adonis test import path in `apps/api/tests/bootstrap.ts` (`@adonisjs/core/ignitor` -> `@adonisjs/core`), corrected bad config env reference in `apps/api/config/app.ts`, and removed unused `@adonisjs/auth` import in auth middleware. Added explicit P0 task in `workflow/tracks/tech/tasks.md` and marked TEC-011 blocked until harness boots.
+- **Tests run**: `cd apps/api && npm test -- --bail` (multiple runs).
+- **Blockers**: test harness still fails before spec execution with container binding error: `Cannot resolve binding "lucid.db"`. Indicates Lucid provider bootstrap/config not wired (likely missing/incorrect Adonis app bootstrap configuration).
+- **Next task**: P0-TEST-001 continue with minimal Adonis v6 bootstrap alignment so Lucid DB binding loads and tests reach first spec.
+
+---
+
 ## 🚨 INCIDENT #9 DETECTED: 2026-03-17 03:16 (CRITICAL INFRASTRUCTURE FAILURE)
 
 **Type**: Cron Job Infrastructure Failure - ALL Jobs Removed
@@ -849,3 +872,26 @@ git fetch origin main
 Git push monitor should run `git fetch` before checking unpushed commits to ensure local references are current.
 
 **Status**: ✅ RESOLVED
+
+
+## Recovery Session: 2026-03-16 21:xx (AdonisJS Stabilization Pass)
+
+**Scope completed**
+- Unified API routes under `start/routes.ts` with `/api/v1` prefixes.
+- Added missing Assessments implementation:
+  - `app/models/assessment.ts`
+  - `app/controllers/assessments_controller.ts`
+- Replaced fake auth flow with deterministic token store + middleware:
+  - `app/services/token_store.ts`
+  - `app/middleware/auth_middleware.ts`
+- Removed duplicate route files and duplicate legacy migration files (`001/002/003` duplicates).
+- Updated migration import test targets to canonical migration file names.
+- Reworked test bootstrap to use IgnitorFactory + TestUtils and single baseURL.
+
+**Current blocker**
+- Backend tests cannot fully execute on this host because no PostgreSQL test instance is reachable on `127.0.0.1:5433` (and no Docker runtime available).
+
+**Next step**
+1. Provision test DB (or switch tests to sqlite test connection).
+2. Run full test suite and fix remaining failing specs.
+3. Continue workflow/task consistency and market-validation text pass.

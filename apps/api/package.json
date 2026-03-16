@@ -3,6 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#controllers/*": "./app/controllers/*.ts",
+    "#models/*": "./app/models/*.ts",
+    "#validators/*": "./app/validators/*.ts",
+    "#middleware/*": "./app/middleware/*.ts",
+    "#exceptions/*": "./app/exceptions/*.ts",
+    "#start/*": "./start/*.ts",
+    "#config/*": "./config/*.ts",
+    "#database/*": "./database/*.ts",
+    "#services/*": "./app/services/*.ts",
+    "#tests/*": "./tests/*.ts"
+  },
   "scripts": {
     "start": "node bin/server.js",
     "build": "tsc",
@@ -21,6 +33,7 @@
     "reflect-metadata": "^0.2.2"
   },
   "devDependencies": {
+    "@adonisjs/tsconfig": "^2.0.0",
     "@japa/api-client": "^2.0.0",
     "@japa/assert": "^3.0.0",
     "@japa/runner": "^4.0.0",

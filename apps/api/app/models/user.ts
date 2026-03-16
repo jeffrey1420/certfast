@@ -1,5 +1,7 @@
-import { BaseModel, column } from '@adonisjs/lucid/orm'
 import { DateTime } from 'luxon'
+import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
+import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
+import Organization from './organization.js'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -8,7 +10,7 @@ export default class User extends BaseModel {
   @column()
   declare email: string
 
-  @column({ serializeAs: null })
+  @column({ serializeAs: null }) // Never serialize password
   declare password: string
 
   @column()
@@ -28,4 +30,18 @@ export default class User extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  // Relationships
+  @hasMany(() => Organization, {
+    foreignKey: 'ownerId',
+  })
+  declare ownedOrganizations: HasMany<typeof Organization>
+
+  @manyToMany(() => Organization, {
+    pivotTable: 'organization_members',
+    pivotForeignKey: 'user_id',
+    pivotRelatedForeignKey: 'organization_id',
+    pivotColumns: ['role'],
+  })
+  declare organizations: ManyToMany<typeof Organization>
 }

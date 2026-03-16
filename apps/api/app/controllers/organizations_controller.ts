@@ -1,122 +1,153 @@
 import { HttpContext } from '@adonisjs/core/http'
-import { tokens } from './auth_controller.js'
-
-// In-memory organizations store
-const organizations: Map<number, any> = new Map()
-let orgIdCounter = 1
-
-export { organizations }
+import Organization from '#models/organization'
+import User from '#models/user'
 
 export default class OrganizationsController {
-  /**
-   * List all organizations
-   */
-  async index({ request, response }: HttpContext) {
-    // Check auth
-    const authHeader = request.header('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return response.status(401).json({ error: 'Unauthorized' })
-    }
+  async index(ctx: HttpContext) {
+    const authUserId = (ctx as any).authUserId as number
 
-    const token = authHeader.substring(7)
-    if (!tokens.has(token)) {
-      return response.status(401).json({ error: 'Unauthorized' })
-    }
+    const organizations = await Organization.query()
+      .where('owner_id', authUserId)
+      .orWhereHas('members', (query) => {
+        query.where('user_id', authUserId)
+      })
+      .select(['id', 'name', 'slug', 'plan', 'status', 'created_at'])
+      .orderBy('created_at', 'desc')
 
-    const orgList = Array.from(organizations.values())
-    return response.status(200).json(orgList)
+    return ctx.response.status(200).json(organizations)
   }
 
-  /**
-   * Create new organization
-   */
-  async store({ request, response }: HttpContext) {
-    // Check auth
-    const authHeader = request.header('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return response.status(401).json({ error: 'Unauthorized' })
+  async store(ctx: HttpContext) {
+    const authUserId = (ctx as any).authUserId as number
+    const { name, slug, description } = ctx.request.body()
+
+    if (!name || !slug) {
+      return ctx.response.status(422).json({
+        error: 'Validation failed',
+        message: 'Name and slug are required',
+      })
     }
 
-    const token = authHeader.substring(7)
-    if (!tokens.has(token)) {
-      return response.status(401).json({ error: 'Unauthorized' })
+    if (!/^[a-z0-9-]+$/.test(slug)) {
+      return ctx.response.status(422).json({
+        error: 'Validation failed',
+        message: 'Slug must contain only lowercase letters, numbers, and hyphens',
+      })
     }
 
-    const { name, description } = request.body()
-
-    // Validation
-    if (!name) {
-      return response.status(422).json({ error: 'Name is required' })
+    const existing = await Organization.findBy('slug', slug)
+    if (existing) {
+      return ctx.response.status(422).json({ error: 'Slug already taken' })
     }
 
-    const org = {
-      id: orgIdCounter++,
+    const organization = await Organization.create({
       name,
-      description: description || null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }
+      slug,
+      description: description ?? null,
+      ownerId: authUserId,
+      plan: 'free',
+      status: 'active',
+    })
 
-    organizations.set(org.id, org)
-
-    return response.status(201).json(org)
+    return ctx.response.status(201).json({
+      id: organization.id,
+      name: organization.name,
+      slug: organization.slug,
+      description: organization.description,
+      plan: organization.plan,
+      status: organization.status,
+      ownerId: organization.ownerId,
+      createdAt: organization.createdAt,
+    })
   }
 
-  /**
-   * Get organization by ID
-   */
-  async show({ request, response, params }: HttpContext) {
-    // Check auth
-    const authHeader = request.header('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return response.status(401).json({ error: 'Unauthorized' })
+  async show(ctx: HttpContext) {
+    const orgId = Number(ctx.params.id)
+    if (Number.isNaN(orgId)) {
+      return ctx.response.status(400).json({ error: 'Invalid organization ID' })
     }
 
-    const token = authHeader.substring(7)
-    if (!tokens.has(token)) {
-      return response.status(401).json({ error: 'Unauthorized' })
+    const organization = await Organization.find(orgId)
+    if (!organization) {
+      return ctx.response.status(404).json({ error: 'Organization not found' })
     }
 
-    const orgId = parseInt(params.id)
-    const org = organizations.get(orgId)
+    await organization.load('owner')
 
-    if (!org) {
-      return response.status(404).json({ error: 'Organization not found' })
-    }
-
-    return response.status(200).json(org)
+    return ctx.response.status(200).json({
+      id: organization.id,
+      name: organization.name,
+      slug: organization.slug,
+      description: organization.description,
+      plan: organization.plan,
+      status: organization.status,
+      owner: {
+        id: organization.owner.id,
+        email: organization.owner.email,
+        fullName: organization.owner.fullName,
+      },
+      createdAt: organization.createdAt,
+      updatedAt: organization.updatedAt,
+    })
   }
 
-  /**
-   * Update organization
-   */
-  async update({ request, response, params }: HttpContext) {
-    // Check auth
-    const authHeader = request.header('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return response.status(401).json({ error: 'Unauthorized' })
+  async update(ctx: HttpContext) {
+    const authUserId = (ctx as any).authUserId as number
+    const user = await User.find(authUserId)
+    const orgId = Number(ctx.params.id)
+
+    if (Number.isNaN(orgId)) {
+      return ctx.response.status(400).json({ error: 'Invalid organization ID' })
     }
 
-    const token = authHeader.substring(7)
-    if (!tokens.has(token)) {
-      return response.status(401).json({ error: 'Unauthorized' })
+    const organization = await Organization.find(orgId)
+    if (!organization) {
+      return ctx.response.status(404).json({ error: 'Organization not found' })
     }
 
-    const orgId = parseInt(params.id)
-    const org = organizations.get(orgId)
-
-    if (!org) {
-      return response.status(404).json({ error: 'Organization not found' })
+    if (organization.ownerId !== authUserId && user?.role !== 'admin') {
+      return ctx.response.status(403).json({ error: 'Forbidden' })
     }
 
-    const { name, description } = request.body()
+    const { name, description, plan, status } = ctx.request.body()
 
-    // Update fields if provided
-    if (name !== undefined) org.name = name
-    if (description !== undefined) org.description = description
-    
-    org.updatedAt = new Date().toISOString()
+    if (name !== undefined) organization.name = name
+    if (description !== undefined) organization.description = description
+    if (plan !== undefined && user?.role === 'admin') organization.plan = plan
+    if (status !== undefined && user?.role === 'admin') organization.status = status
 
-    return response.status(200).json(org)
+    await organization.save()
+
+    return ctx.response.status(200).json({
+      id: organization.id,
+      name: organization.name,
+      slug: organization.slug,
+      description: organization.description,
+      plan: organization.plan,
+      status: organization.status,
+      updatedAt: organization.updatedAt,
+    })
+  }
+
+  async destroy(ctx: HttpContext) {
+    const authUserId = (ctx as any).authUserId as number
+    const user = await User.find(authUserId)
+    const orgId = Number(ctx.params.id)
+
+    if (Number.isNaN(orgId)) {
+      return ctx.response.status(400).json({ error: 'Invalid organization ID' })
+    }
+
+    const organization = await Organization.find(orgId)
+    if (!organization) {
+      return ctx.response.status(404).json({ error: 'Organization not found' })
+    }
+
+    if (organization.ownerId !== authUserId && user?.role !== 'admin') {
+      return ctx.response.status(403).json({ error: 'Forbidden' })
+    }
+
+    await organization.delete()
+    return ctx.response.status(204).send('')
   }
 }

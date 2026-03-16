@@ -4,6 +4,8 @@
     "rootDir": ".",
     "outDir": "./build",
     "baseUrl": ".",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "paths": {
       "#controllers/*": ["./app/controllers/*.js"],
       "#models/*": ["./app/models/*.js"],
@@ -13,6 +15,7 @@
       "#start/*": ["./start/*.js"],
       "#config/*": ["./config/*.js"],
       "#database/*": ["./database/*.js"],
+      "#services/*": ["./app/services/*.js"],
       "#tests/*": ["./tests/*.js"]
     }
   },

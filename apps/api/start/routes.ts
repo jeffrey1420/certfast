@@ -1,20 +1,37 @@
-import { HttpContext } from '@adonisjs/core/http'
 import router from '@adonisjs/core/services/router'
+import { middleware } from '#start/kernel'
 
-// Import auth routes
-import './routes/auth.js'
+router.get('/', async () => ({ hello: 'world', app: 'certfast-api' }))
+router.get('/health', async () => ({ status: 'ok', service: 'certfast-api', timestamp: new Date().toISOString() }))
 
-// Import users and organizations routes
-import './routes/users_orgs.js'
-
-router.get('/', async ({ response }: HttpContext) => {
-  return response.json({ hello: 'world', app: 'certfast-api' })
-})
-
-router.get('/health', async ({ response }: HttpContext) => {
-  return response.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    service: 'certfast-api'
+router
+  .group(() => {
+    router.post('/auth/register', '#controllers/auth_controller.register')
+    router.post('/auth/login', '#controllers/auth_controller.login')
   })
-})
+  .prefix('/api/v1')
+
+router
+  .group(() => {
+    router.get('/auth/me', '#controllers/auth_controller.me')
+    router.post('/auth/logout', '#controllers/auth_controller.logout')
+
+    router.get('/users', '#controllers/users_controller.index')
+    router.get('/users/:id', '#controllers/users_controller.show')
+    router.put('/users/:id', '#controllers/users_controller.update')
+    router.delete('/users/:id', '#controllers/users_controller.destroy')
+
+    router.get('/organizations', '#controllers/organizations_controller.index')
+    router.post('/organizations', '#controllers/organizations_controller.store')
+    router.get('/organizations/:id', '#controllers/organizations_controller.show')
+    router.put('/organizations/:id', '#controllers/organizations_controller.update')
+    router.delete('/organizations/:id', '#controllers/organizations_controller.destroy')
+
+    router.get('/assessments', '#controllers/assessments_controller.index')
+    router.post('/assessments', '#controllers/assessments_controller.store')
+    router.get('/assessments/:id', '#controllers/assessments_controller.show')
+    router.put('/assessments/:id', '#controllers/assessments_controller.update')
+    router.delete('/assessments/:id', '#controllers/assessments_controller.destroy')
+  })
+  .use(middleware.auth())
+  .prefix('/api/v1')
