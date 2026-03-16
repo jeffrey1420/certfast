@@ -1,6 +1,19 @@
+# ⚠️ OBSOLETE — AWS Architecture (Legacy)
+
+> **Status**: ARCHIVED — This document describes the original AWS-based architecture.
+> 
+> **Decision Date**: 2026-03-15  
+> **Current Architecture**: Bare Metal + Docker + Cloudflare R2  
+> 
+> **See instead**: `/work/certfast/architecture/system-architecture.md` for the current Bare Metal architecture.
+> 
+> **Reason for change**: Cost control, data sovereignty, operational simplicity
+
+---
+
 # CertFast System Architecture
 
-**Document Version**: 1.0  
+**Document Version**: 1.0 (ARCHIVED)  
 **Date**: March 15, 2026  
 **Architect**: System Architect  
 **Status**: Draft

@@ -1,6 +1,19 @@
+# ⚠️ OBSOLETE — AWS Security Architecture (Legacy)
+
+> **Status**: ARCHIVED — This document describes security controls for the original AWS-based architecture.
+> 
+> **Decision Date**: 2026-03-15  
+> **Current Architecture**: Bare Metal + Docker + Cloudflare R2  
+> 
+> **See instead**: `/work/certfast/architecture/security-architecture.md` for the current Bare Metal security architecture.
+> 
+> **Reason for change**: Cost control, data sovereignty, operational simplicity
+
+---
+
 # CertFast Security Architecture
 
-**Document Version**: 1.0  
+**Document Version**: 1.0 (ARCHIVED)  
 **Date**: March 15, 2026  
 **Architect**: System Architect  
 **Status**: Draft

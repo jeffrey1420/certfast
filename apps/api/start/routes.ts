@@ -47,6 +47,12 @@ router
     router.put('/policies/:id', '#controllers/policies_controller.update')
     router.delete('/policies/:id', '#controllers/policies_controller.destroy')
 
+    router.get('/evidence', '#controllers/evidence_controller.index')
+    router.post('/evidence', '#controllers/evidence_controller.store')
+    router.get('/evidence/:id', '#controllers/evidence_controller.show')
+    router.put('/evidence/:id', '#controllers/evidence_controller.update')
+    router.delete('/evidence/:id', '#controllers/evidence_controller.destroy')
+
     router.get('/dashboard/activity', '#controllers/dashboard_controller.activity')
   })
   .use(middleware.auth())
