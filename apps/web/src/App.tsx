@@ -4,6 +4,7 @@ import { RegisterPage } from '@/routes/auth/register'
 import { ForgotPasswordPage } from '@/routes/auth/forgot-password'
 import { ResetPasswordPage } from '@/routes/auth/reset-password'
 import { DashboardPage } from '@/routes/dashboard'
+import { AssessmentsPage } from '@/routes/assessments'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/assessments" element={<AssessmentsPage />} />
         <Route path="*" element={<div className="p-8">404 - Not Found</div>} />
       </Routes>
     </div>
