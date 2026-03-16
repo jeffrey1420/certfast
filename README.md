@@ -3,7 +3,7 @@
 <img src="https://img.shields.io/badge/status-active-success?style=flat-square" alt="Status">
 <img src="https://img.shields.io/badge/progress-70%25-blue?style=flat-square" alt="Progress">
 <img src="https://img.shields.io/badge/quality-4.8%2F5-brightgreen?style=flat-square" alt="Quality">
-<img src="https://img.shields.io/badge/sprint-1.5%20Realignment-orange?style=flat-square" alt="Sprint">
+<img src="https://img.shields.io/badge/sprint-2%20MVP%20Development-blue?style=flat-square" alt="Sprint">
 
 # 🚀 CertFast
 
@@ -51,11 +51,27 @@ Tech      [████████████████░░░░]  80%   
 
 ---
 
-## ✅ Architecture Realignment Complete
+## 🏗️ V1 Delivered
 
-**Completed 2026-03-16**: Architecture documents have been updated for bare metal deployment.
+**V1 Foundation (Sprint #1 + Sprint #1.5) - COMPLETE ✅**
 
-**Infrastructure Stack (Confirmed):**
+### What's Actually Built
+
+| Component | Status | Location |
+|-----------|--------|----------|
+| **Product Strategy** | ✅ Complete | `project/strategy/` |
+| **Brand Identity** | ✅ Complete | `project/design/brand/` |
+| **UX Research** | ✅ Complete | `project/design/ux-research/` |
+| **Design System** | ✅ Complete | `project/design/design-system/` |
+| **Wireframes & Mockups** | ✅ Complete | `project/design/wireframes/` |
+| **Database Schema** | ✅ Complete | `apps/api/database/` |
+| **API Specification** | ✅ Complete | `architecture/api-core-endpoints.md` |
+| **System Architecture** | ✅ Complete | `architecture/system-architecture.md` (Bare Metal) |
+| **Security Architecture** | ✅ Complete | `architecture/security-architecture.md` |
+| **DevOps Plan** | ✅ Complete | `architecture/infrastructure-plan.md` |
+
+### Architecture Decision (2026-03-15)
+**Selected Stack:**
 - ✅ **Hosting**: Bare metal server (EU datacenter)
 - ✅ **Containers**: Docker + Docker Compose
 - ✅ **Storage**: Cloudflare R2 (S3-compatible)
@@ -63,7 +79,7 @@ Tech      [████████████████░░░░]  80%   
 - ✅ **API**: AdonisJS v6 (ready)
 - ✅ **Frontend**: React 18 + Vite (ready)
 
-**Sprint #2 is now UNBLOCKED and ACTIVE**
+**Rationale**: Cost control, data sovereignty, operational simplicity
 
 ---
 
