@@ -1,5 +1,7 @@
 # Design Track - Task Queue
 
+> Legacy board: for canonical status, read `workflow/PROJECT_STATE.md`.
+
 **Track Owner**: Design Pipeline
 **Current Phase**: Sprint #2 - Frontend Development
 

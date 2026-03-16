@@ -1,5 +1,7 @@
 # 🔄 Current Sprint State
 
+> Legacy board: for canonical status, read `workflow/PROJECT_STATE.md`.
+
 **Sprint**: #1 - Foundation  
 **Theme**: Strategy & Architecture Setup  
 **Started**: 2026-03-15 00:00 CET  

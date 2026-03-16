@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { api } from '@/lib/api'
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -36,19 +37,8 @@ export function LoginPage() {
     setError(null)
 
     try {
-      const response = await fetch('/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || 'Login failed')
-      }
-
-      const result = await response.json()
-      setAuth(result.data.user, result.data.token)
+      const response = await api.post('/auth/login', data)
+      setAuth(response.data.user, response.data.token)
       toast.success('Welcome back!')
       navigate('/dashboard')
     } catch (err) {

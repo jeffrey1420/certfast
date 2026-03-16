@@ -1,5 +1,7 @@
 # Tech Track - Task Queue
 
+> Legacy board: for canonical status, read `workflow/PROJECT_STATE.md`.
+
 **Track Owner**: Technical Pipeline
 **Current Phase**: Sprint #2 - Development (SIMPLIFIED)
 

@@ -1,80 +1,41 @@
-import { test as japaTest } from '@japa/runner'
 import { Database } from '@adonisjs/lucid/database'
+import User from '#models/user'
+import Organization from '#models/organization'
 
-// Extended test helper with transaction support
-export function test(name: string, callback: (context: any) => Promise<void> | void) {
-  return japaTest(name, async (context) => {
-    const db = globalThis.$db as Database
-    
-    // Start transaction
-    const trx = await db.connection().transaction()
-    
-    // Replace default connection with transaction for this test
-    const originalConnection = db.connection()
-    const connectionProxy = new Proxy(originalConnection, {
-      get(target, prop) {
-        if (prop === 'query' || prop === 'insertQuery' || prop === 'modelQuery') {
-          return (...args: any[]) => (trx as any)[prop](...args)
-        }
-        return (trx as any)[prop]
-      },
-    })
-    
-    // Monkey-patch connection for the duration of the test
-    const manager = db.manager as any
-    const originalGet = manager.get
-    manager.get = () => connectionProxy
-    
-    try {
-      // Run the actual test
-      await callback(context)
-    } finally {
-      // Always rollback, even if test fails
-      await trx.rollback()
-      // Restore original connection
-      manager.get = originalGet
-    }
-  })
+const TABLES_IN_RESET_ORDER = [
+  'user_tokens',
+  'organization_members',
+  'evidence',
+  'controls',
+  'assessments',
+  'organizations',
+  'users',
+]
+
+export async function resetDatabase() {
+  const db = globalThis.$db as Database
+  const tableList = TABLES_IN_RESET_ORDER.join(', ')
+  await db.rawQuery(`TRUNCATE TABLE ${tableList} RESTART IDENTITY CASCADE`)
 }
 
-// Transaction wrapper for test groups
-export function testGroup(name: string, callback: (group: any) => void) {
-  return japaTest.group(name, (group) => {
-    let trx: any = null
-    const db = () => globalThis.$db as Database
-    
-    group.each.setup(async () => {
-      trx = await db().connection().transaction()
-    })
-    
-    group.each.teardown(async () => {
-      if (trx) {
-        await trx.rollback()
-        trx = null
-      }
-    })
-    
-    callback(group)
-  })
-}
-
-// Factory helpers for tests
-export async function createUser(overrides: any = {}) {
-  const User = (await import('#models/user')).default
+export async function createUser(overrides: Partial<User> = {}) {
   return User.create({
-    email: `test_${Date.now()}@example.com`,
+    email: `test_${Date.now()}_${Math.random().toString(36).slice(2)}@example.com`,
     password: 'password123',
     fullName: 'Test User',
+    role: 'user',
+    isActive: true,
     ...overrides,
   })
 }
 
-export async function createOrganization(userId: number, overrides: any = {}) {
-  const Organization = (await import('#models/organization')).default
+export async function createOrganization(userId: number, overrides: Partial<Organization> = {}) {
   return Organization.create({
     name: 'Test Organization',
-    slug: `test-org-${Date.now()}`,
+    slug: `test-org-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     ownerId: userId,
+    plan: 'free',
+    status: 'active',
     ...overrides,
   })
 }

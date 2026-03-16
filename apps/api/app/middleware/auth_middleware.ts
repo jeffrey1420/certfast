@@ -20,7 +20,7 @@ export default class AuthMiddleware {
       return ctx.response.status(401).json({ error: 'Unauthorized' })
     }
 
-    const userId = resolveUserIdFromToken(token)
+    const userId = await resolveUserIdFromToken(token)
     if (!userId) {
       return ctx.response.status(401).json({ error: 'Unauthorized' })
     }

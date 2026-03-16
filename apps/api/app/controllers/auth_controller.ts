@@ -1,7 +1,11 @@
 import { HttpContext } from '@adonisjs/core/http'
-import hash from '@adonisjs/core/services/hash'
 import User from '#models/user'
-import { extractBearerToken, issueTokenForUser, resolveUserIdFromToken, revokeToken } from '#services/token_store'
+import {
+  extractBearerToken,
+  issueTokenForUser,
+  resolveUserIdFromToken,
+  revokeToken,
+} from '#services/token_store'
 
 async function getAuthenticatedUser(ctx: HttpContext) {
   const userIdFromMiddleware = (ctx as any).authUserId as number | undefined
@@ -12,15 +16,24 @@ async function getAuthenticatedUser(ctx: HttpContext) {
   const token = extractBearerToken(ctx.request.header('authorization'))
   if (!token) return null
 
-  const userId = resolveUserIdFromToken(token)
+  const userId = await resolveUserIdFromToken(token)
   if (!userId) return null
 
   return User.find(userId)
 }
 
+function toPublicUser(user: User) {
+  return {
+    id: user.id,
+    email: user.email,
+    fullName: user.fullName,
+    role: user.role,
+  }
+}
+
 export default class AuthController {
   async register({ request, response }: HttpContext) {
-    const { email, password, fullName } = request.body()
+    const { email, password, fullName, firstName, lastName } = request.body()
 
     if (!email || !password) {
       return response.status(422).json({
@@ -34,19 +47,24 @@ export default class AuthController {
       return response.status(422).json({ error: 'User already exists' })
     }
 
+    const joinedName = [firstName, lastName]
+      .filter((part) => typeof part === 'string' && part.trim())
+      .join(' ')
+    const computedFullName = fullName ?? (joinedName || null)
+
     const user = await User.create({
       email,
-      password: await hash.make(password),
-      fullName: fullName ?? null,
+      password,
+      fullName: computedFullName,
       role: 'user',
       isActive: true,
     })
 
+    const token = await issueTokenForUser(user.id)
+
     return response.status(201).json({
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      role: user.role,
+      token,
+      user: toPublicUser(user),
     })
   }
 
@@ -65,21 +83,16 @@ export default class AuthController {
       return response.status(401).json({ error: 'Invalid credentials' })
     }
 
-    const passwordOk = await hash.verify(user.password, password)
+    const passwordOk = await user.verifyPassword(password)
     if (!passwordOk) {
       return response.status(401).json({ error: 'Invalid credentials' })
     }
 
-    const token = issueTokenForUser(user.id)
+    const token = await issueTokenForUser(user.id)
 
     return response.status(200).json({
       token,
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-      },
+      user: toPublicUser(user),
     })
   }
 
@@ -89,12 +102,7 @@ export default class AuthController {
       return ctx.response.status(401).json({ error: 'Unauthorized' })
     }
 
-    return ctx.response.status(200).json({
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      role: user.role,
-    })
+    return ctx.response.status(200).json(toPublicUser(user))
   }
 
   async logout(ctx: HttpContext) {
@@ -103,7 +111,7 @@ export default class AuthController {
       return ctx.response.status(401).json({ error: 'Unauthorized' })
     }
 
-    revokeToken(token)
+    await revokeToken(token)
     return ctx.response.status(200).json({ message: 'Logged out successfully' })
   }
 }

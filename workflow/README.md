@@ -1,5 +1,7 @@
 # Multi-Agent Workflow System v2
 
+> State tracking note: `workflow/PROJECT_STATE.md` is the single source of truth for current project state.
+
 ## Architecture Overview
 
 This is a **3-track parallel system** with quality gates, review loops, and automated monitoring.

@@ -16,6 +16,8 @@ router
     router.get('/auth/me', '#controllers/auth_controller.me')
     router.post('/auth/logout', '#controllers/auth_controller.logout')
 
+    router.get('/users/me', '#controllers/users_controller.me')
+    router.put('/users/me', '#controllers/users_controller.updateMe')
     router.get('/users', '#controllers/users_controller.index')
     router.get('/users/:id', '#controllers/users_controller.show')
     router.put('/users/:id', '#controllers/users_controller.update')

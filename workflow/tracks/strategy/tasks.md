@@ -1,5 +1,7 @@
 # Strategy Track - Task Queue
 
+> Legacy board: for canonical status, read `workflow/PROJECT_STATE.md`.
+
 **Track Owner**: Strategy Pipeline
 **Current Phase**: Sprint #2 - Go-to-Market Execution
 

@@ -1,3 +1,4 @@
+import type { ChangeEvent } from 'react'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -48,7 +49,7 @@ export function AssessmentFilters({ filters, onFiltersChange }: AssessmentFilter
     onFiltersChange({ ...filters, framework: value })
   }
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     onFiltersChange({ ...filters, search: e.target.value })
   }
 
