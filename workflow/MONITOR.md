@@ -1,5 +1,36 @@
 # CertFast Workflow Monitor - Lessons Learned
 
+## 2026-03-16: Agent Execution Failure - RECURRENCE #4 (18:16) - RECOVERY AGENTS DEPLOYED
+
+### Problem
+**FOURTH RECURRENCE** of the agent execution failure pattern. Workflow stalled for **47 minutes** with identical symptoms to previous incidents.
+
+### Evidence
+| Metric | 09:16 | 11:31 | 16:46 | 18:16 (this) |
+|--------|-------|-------|-------|--------------|
+| Stall duration | 89 min | 63 min | 88 min | 47 min |
+| Tech track exec | 41 sec | 38 sec | 47 sec | ~57 sec |
+| Design track exec | 54 sec | 55 sec | 56 sec | ~55 sec |
+| Subagents found | 0 | 0 | 0 | 0 |
+| Sessions active | 1 | 1 | 1 | 1 |
+
+### Recovery Action Deployed
+Spawned 3 manual recovery subagents:
+- `strategy-recovery-STR016`: Session d6b14ba7-d82f-41bd-a4ae-506f21760854
+- `design-recovery-DSG011`: Session ef865127-c431-4298-9205-c2472e5772ae  
+- `tech-recovery-TEC010`: Session 6a8bc128-9a35-4a98-bd99-e291250df0b0
+
+### Why Manual Recovery Was Needed
+The cron-based agent system has a **systemic failure** - agents spawn but don't execute. The monitor cannot fix this at the cron level, so I manually spawned agents with explicit recovery instructions.
+
+### Monitoring Recovery
+Will check in 10-15 minutes for:
+1. Git push activity (new commits)
+2. Task file updates (status changes to COMPLETE)
+3. Subagent completion status
+
+---
+
 ## 2026-03-16: Agent Execution Failure - RECURRENCE #3 (16:46)
 
 ### Problem
