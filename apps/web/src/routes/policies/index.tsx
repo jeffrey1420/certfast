@@ -153,7 +153,7 @@ export function PoliciesPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onPageChange(currentPage - 1)}
+                  onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                 >
                   Previous
@@ -164,7 +164,7 @@ export function PoliciesPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onPageChange(currentPage + 1)}
+                  onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                 >
                   Next

@@ -154,6 +154,9 @@ export function AssessmentDetailPage() {
   const [controls, setControls] = useState<Control[]>(mockControls)
   const [evidenceFiles, setEvidenceFiles] = useState<EvidenceFile[]>(mockEvidenceFiles)
 
+  // Use id to fetch assessment data in real implementation
+  console.log('Assessment ID:', id)
+
   // Calculate stats
   const completedControls = controls.filter((c) => c.status === 'completed').length
   const totalControls = controls.length

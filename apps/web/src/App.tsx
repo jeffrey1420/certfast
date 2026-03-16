@@ -6,6 +6,10 @@ import { ResetPasswordPage } from '@/routes/auth/reset-password'
 import { DashboardPage } from '@/routes/dashboard'
 import { AssessmentsPage } from '@/routes/assessments'
 import { AssessmentDetailPage } from '@/routes/assessments/detail'
+import { ControlsPage } from '@/routes/controls'
+import { ControlDetailPage } from '@/routes/controls/detail'
+import { PoliciesPage } from '@/routes/policies'
+import { PolicyDetailPage } from '@/routes/policies/detail'
 
 function App() {
   return (
@@ -19,6 +23,10 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/assessments" element={<AssessmentsPage />} />
         <Route path="/assessments/:id" element={<AssessmentDetailPage />} />
+        <Route path="/controls" element={<ControlsPage />} />
+        <Route path="/controls/:id" element={<ControlDetailPage />} />
+        <Route path="/policies" element={<PoliciesPage />} />
+        <Route path="/policies/:id" element={<PolicyDetailPage />} />
         <Route path="*" element={<div className="p-8">404 - Not Found</div>} />
       </Routes>
     </div>
