@@ -38,7 +38,7 @@ export function Blog() {
       searchQuery === '' ||
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       article.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.tags.some((tag) =
+      article.tags.some((tag) =>
         tag.toLowerCase().includes(searchQuery.toLowerCase())
       );
 
