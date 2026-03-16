@@ -1,123 +1,196 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Activity, TrendingUp, Shield, FileCheck } from 'lucide-react';
-import { MetricCard } from './components/MetricCard';
-import { ProgressBar } from './components/ProgressBar';
-import { ActivityList } from './components/ActivityList';
-import { QuickActions } from './components/QuickActions';
+import { useState, useEffect } from 'react'
+import { MainContent } from '@/components/layout'
+import { MetricCard } from './components/MetricCard'
+import { ProgressBar } from './components/ProgressBar'
+import { ActivityList } from './components/ActivityList'
+import { QuickActions } from './components/QuickActions'
+import { Shield, ClipboardCheck, FileText, Calendar, TrendingUp } from 'lucide-react'
+import { toast } from 'sonner'
 
 // Mock data for now (API not ready)
-const metrics = {
+interface DashboardMetrics {
+  complianceScore: number
+  totalAssessments: number
+  evidenceCount: number
+  daysToCompliance: number
+}
+
+interface Activity {
+  id: number
+  type: 'assessment_completed' | 'evidence_uploaded' | 'control_approved' | 'compliance_alert' | 'task_assigned'
+  title: string
+  description?: string
+  time: string
+}
+
+const mockMetrics: DashboardMetrics = {
   complianceScore: 85,
   totalAssessments: 12,
   evidenceCount: 47,
   daysToCompliance: 45
-};
+}
 
-const activities = [
-  { id: 1, type: 'assessment_completed', title: 'ISO 27001 Assessment', time: '2h ago' },
-  { id: 2, type: 'evidence_uploaded', title: 'Policy Document Uploaded', time: '4h ago' },
-  { id: 3, type: 'control_passed', title: 'Access Control Passed', time: '6h ago' },
-  { id: 4, type: 'assessment_started', title: 'SOC 2 Assessment Started', time: '1d ago' },
-  { id: 5, type: 'evidence_uploaded', title: 'Audit Trail Uploaded', time: '2d ago' },
-];
+const mockActivities: Activity[] = [
+  {
+    id: 1,
+    type: 'assessment_completed',
+    title: 'ISO 27001 Assessment',
+    description: 'All controls have been reviewed',
+    time: '2h ago'
+  },
+  {
+    id: 2,
+    type: 'evidence_uploaded',
+    title: 'Policy Document',
+    description: 'Information Security Policy v2.0',
+    time: '4h ago'
+  },
+  {
+    id: 3,
+    type: 'control_approved',
+    title: 'Access Control Review',
+    description: 'Approved by Compliance Officer',
+    time: '1d ago'
+  },
+  {
+    id: 4,
+    type: 'compliance_alert',
+    title: 'Upcoming Audit',
+    description: 'External audit scheduled in 30 days',
+    time: '2d ago'
+  },
+  {
+    id: 5,
+    type: 'task_assigned',
+    title: 'Risk Assessment',
+    description: 'Assigned to John Smith',
+    time: '3d ago'
+  }
+]
 
-export default function DashboardPage() {
+export function DashboardPage() {
+  const [metrics, setMetrics] = useState<DashboardMetrics>(mockMetrics)
+  const [activities] = useState<Activity[]>(mockActivities)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch metrics from API (with fallback to mock)
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const response = await fetch('/api/v1/dashboard/metrics')
+        if (response.ok) {
+          const data = await response.json()
+          setMetrics(data)
+        }
+      } catch {
+        // Fallback to mock data already set
+        console.log('Using mock dashboard data')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchMetrics()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <MainContent>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-pulse text-muted-foreground">Loading dashboard...</div>
+        </div>
+      </MainContent>
+    )
+  }
+
   return (
-    <div className="space-y-6">
+    <MainContent>
       {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">
           Welcome back! Here's your compliance overview.
         </p>
       </div>
 
-      {/* Metric Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Metric Cards Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <MetricCard
           title="Compliance Score"
           value={`${metrics.complianceScore}%`}
-          description="Overall compliance rating"
-          icon={<Shield className="h-4 w-4 text-muted-foreground" />}
-          trend="+5% from last month"
-          trendUp={true}
+          description="Overall compliance status"
+          icon={Shield}
+          trend={{ value: 12, isPositive: true }}
         />
         <MetricCard
-          title="Assessments"
+          title="Total Assessments"
           value={metrics.totalAssessments}
-          description="Active assessments"
-          icon={<FileCheck className="h-4 w-4 text-muted-foreground" />}
-          trend="3 pending review"
-          trendUp={null}
+          description="Active and completed"
+          icon={ClipboardCheck}
         />
         <MetricCard
-          title="Evidence"
+          title="Evidence Items"
           value={metrics.evidenceCount}
-          description="Files uploaded"
-          icon={<Activity className="h-4 w-4 text-muted-foreground" />}
-          trend="+12 this week"
-          trendUp={true}
+          description="Uploaded documents"
+          icon={FileText}
+          trend={{ value: 8, isPositive: true }}
         />
         <MetricCard
-          title="Days Remaining"
+          title="Days to Compliance"
           value={metrics.daysToCompliance}
-          description="Until compliance deadline"
-          icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
-          trend="On track"
-          trendUp={true}
+          description="Target: ISO 27001 certification"
+          icon={Calendar}
         />
       </div>
 
-      {/* Progress and Activity */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Compliance Progress</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <ProgressBar 
-              value={metrics.complianceScore} 
-              label="Overall Compliance"
-              description={`${metrics.complianceScore}% completed`}
-            />
-            <ProgressBar 
-              value={72} 
-              label="ISO 27001"
-              description="8 of 14 controls passed"
-            />
-            <ProgressBar 
-              value={45} 
-              label="SOC 2 Type II"
-              description="9 of 20 controls passed"
-            />
-            <ProgressBar 
-              value={90} 
-              label="GDPR"
-              description="18 of 20 controls passed"
-            />
-          </CardContent>
-        </Card>
+      {/* Main Content Grid */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left Column - Progress Bar */}
+        <div className="lg:col-span-2 space-y-6">
+          <ProgressBar
+            title="Compliance Progress"
+            value={metrics.complianceScore}
+            max={100}
+            description={`You're ${metrics.complianceScore}% compliant with ISO 27001 requirements. Keep up the good work!`}
+          />
+          
+          {/* Additional Stats Row */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="bg-muted/50 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <TrendingUp className="h-4 w-4" />
+                <span>Completed</span>
+              </div>
+              <div className="text-2xl font-bold mt-1">8/12</div>
+              <div className="text-xs text-muted-foreground">Assessments done</div>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <FileText className="h-4 w-4" />
+                <span>Pending</span>
+              </div>
+              <div className="text-2xl font-bold mt-1">4</div>
+              <div className="text-xs text-muted-foreground">Items need attention</div>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Shield className="h-4 w-4" />
+                <span>Score</span>
+              </div>
+              <div className="text-2xl font-bold mt-1">A-</div>
+              <div className="text-xs text-muted-foreground">Current grade</div>
+            </div>
+          </div>
+        </div>
 
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ActivityList activities={activities} />
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
+        {/* Right Column - Quick Actions & Activity */}
+        <div className="space-y-6">
           <QuickActions />
-        </CardContent>
-      </Card>
-    </div>
-  );
+          <ActivityList activities={activities} />
+        </div>
+      </div>
+    </MainContent>
+  )
 }
+
+export default DashboardPage

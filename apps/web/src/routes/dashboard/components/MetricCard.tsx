@@ -1,51 +1,56 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
+import { LucideIcon } from 'lucide-react'
 
 interface MetricCardProps {
-  title: string;
-  value: string | number;
-  description: string;
-  icon: React.ReactNode;
-  trend?: string;
-  trendUp: boolean | null;
+  title: string
+  value: string | number
+  description?: string
+  icon: LucideIcon
+  trend?: {
+    value: number
+    isPositive: boolean
+  }
+  className?: string
 }
 
-export function MetricCard({ 
-  title, 
-  value, 
-  description, 
-  icon, 
+export function MetricCard({
+  title,
+  value,
+  description,
+  icon: Icon,
   trend,
-  trendUp 
+  className,
 }: MetricCardProps) {
   return (
-    <Card>
+    <Card className={cn(className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
-        {icon}
+        <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground">
-          {description}
-        </p>
+        {description && (
+          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+        )}
         {trend && (
-          <div className={cn(
-            "mt-2 flex items-center text-xs",
-            trendUp === true && "text-green-600",
-            trendUp === false && "text-red-600",
-            trendUp === null && "text-muted-foreground"
-          )}>
-            {trendUp === true && <TrendingUp className="mr-1 h-3 w-3" />}
-            {trendUp === false && <TrendingDown className="mr-1 h-3 w-3" />}
-            {trendUp === null && <Minus className="mr-1 h-3 w-3" />}
-            {trend}
+          <div className="flex items-center gap-1 mt-2">
+            <span
+              className={cn(
+                'text-xs font-medium',
+                trend.isPositive ? 'text-green-600' : 'text-red-600'
+              )}
+            >
+              {trend.isPositive ? '+' : ''}{trend.value}%
+            </span>
+            <span className="text-xs text-muted-foreground">from last month</span>
           </div>
         )}
       </CardContent>
     </Card>
-  );
+  )
 }
+
+export default MetricCard
