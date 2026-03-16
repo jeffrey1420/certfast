@@ -146,6 +146,15 @@ Core API - Users & Organizations
 
 ---
 
+
+### 🚨 P0-TEST-001: Restore AdonisJS test harness boot
+- **Role**: backend-developer
+- **Type**: Quick (15 min)
+- **Status**: IN PROGRESS (boot path restored, suite now fails inside specs)
+- **Priority**: P0 stability
+- **Scope**: unblock `apps/api npm test` boot path before continuing TEC-011
+- **Latest finding (2026-03-16)**: Japa hook API mismatch fixed (`group.setup.each` -> `group.each.setup`). Harness now boots and executes specs; current blockers are DB connectivity (`AggregateError` from API client) and stale migration import paths in `tests/migrations.spec.ts` (`/work/certfast/apps/database/...`).
+
 ## Backlog - Sprint #2
 
 ### ✅ TEC-007: Backend Project Setup - COMPLETE
@@ -184,7 +193,7 @@ Core API - Users & Organizations
 ### TEC-011: Core API - Assessments
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
-- **Status**: ACTIVE - EXECUTE NOW
+- **Status**: BLOCKED by P0 test harness bootstrapping
 - **Depends on**: TEC-010 ✅
 
 ---

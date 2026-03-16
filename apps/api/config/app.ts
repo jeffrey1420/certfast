@@ -1,10 +1,9 @@
-import { defineConfig } from '@adonisjs/core'
-import { env } from './env.js'
-
-export default defineConfig({
-  appKey: env.get('APP_KEY'),
+const appConfig = {
+  appKey: process.env.APP_KEY || 'test-app-key-32-characters-minimum',
   http: {
     cookie: {},
     trustProxy: () => true,
   },
-})
+}
+
+export default appConfig

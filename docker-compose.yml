@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: certfast-postgres
+    environment:
+      POSTGRES_USER: certfast
+      POSTGRES_PASSWORD: certfast_dev_password
+      POSTGRES_DB: certfast_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U certfast -d certfast_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: certfast-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Service pour les tests — même config mais DB différente
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: certfast-postgres-test
+    environment:
+      POSTGRES_USER: certfast
+      POSTGRES_PASSWORD: certfast_test_password
+      POSTGRES_DB: certfast_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U certfast -d certfast_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:

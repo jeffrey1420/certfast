@@ -1,55 +1,32 @@
 import { HttpContext } from '@adonisjs/core/http'
-
-// Import shared stores from auth controller
-import { users, tokens } from './auth_controller.js'
+import User from '#models/user'
 
 export default class UsersController {
   /**
-   * List all users
+   * List all users (paginated)
    */
   async index({ request, response }: HttpContext) {
-    // Check auth
-    const authHeader = request.header('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return response.status(401).json({ error: 'Unauthorized' })
-    }
+    const page = request.input('page', 1)
+    const limit = request.input('limit', 20)
+    
+    const users = await User.query()
+      .select(['id', 'email', 'full_name', 'role', 'is_active', 'created_at', 'updated_at'])
+      .paginate(page, limit)
 
-    const token = authHeader.substring(7)
-    if (!tokens.has(token)) {
-      return response.status(401).json({ error: 'Unauthorized' })
-    }
-
-    // Return all users (exclude password)
-    const userList = Array.from(users.values()).map(user => ({
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      role: user.role,
-      isActive: user.isActive,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt
-    }))
-
-    return response.status(200).json(userList)
+    return response.status(200).json(users)
   }
 
   /**
    * Get user by ID
    */
-  async show({ request, response, params }: HttpContext) {
-    // Check auth
-    const authHeader = request.header('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return response.status(401).json({ error: 'Unauthorized' })
-    }
-
-    const token = authHeader.substring(7)
-    if (!tokens.has(token)) {
-      return response.status(401).json({ error: 'Unauthorized' })
-    }
-
+  async show({ params, response }: HttpContext) {
     const userId = parseInt(params.id)
-    const user = users.get(userId)
+    
+    if (isNaN(userId)) {
+      return response.status(400).json({ error: 'Invalid user ID' })
+    }
+
+    const user = await User.find(userId)
 
     if (!user) {
       return response.status(404).json({ error: 'User not found' })
@@ -62,27 +39,21 @@ export default class UsersController {
       role: user.role,
       isActive: user.isActive,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
     })
   }
 
   /**
    * Update user
    */
-  async update({ request, response, params }: HttpContext) {
-    // Check auth
-    const authHeader = request.header('authorization')
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return response.status(401).json({ error: 'Unauthorized' })
-    }
-
-    const token = authHeader.substring(7)
-    if (!tokens.has(token)) {
-      return response.status(401).json({ error: 'Unauthorized' })
-    }
-
+  async update({ params, request, response }: HttpContext) {
     const userId = parseInt(params.id)
-    const user = users.get(userId)
+    
+    if (isNaN(userId)) {
+      return response.status(400).json({ error: 'Invalid user ID' })
+    }
+
+    const user = await User.find(userId)
 
     if (!user) {
       return response.status(404).json({ error: 'User not found' })
@@ -96,7 +67,7 @@ export default class UsersController {
     if (role !== undefined) user.role = role
     if (isActive !== undefined) user.isActive = isActive
     
-    user.updatedAt = new Date().toISOString()
+    await user.save()
 
     return response.status(200).json({
       id: user.id,
@@ -105,7 +76,28 @@ export default class UsersController {
       role: user.role,
       isActive: user.isActive,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt
+      updatedAt: user.updatedAt,
     })
+  }
+
+  /**
+   * Delete user
+   */
+  async destroy({ params, response }: HttpContext) {
+    const userId = parseInt(params.id)
+    
+    if (isNaN(userId)) {
+      return response.status(400).json({ error: 'Invalid user ID' })
+    }
+
+    const user = await User.find(userId)
+
+    if (!user) {
+      return response.status(404).json({ error: 'User not found' })
+    }
+
+    await user.delete()
+
+    return response.status(204).send('')
   }
 }
