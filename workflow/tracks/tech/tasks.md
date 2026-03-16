@@ -184,7 +184,8 @@ Core API - Users & Organizations
 ### TEC-011: Core API - Assessments
 - **Role**: backend-developer
 - **Type**: Standard (30 min)
-- **Depends on**: TEC-010
+- **Status**: ACTIVE - EXECUTE NOW
+- **Depends on**: TEC-010 ✅
 
 ---
 

@@ -182,7 +182,8 @@ apps/web/src/routes/assessments/
 ### DSG-012: Assessment Detail Page
 - **Role**: frontend-developer
 - **Type**: Standard (30 min)
-- **Depends on**: DSG-011
+- **Status**: ACTIVE - EXECUTE NOW
+- **Depends on**: DSG-011 ✅
 
 **Features:**
 - Header with status
