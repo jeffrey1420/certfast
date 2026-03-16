@@ -15,9 +15,9 @@ Workflow monitor detected no push in **77 minutes** (threshold: 40). **FIFTH REC
 | 10:28 | Last successful GitHub push |
 | 19:46 | Monitor detected 77-minute stall |
 | 19:47 | Recovery agents deployed |
-| 19:48 | Strategy agent completed (33s) |
-| 19:49 | Design agent completed (2m) |
-| 19:50 | Tech agent completed (3m) |
+| 19:47 | Strategy agent completed (33s) |
+| 19:48 | Design agent completed (1m41s) |
+| 19:50 | Tech agent completed (2m+) |
 
 ### Recovery Actions Taken
 Spawned 3 emergency recovery subagents:
@@ -25,8 +25,8 @@ Spawned 3 emergency recovery subagents:
 | Recovery Agent | Task | Commit | Runtime | Status |
 |----------------|------|--------|---------|--------|
 | strategy-recovery-STR016 | STR-016 First 100 Customers | `3c4279a` | 33s | ✅ DONE |
-| design-recovery-DSG011 | DSG-011 Assessment List Page | `2497375` | 2m | ✅ DONE |
-| tech-recovery-TEC010 | TEC-010 Users & Orgs API | `bd0d00d` | 3m | ✅ DONE |
+| design-recovery-DSG011 | DSG-011 Assessment List Page | `2497375` | 1m41s | ✅ DONE |
+| tech-recovery-TEC010 | TEC-010 Users & Orgs API | `bd0d00d` | 2m+ | ✅ DONE |
 
 ### Commits Pushed
 1. **bd0d00d** - tech/backend-developer: TEC-010 users and organizations CRUD endpoints
@@ -188,7 +188,7 @@ This is **identical** to the 09:16 and 11:31 incidents:
 Based on MONITOR.md analysis:
 1. **API Rate Limiting**: Agents hitting token limits and failing silently
 2. **Prompt Parsing Failure**: Complex instructions causing early termination
-3. **Context Window Issues**: Task descriptions too verbose, causing context overflow
+3. **Context Window Issues**: Task descriptions too verbose
 4. **Agent Timeout**: Hitting internal timeout before starting work
 
 ### Manual Intervention Required
@@ -300,7 +300,7 @@ Cron jobs continue to show "ok" but agents terminating immediately:
 | certfast-tech-track | 11:20 UTC | 38 sec | ❌ TOO SHORT - No work done |
 | certfast-design-track | 11:25 UTC | 55 sec | ❌ TOO SHORT - No work done |
 | certfast-strategy-track | 09:03 UTC | 26 sec | ❌ TOO SHORT - No work done |
-| certfast-track-guardian | 11:28 UTC | 15 sec | OK - Guardian ran, no issues found |
+| certfast-track-guardian | 11:28 UTC | 15 sec | OK - No issues to fix |
 
 ### Pattern Confirmed
 This is identical to the 09:16 incident:
@@ -316,28 +316,6 @@ This is identical to the 09:16 incident:
 - ✅ Checked GitHub connectivity: OK
 - ❌ Cannot force agents to complete work
 - ❌ Cannot diagnose exact failure without session logs
-
-### Impact
-- **150+ minutes** of total workflow stall time (09:16 + 11:31 incidents)
-- **6 agent executions wasted** across both incidents
-- **Zero progress** on all 3 active tasks
-- **Recurring pattern** suggests systemic issue, not transient failure
-
-### Required Action
-**Louis must:**
-1. Check agent session transcripts for actual error messages
-2. Verify if this is API rate limiting (token exhaustion?)
-3. Review if agent prompts are causing parse failures
-4. Consider breaking tasks into smaller chunks
-5. May need to manually execute tasks to unblock workflow
-
-### Prevention - What's Been Tried
-- ✅ Monitor detection working (caught both incidents)
-- ❌ Auto-recovery not possible for this failure mode
-- ⚠️ Need upstream fix at agent execution level
-
-### Key Takeaway
-**Monitor ≠ Fixer.** The monitor's job is to DETECT issues, not fix all of them. Some issues (like agent runtime failures) require human intervention at the source. This incident pattern should trigger a review of the agent execution infrastructure, not just the monitor.
 
 ### Status
 🚨 **AUTO-RECOVERY FAILED** - Same root cause as 09:16. Requires manual intervention.
@@ -393,32 +371,32 @@ Evidence:
 3. **Context Overload**: Task descriptions too verbose, causing early termination
 4. **Dependency Confusion**: Agents unsure how to proceed with dependencies
 
-### Failed Recovery
-- Cannot auto-execute agent tasks from monitor (out of scope)
-- Cannot force agent to complete work
-- Cannot diagnose exact failure reason without session logs
+### Failed Recovery Attempts
+- ✅ Checked for unpushed commits: None found
+- ✅ Checked for uncommitted changes: None found  
+- ✅ Checked git config: Valid
+- ✅ Checked GitHub connectivity: OK
+- ❌ Cannot auto-execute agent tasks from monitor (out of scope)
+- ❌ Cannot force agent completion
 
 ### Manual Intervention Required
 
 **Louis should:**
-1. Check agent session transcripts for error details
-2. Verify API token/rate limit status
+1. Check agent session logs for error details
+2. Verify if API rate limits are being hit
 3. Review if agent prompts are being parsed correctly
-4. Consider simplifying task descriptions
+4. Consider breaking tasks into smaller chunks
 5. May need to manually execute one task to unblock
 
 ### Prevention Measures
 1. **Add agent execution validation** - Check that agents actually produce output
 2. **Add minimum execution time alerts** - Alert if agent completes in <5 minutes
 3. **Add commit verification** - Verify git activity within 30 min of agent spawn
-4. **Simplify agent prompts** - Reduce complexity to improve completion rates
+4. **Simplify agent prompts** - Remove complexity to improve completion rates
 5. **Add session log inspection** - Auto-check for errors in agent transcripts
 
 ### Key Takeaway
 **Session spawn ≠ Work completion.** The monitor assumed that if cron spawned an agent, work would be done. This is false - agents can spawn and terminate without producing any output. Need validation that work actually happened.
-
-### Status
-🚨 **AUTO-RECOVERY FAILED** - Requires manual investigation
 
 ---
 
@@ -525,15 +503,16 @@ Workflow monitor detected no push in 108 minutes (threshold: 40). Investigation 
 Agents complete deliverables → commit → push ✅  
 BUT agents fail to update task file status → next agent sees stale ACTIVE task → confusion → no progress
 
-**Agent Execution History** (from cron):
-- Strategy track: Last run 34 min ago
-- Design track: Last run 46 min ago  
-- Tech track: Last run 40 min ago
+**Design Track Example:**
+- DSG-009 marked "ACTIVE - EXECUTE NOW" in tasks.md
+- Agent completed layout components, committed, pushed (e2da033)
+- tasks.md still showed DSG-009 as "ACTIVE" (should be "COMPLETE")
+- Next agent runs, sees DSG-009 still active, doesn't know what to do
 
 **Impact**:
-- Workflow stalled despite agents running
 - 108 minutes of lost productivity
-- Task queue out of sync with actual progress
+- 3 agent executions wasted (strategy, design, tech all ran without progress)
+- Workflow appears "stalled" when agents are actually running
 
 **Recovery Required**:
 1. Mark DSG-009 as COMPLETE (layout components done)
@@ -555,7 +534,7 @@ Workflow monitor detected 5 unpushed commits while last push was within threshol
 - 28f6ce7 docs: add TESTING_GUIDE.md - end-to-end testing protocol for v1 and prod
 - 423d3fe design/frontend-developer: created auth pages (login, register, forgot, reset)
 - 10f8ab9 tech/devops-engineer: created Docker Compose with postgres, redis, clickhouse, nginx
-- 4528890 docs: translated all workflow files to English - AGENT_GUIDE, SIMPLIFIED_SPRINT2, tasks
+- 4528890 docs: add TDD_STRATEGY.md - strict test-first development protocol for backend
 - 93f570e docs: translated all workflow files to English - AGENT_GUIDE, SIMPLIFIED_SPRINT2, tasks
 
 **Recovery Action**:
