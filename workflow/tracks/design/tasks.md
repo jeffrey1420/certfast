@@ -122,17 +122,60 @@ const activities = [
 
 ## Backlog - Sprint #2
 
-### DSG-011: Assessment List Page
-- **Role**: frontend-developer
-- **Type**: Standard (30 min)
-- **Status**: ACTIVE - EXECUTE NOW
-- **Depends on**: DSG-009 ✅
+### ✅ DSG-011: Assessment List Page - COMPLETE
+
+**Task ID**: DSG-011
+**Type**: Standard (30 min)
+**Assigned Role**: `frontend-developer`
+**Status**: ✅ COMPLETE
+**Priority**: High
+**Depends on**: DSG-009 ✅
+**Completed**: 2026-03-16
+**Quality Score**: 5/5
+
+#### Description
+Assessment List Page with full filtering and pagination
 
 **Features:**
-- Table with pagination
-- Filters (status, framework)
-- Search
-- Create button
+- ✅ Table with pagination
+- ✅ Filters (status, framework dropdowns)
+- ✅ Search input
+- ✅ Create button
+- ✅ Mock data for 8 assessments
+
+**Files created:**
+```
+apps/web/src/routes/assessments/
+├── index.tsx                    # Main page
+└── components/
+    ├── AssessmentTable.tsx      # Table with pagination
+    ├── AssessmentFilters.tsx    # Status, framework filters + search
+    └── CreateButton.tsx         # New Assessment button
+```
+
+**shadcn/ui components used:**
+- `Table`, `TableBody`, `TableCell`, `TableHead`, `TableHeader`, `TableRow`
+- `Button`, `Input`, `Select`, `Badge`, `Progress`, `Card`
+- `Search`, `Plus`, `Eye`, `ChevronLeft`, `ChevronRight` icons
+
+**Mock data:**
+- 8 assessments across multiple frameworks (ISO 27001, SOC 2, GDPR, HIPAA, PCI DSS, NIST CSF, CIS Controls, CCPA)
+- Various statuses: pending, in_progress, completed, overdue
+- Progress tracking per assessment
+
+**Quality Gates:**
+- [x] Table displays all columns (Name, Framework, Status, Progress, Due Date, Owner, Actions)
+- [x] Pagination works correctly (5 items per page)
+- [x] Status filter dropdown works
+- [x] Framework filter dropdown works
+- [x] Search filters by name and owner
+- [x] Create button navigates to /assessments/new
+- [x] View button navigates to assessment detail
+- [x] Responsive layout
+- [x] Empty state handled
+- [x] Commit + push
+
+**Commit:** `design/frontend-developer: DSG-011 assessment list page with filters and pagination`
 
 ---
 
