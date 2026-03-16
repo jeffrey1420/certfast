@@ -11,52 +11,15 @@ import {
   Calendar,
   TrendingUp,
 } from 'lucide-react'
+import api from '@/lib/api'
 
-// Mock data - will be replaced with API call
+// Mock metrics remain until backend metrics endpoint is ready
 const mockMetrics = {
   complianceScore: 85,
   totalAssessments: 12,
   evidenceCount: 47,
   daysToCompliance: 45,
 }
-
-const mockActivities: Activity[] = [
-  {
-    id: 1,
-    type: 'assessment_completed',
-    title: 'ISO 27001 Assessment',
-    description: 'All controls reviewed and approved',
-    time: '2h ago',
-  },
-  {
-    id: 2,
-    type: 'evidence_uploaded',
-    title: 'Security Policy Document',
-    description: 'Uploaded to SOC 2 Control A1.2',
-    time: '4h ago',
-  },
-  {
-    id: 3,
-    type: 'control_approved',
-    title: 'Access Control Review',
-    description: 'Approved by Security Lead',
-    time: '1d ago',
-  },
-  {
-    id: 4,
-    type: 'deadline_approaching',
-    title: 'SOC 2 Audit Due',
-    description: 'Complete remaining 5 controls',
-    time: '2d ago',
-  },
-  {
-    id: 5,
-    type: 'audit_scheduled',
-    title: 'Quarterly Compliance Review',
-    description: 'Scheduled for March 25, 2026',
-    time: '3d ago',
-  },
-]
 
 interface DashboardMetrics {
   complianceScore: number
@@ -65,29 +28,72 @@ interface DashboardMetrics {
   daysToCompliance: number
 }
 
+interface DashboardActivityResponse {
+  id: number
+  type: Activity['type']
+  title: string
+  description?: string
+  occurredAt: string
+}
+
+function formatRelativeTime(occurredAt: string): string {
+  const timestamp = new Date(occurredAt)
+  if (Number.isNaN(timestamp.getTime())) {
+    return 'Recently'
+  }
+
+  const diffMs = timestamp.getTime() - Date.now()
+  const absDiffMs = Math.abs(diffMs)
+
+  const minute = 60_000
+  const hour = 60 * minute
+  const day = 24 * hour
+
+  const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+
+  if (absDiffMs < hour) {
+    return rtf.format(Math.round(diffMs / minute), 'minute')
+  }
+
+  if (absDiffMs < day) {
+    return rtf.format(Math.round(diffMs / hour), 'hour')
+  }
+
+  return rtf.format(Math.round(diffMs / day), 'day')
+}
+
 export function DashboardPage() {
   const navigate = useNavigate()
-  const [metrics, setMetrics] = useState<DashboardMetrics>(mockMetrics)
-  const [activities, setActivities] = useState<Activity[]>(mockActivities)
+  const [metrics] = useState<DashboardMetrics>(mockMetrics)
+  const [activities, setActivities] = useState<Activity[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  // TODO: Replace with actual API call when ready
-  // useEffect(() => {
-  //   const fetchMetrics = async () => {
-  //     setIsLoading(true)
-  //     try {
-  //       const response = await fetch('/api/v1/dashboard/metrics')
-  //       if (!response.ok) throw new Error('Failed to fetch metrics')
-  //       const data = await response.json()
-  //       setMetrics(data)
-  //     } catch (error) {
-  //       console.error('Failed to fetch dashboard metrics:', error)
-  //     } finally {
-  //       setIsLoading(false)
-  //     }
-  //   }
-  //   fetchMetrics()
-  // }, [])
+  useEffect(() => {
+    const fetchActivity = async () => {
+      setIsLoading(true)
+
+      try {
+        const { data } = await api.get<DashboardActivityResponse[]>('/dashboard/activity')
+
+        setActivities(
+          data.map((item) => ({
+            id: item.id,
+            type: item.type,
+            title: item.title,
+            description: item.description,
+            time: formatRelativeTime(item.occurredAt),
+          }))
+        )
+      } catch (error) {
+        console.error('Failed to fetch dashboard activity:', error)
+        setActivities([])
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void fetchActivity()
+  }, [])
 
   const handleQuickAction = (actionId: string) => {
     switch (actionId) {
@@ -164,7 +170,7 @@ export function DashboardPage() {
               </div>
               <TrendingUp className="h-5 w-5 text-muted-foreground" />
             </div>
-            
+
             <ProgressBar
               value={metrics.complianceScore}
               max={100}
@@ -172,7 +178,7 @@ export function DashboardPage() {
               size="lg"
               className="mt-4"
             />
-            
+
             <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
               <div className="text-center">
                 <p className="text-2xl font-bold">8</p>
@@ -199,8 +205,8 @@ export function DashboardPage() {
 
       {/* Activity Feed */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <ActivityList activities={activities} />
-        
+        <ActivityList activities={isLoading ? [] : activities} />
+
         <div className="bg-card border rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Upcoming Deadlines</h2>
           <div className="space-y-4">
