@@ -34,6 +34,8 @@ router
     router.get('/assessments/:id', '#controllers/assessments_controller.show')
     router.put('/assessments/:id', '#controllers/assessments_controller.update')
     router.delete('/assessments/:id', '#controllers/assessments_controller.destroy')
+
+    router.get('/dashboard/activity', '#controllers/dashboard_controller.activity')
   })
   .use(middleware.auth())
   .prefix('/api/v1')
