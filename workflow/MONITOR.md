@@ -1,5 +1,60 @@
 # CertFast Workflow Monitor - Lessons Learned
 
+## 2026-03-16: Agent Execution Failure - RECURRING (11:31)
+
+### Problem
+**RECURRENCE** of the 09:16 incident. Workflow stalled for **63 minutes** with identical symptoms.
+
+### Evidence
+| Metric | 09:16 Incident | 11:31 Incident |
+|--------|----------------|----------------|
+| Duration stuck | 89 min | 63 min |
+| Tech track exec time | 41 sec | 38 sec |
+| Design track exec time | 54 sec | 55 sec |
+| Strategy track exec time | 26 sec | N/A (not run) |
+| Git activity | None | None |
+| Subagents | None | None |
+
+### Root Cause Confirmed
+This is **NOT** a transient issue. The agent execution problem is **PERSISTENT**.
+
+Agents continue to spawn and immediately terminate without:
+- Reading task files
+- Creating deliverables
+- Making git commits
+- Producing any output
+
+### Why Auto-Recovery Failed Again
+The monitor cannot fix this because:
+1. **Out of scope**: Monitor cannot execute agent tasks
+2. **No diagnostic visibility**: Cannot see why agents terminate early
+3. **No control over agent runtime**: Cannot force agents to complete work
+4. **Silent failure**: No error messages to act upon
+
+### Impact
+- **150+ minutes** of total workflow stall time (09:16 + 11:31 incidents)
+- **6 agent executions wasted** across both incidents
+- **Zero progress** on all 3 active tasks
+- **Recurring pattern** suggests systemic issue, not transient failure
+
+### Required Action
+**Louis must:**
+1. Check agent session transcripts for actual error messages
+2. Verify if this is API rate limiting (token exhaustion?)
+3. Review if agent prompts are causing parse failures
+4. Consider simplifying agent prompts
+5. May need to manually execute tasks to unblock workflow
+
+### Prevention - What's Been Tried
+- ✅ Monitor detection working (caught both incidents)
+- ❌ Auto-recovery not possible for this failure mode
+- ⚠️ Need upstream fix at agent execution level
+
+### Key Takeaway
+**Monitor ≠ Fixer.** The monitor's job is to DETECT issues, not fix all of them. Some issues (like agent runtime failures) require human intervention at the source. This incident pattern should trigger a review of the agent execution infrastructure, not just the monitor.
+
+---
+
 ## 2026-03-16: Agent Execution Failure - Silent Termination
 
 ### Problem
