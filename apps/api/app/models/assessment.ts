@@ -32,7 +32,7 @@ export default class Assessment extends BaseModel {
   declare completedAt: DateTime | null
 
   @column()
-  declare metadata: Record<string, any> | null
+  declare metadata: Record<string, unknown> | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
