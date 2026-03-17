@@ -58,6 +58,15 @@ The following files are now legacy status boards and are informational only:
 
 ### Infrastructure
 - **PostgreSQL test database not running:** Tests require `postgres-test` on port 5433 (defined in docker-compose.yml). Current environment has no Docker and no PostgreSQL installation, causing all 73 integration tests to fail with connection errors. This blocks automated testing and CI/CD pipeline.
+  
+  **Solution Path**: Complete setup documentation and scripts now available:
+  - 📖 **[TESTING_SETUP.md](../TESTING_SETUP.md)** - Comprehensive testing setup guide
+  - 🔧 **[scripts/setup-test-db.sh](../scripts/setup-test-db.sh)** - Automated setup script for test database
+  
+  **Next Steps (when Docker available)**:
+  1. Run `./scripts/setup-test-db.sh` from project root
+  2. Execute `cd apps/api && npm test` to verify all 73 tests pass
+  3. Add CI/CD pipeline with automated test runs (GitHub Actions example in TESTING_SETUP.md)
 
 ### Frontend
 - Frontend assessment creation flow is still minimal and should be expanded once org selection UX is finalized.
