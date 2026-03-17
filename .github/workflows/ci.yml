@@ -1,0 +1,110 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  # API Tests and Linting
+  api-tests:
+    name: API Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: certfast
+          POSTGRES_PASSWORD: certfast_test_password
+          POSTGRES_DB: certfast_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U certfast -d certfast_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'apps/api/package-lock.json'
+      
+      - name: Install API dependencies
+        run: |
+          cd apps/api
+          npm ci
+      
+      - name: Run API tests
+        run: |
+          cd apps/api
+          npm test
+        env:
+          DB_HOST_TEST: localhost
+          DB_PORT_TEST: 5433
+          DB_USER_TEST: certfast
+          DB_PASSWORD_TEST: certfast_test_password
+          DB_DATABASE_TEST: certfast_test
+          NODE_ENV: test
+      
+      - name: Run API lint
+        run: |
+          cd apps/api
+          npm run lint --if-present
+
+  # Web Build and Linting
+  web-build:
+    name: Web Build & Lint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'apps/web/package-lock.json'
+      
+      - name: Install Web dependencies
+        run: |
+          cd apps/web
+          npm ci
+      
+      - name: Run Web lint
+        run: |
+          cd apps/web
+          npm run lint
+      
+      - name: Build Web app
+        run: |
+          cd apps/web
+          npm run build
+        env:
+          NODE_ENV: production
+
+  # Combined Status Check
+  ci-status:
+    name: CI Status
+    runs-on: ubuntu-latest
+    needs: [api-tests, web-build]
+    if: always()
+    
+    steps:
+      - name: Check all jobs
+        run: |
+          if [ "${{ needs.api-tests.result }}" != "success" ] || [ "${{ needs.web-build.result }}" != "success" ]; then
+            echo "❌ CI failed"
+            exit 1
+          fi
+          echo "✅ All CI checks passed"
