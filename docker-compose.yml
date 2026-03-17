@@ -46,7 +46,7 @@ services:
     container_name: certfast-web
     restart: unless-stopped
     ports:
-      - "3000:80"
+      - "3040:80"
     depends_on:
       - api
     networks:
