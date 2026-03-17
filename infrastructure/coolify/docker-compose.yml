@@ -1,0 +1,155 @@
+# ============================================================
+# COOLIFY DEPLOYMENT - docker-compose.yml
+# CertFast Production Stack
+# ============================================================
+# Usage: Coolify utilise ce fichier pour déployer les services
+# ============================================================
+
+version: '3.8'
+
+services:
+  # ============================================================
+  # API - AdonisJS Backend
+  # ============================================================
+  api:
+    build:
+      context: ../../
+      dockerfile: ./apps/api/Dockerfile
+    container_name: certfast-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3333
+      - HOST=0.0.0.0
+    env_file:
+      - ../.env.production
+    ports:
+      - "3333:3333"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - certfast-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ============================================================
+  # WEB - React Frontend
+  # ============================================================
+  web:
+    build:
+      context: ../../
+      dockerfile: ./apps/web/Dockerfile
+    container_name: certfast-web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - certfast-network
+
+  # ============================================================
+  # DATABASE - PostgreSQL
+  # ============================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: certfast-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: certfast
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: certfast_prod
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "5432:5432"
+    networks:
+      - certfast-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U certfast -d certfast_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # CACHE - Redis
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: certfast-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - certfast-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============================================================
+  # ANALYTICS - ClickHouse (Optional)
+  # ============================================================
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: certfast-clickhouse
+    restart: unless-stopped
+    environment:
+      CLICKHOUSE_USER: certfast
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: certfast_analytics
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    networks:
+      - certfast-network
+    # Uncomment if you need analytics
+    # profiles: ["analytics"]
+
+  # ============================================================
+  # BACKUP - Automated DB Backups
+  # ============================================================
+  backup:
+    image: offen/docker-volume-backup:latest
+    container_name: certfast-backup
+    restart: unless-stopped
+    environment:
+      BACKUP_CRON_EXPRESSION: "0 2 * * *"
+      BACKUP_RETENTION_DAYS: "30"
+      BACKUP_FILENAME: "certfast-backup-%Y-%m-%dT%H-%M-%S.tar.gz"
+      BACKUP_ARCHIVE: "/archive"
+      BACKUP_STOP_CONTAINER_LABEL: certfast.stop-during-backup
+      NOTIFICATION_URLS: ${BACKUP_NOTIFICATION_URL}
+      NOTIFICATION_LEVEL: error
+    volumes:
+      - postgres_data:/backup/postgres:ro
+      - redis_data:/backup/redis:ro
+      - ./backups:/archive
+    networks:
+      - certfast-network
+    labels:
+      - certfast.stop-during-backup=true
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  clickhouse_data:
+    driver: local
+
+networks:
+  certfast-network:
+    driver: bridge
