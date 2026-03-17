@@ -13,12 +13,8 @@ done
 
 echo "✅ PostgreSQL is ready"
 
-# Run migrations (use compiled ace.js from build/)
-echo "🔄 Running database migrations..."
-node build/ace.js migration:run --force
+# NOTE: Migrations must be run manually after first deploy
+# docker exec <container> node ace migration:run --force
 
-echo "✅ Migrations completed"
-
-# Start the application
 echo "🎉 Starting CertFast API server..."
 exec node build/bin/server.js
