@@ -47,7 +47,10 @@ export default class ControlsController {
 
     const existingControl = await Control.findBy('code', code)
     if (existingControl) {
-      return ctx.response.status(422).json({ error: 'Control code already exists' })
+      return ctx.response.status(422).json({ 
+        error: 'Validation failed',
+        message: 'Control code already exists'
+      })
     }
 
     const control = await Control.create({
@@ -103,7 +106,10 @@ export default class ControlsController {
     if (code !== undefined && code !== control.code) {
       const existingControl = await Control.findBy('code', code)
       if (existingControl) {
-        return ctx.response.status(422).json({ error: 'Control code already exists' })
+        return ctx.response.status(422).json({ 
+          error: 'Validation failed',
+          message: 'Control code already exists'
+        })
       }
       control.code = code
     }

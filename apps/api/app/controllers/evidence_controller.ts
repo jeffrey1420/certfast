@@ -116,7 +116,10 @@ export default class EvidenceController {
     const { description, status, reviewedBy } = ctx.request.body()
 
     if (status !== undefined && !VALID_STATUSES.has(status)) {
-      return ctx.response.status(422).json({ error: 'Invalid status' })
+      return ctx.response.status(422).json({ 
+        error: 'Validation failed',
+        message: 'Invalid status value'
+      })
     }
 
     // Handle review workflow

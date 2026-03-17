@@ -80,7 +80,10 @@ export default class PoliciesController {
     const { title, content, status, version } = ctx.request.body()
 
     if (status !== undefined && !VALID_STATUSES.has(status)) {
-      return ctx.response.status(422).json({ error: 'Invalid status' })
+      return ctx.response.status(422).json({ 
+        error: 'Validation failed',
+        message: 'Invalid status value'
+      })
     }
 
     if (title !== undefined) policy.title = title
