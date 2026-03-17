@@ -16,6 +16,7 @@ import { Home } from '@/pages/Home';
 import { Blog } from '@/pages/Blog';
 import { BlogPost } from '@/pages/BlogPost';
 import { VsVanta } from '@/pages/VsVanta';
+import { VsDrata } from '@/pages/VsDrata';
 import { CaseStudy } from '@/pages/CaseStudy';
 import { About } from '@/pages/About';
 import { Contact } from '@/pages/Contact';
@@ -30,6 +31,7 @@ function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/vs-vanta" element={<VsVanta />} />
+          <Route path="/vs-drata" element={<VsDrata />} />
           <Route path="/case-study/:slug" element={<CaseStudy />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
