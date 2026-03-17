@@ -31,8 +31,8 @@ RUN mkdir -p tmp/uploads
 
 # Set environment
 ENV NODE_ENV=production
-PORT=3333
-HOST=0.0.0.0
+ENV PORT=3333
+ENV HOST=0.0.0.0
 
 # Expose port
 EXPOSE 3333
