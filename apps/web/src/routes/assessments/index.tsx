@@ -5,6 +5,7 @@ import { AssessmentFilters, type FilterState } from './components/AssessmentFilt
 import { CreateButton } from './components/CreateButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAssessmentStore, type AssessmentBackend } from '@/stores/assessment'
+import { useAuthStore } from '@/stores/auth'
 import { Loader2 } from 'lucide-react'
 
 const ITEMS_PER_PAGE = 5
@@ -28,7 +29,7 @@ const statusMap: Record<string, Assessment['status']> = {
   archived: 'completed',
 }
 
-function mapBackendToFrontend(backend: AssessmentBackend): Assessment {
+function mapBackendToFrontend(backend: AssessmentBackend, ownerName: string): Assessment {
   // Calculate a rough progress based on status
   let progress = 0
   if (backend.status === 'active') progress = 50
@@ -48,13 +49,14 @@ function mapBackendToFrontend(backend: AssessmentBackend): Assessment {
     status,
     progress,
     dueDate: backend.dueDate || new Date().toISOString().split('T')[0],
-    owner: 'Unknown', // TODO: Add owner information once available
+    owner: ownerName,
   }
 }
 
 export function AssessmentsPage() {
   const navigate = useNavigate()
   const { assessments: backendAssessments, isLoading, error, fetchAssessments } = useAssessmentStore()
+  const { user } = useAuthStore()
   const [filters, setFilters] = useState<FilterState>({
     status: 'all',
     framework: 'all',
@@ -67,8 +69,13 @@ export function AssessmentsPage() {
     void fetchAssessments()
   }, [fetchAssessments])
 
+  // Get owner name from current user
+  const ownerName = user ? `${user.firstName} ${user.lastName}` : 'Unknown'
+
   // Map backend assessments to frontend format
-  const assessments = backendAssessments.map(mapBackendToFrontend)
+  const assessments = backendAssessments.map((assessment) => 
+    mapBackendToFrontend(assessment, ownerName)
+  )
 
   // Filter assessments based on current filters
   const filteredAssessments = assessments.filter((assessment) => {
