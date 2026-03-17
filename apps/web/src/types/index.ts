@@ -99,18 +99,42 @@ export interface AssessmentControl {
 }
 
 // Evidence types
+export type EvidenceStatus = 'pending' | 'approved' | 'rejected' | 'needs_review'
+
 export interface Evidence {
-  id: string
-  filename: string
-  originalName: string
-  mimeType: string
-  size: number
-  url: string
-  uploadedBy: User
-  controlId?: string
-  assessmentId?: string
-  metadata?: Record<string, unknown>
+  id: number
+  controlId: number
+  fileUrl: string
+  fileName: string
+  fileType: string
+  fileSize: number | null
+  description: string | null
+  status: EvidenceStatus
+  uploadedBy: number
+  reviewedAt: string | null
+  reviewedBy: number | null
   createdAt: string
+  updatedAt: string
+  
+  // Optional expanded relations (when preloaded)
+  uploadedByUser?: User
+  reviewedByUser?: User
+  control?: Control
+}
+
+export interface CreateEvidenceData {
+  controlId: number
+  fileUrl: string
+  fileName: string
+  fileType: string
+  fileSize?: number
+  description?: string
+}
+
+export interface UpdateEvidenceData {
+  description?: string
+  status?: EvidenceStatus
+  reviewedBy?: number
 }
 
 // API response types
