@@ -79,7 +79,7 @@ export default class ControlsController {
   }
 
   async update(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const control = await Control.find(Number(ctx.params.id))
 
     if (!control) {
@@ -116,7 +116,7 @@ export default class ControlsController {
   }
 
   async destroy(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const control = await Control.find(Number(ctx.params.id))
 
     if (!control) {

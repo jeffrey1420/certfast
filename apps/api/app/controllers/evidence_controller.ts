@@ -8,7 +8,7 @@ const VALID_STATUSES = new Set(['pending', 'approved', 'rejected', 'needs_review
 
 export default class EvidenceController {
   async index(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const controlId = ctx.request.input('controlId')
 
     if (!controlId) {
@@ -37,7 +37,7 @@ export default class EvidenceController {
   }
 
   async store(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const { controlId, fileUrl, fileName, fileType, fileSize, description } = ctx.request.body()
 
     if (!controlId || !fileUrl || !fileName || !fileType) {
@@ -73,7 +73,7 @@ export default class EvidenceController {
   }
 
   async show(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const evidence = await Evidence.find(Number(ctx.params.id))
 
     if (!evidence) {
@@ -95,7 +95,7 @@ export default class EvidenceController {
   }
 
   async update(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const evidence = await Evidence.find(Number(ctx.params.id))
 
     if (!evidence) {
@@ -134,7 +134,7 @@ export default class EvidenceController {
   }
 
   async destroy(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const evidence = await Evidence.find(Number(ctx.params.id))
 
     if (!evidence) {

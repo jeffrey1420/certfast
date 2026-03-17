@@ -25,8 +25,8 @@ export default class AuthMiddleware {
       return ctx.response.status(401).json({ error: 'Unauthorized' })
     }
 
-    ;(ctx as any).authUserId = userId
-    ;(ctx as any).authToken = token
+    ctx.authUserId = userId
+    ctx.authToken = token
 
     return next()
   }

@@ -7,5 +7,6 @@
 declare module '@adonisjs/core/http' {
   interface HttpContext {
     authUserId: number
+    authToken: string
   }
 }

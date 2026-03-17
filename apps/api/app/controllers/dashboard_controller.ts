@@ -11,7 +11,7 @@ const STATUS_TO_ACTIVITY_TYPE: Record<string, 'assessment_completed' | 'audit_sc
 
 export default class DashboardController {
   async activity(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
 
     const assessments = await Assessment.query()
       .whereHas('organization', (orgQuery) => {

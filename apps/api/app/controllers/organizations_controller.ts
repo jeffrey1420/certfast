@@ -4,7 +4,7 @@ import User from '#models/user'
 
 export default class OrganizationsController {
   async index(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
 
     const organizations = await Organization.query()
       .where('owner_id', authUserId)
@@ -18,7 +18,7 @@ export default class OrganizationsController {
   }
 
   async store(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const { name, slug, description } = ctx.request.body()
 
     if (!name || !slug) {
