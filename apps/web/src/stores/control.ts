@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import api from '@/lib/api'
-import type { ControlDetailed } from '@/types'
+import type { ControlDetailed, CreateControlData } from '@/types'
 
 export interface UpdateControlData {
   title?: string
@@ -18,6 +18,7 @@ interface ControlState {
   // Actions
   fetchControls: () => Promise<void>
   fetchControlById: (id: string) => Promise<void>
+  createControl: (data: CreateControlData) => Promise<ControlDetailed | null>
   updateControl: (id: number, data: UpdateControlData) => Promise<ControlDetailed | null>
   archiveControl: (id: number) => Promise<boolean>
   setCurrentControl: (control: ControlDetailed | null) => void
@@ -49,6 +50,22 @@ export const useControlStore = create<ControlState>((set) => ({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch control'
       set({ error: message, isLoading: false })
+    }
+  },
+
+  createControl: async (data: CreateControlData) => {
+    set({ isLoading: true, error: null })
+    try {
+      const { data: control } = await api.post<ControlDetailed>('/controls', data)
+      set((state) => ({
+        controls: [control, ...state.controls],
+        isLoading: false,
+      }))
+      return control
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to create control'
+      set({ error: message, isLoading: false })
+      return null
     }
   },
 

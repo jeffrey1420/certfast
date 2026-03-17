@@ -83,6 +83,15 @@ export interface Control {
   updatedAt: string
 }
 
+export interface CreateControlData {
+  organizationId: number
+  title: string
+  code: string
+  category: string
+  description?: string
+  status?: 'draft' | 'active' | 'archived' | 'deprecated'
+}
+
 export interface AssessmentControl {
   id: string
   assessmentId: string
