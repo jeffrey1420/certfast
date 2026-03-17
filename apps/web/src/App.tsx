@@ -15,6 +15,8 @@ import { PolicyDetailPage } from '@/routes/policies/detail';
 import { Home } from '@/pages/Home';
 import { Blog } from '@/pages/Blog';
 import { BlogPost } from '@/pages/BlogPost';
+import { VsVanta } from '@/pages/VsVanta';
+import { CaseStudy } from '@/pages/CaseStudy';
 import { About } from '@/pages/About';
 import { Contact } from '@/pages/Contact';
 import { Security } from '@/pages/Security';
@@ -27,6 +29,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/vs-vanta" element={<VsVanta />} />
+          <Route path="/case-study/:slug" element={<CaseStudy />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/security" element={<Security />} />
