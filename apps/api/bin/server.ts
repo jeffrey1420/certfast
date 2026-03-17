@@ -17,11 +17,13 @@ const ignitor = new IgnitorFactory()
   })
   .create(new URL('../', import.meta.url))
 
-const app = await ignitor.createApp('api')
+const app = await ignitor.createApp('web')
 await app.init()
 await app.boot()
 
 await import('../start/kernel.js')
 await import('../start/routes.js')
 
-await app.start(() => import('../start/kernel.js'))
+await app.start(async () => {
+  await import('../start/kernel.js')
+})

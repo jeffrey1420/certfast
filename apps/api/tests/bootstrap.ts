@@ -1,4 +1,4 @@
-import { configure, processCLIArgs, run } from '@japa/runner'
+import { configure, run } from '@japa/runner'
 import { apiClient } from '@japa/api-client'
 import { assert } from '@japa/assert'
 import { ApplicationService } from '@adonisjs/core/types'
@@ -60,7 +60,6 @@ async function startApp() {
 }
 
 configure({
-  ...processCLIArgs(process.argv.slice(2)),
   files: ['tests/**/*.spec.ts'],
   plugins: [assert(), apiClient('http://127.0.0.1:3333')],
   setup: [

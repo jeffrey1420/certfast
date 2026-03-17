@@ -13,7 +13,6 @@ export default class Serve extends BaseCommand {
 
   async run() {
     this.logger.info('Starting server...')
-    const { default: startApp } = await import('../start/app.js')
-    await startApp
+    await import('../start/app.js')
   }
 }

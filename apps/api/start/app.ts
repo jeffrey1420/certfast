@@ -20,14 +20,16 @@ try {
     })
     .create(new URL('../', import.meta.url))
 
-  const app = await ignitor.createApp('api')
+  const app = await ignitor.createApp('web')
   await app.init()
   await app.boot()
 
   await import('./kernel.js')
   await import('./routes.js')
 
-  await app.start(() => import('./kernel.js'))
+  await app.start(async () => {
+    await import('./kernel.js')
+  })
 } catch (error) {
   prettyPrintError(error)
   process.exit(1)

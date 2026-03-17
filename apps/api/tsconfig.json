@@ -19,5 +19,6 @@
       "#tests/*": ["./tests/*.js"]
     }
   },
+  "include": ["**/*.ts", "types/**/*.d.ts"],
   "exclude": ["./build", "./node_modules"]
 }
