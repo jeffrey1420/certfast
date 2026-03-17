@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useEvidenceStore } from '@/stores'
 import type { Evidence } from '@/types'
+import { UploadEvidenceDialog } from '@/components/evidence/UploadEvidenceDialog'
 
 const statusConfig = {
   pending: { 
@@ -82,10 +83,16 @@ export function EvidenceSection({ controlId }: EvidenceSectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
-          Evidence ({evidence.length})
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Evidence ({evidence.length})
+          </CardTitle>
+          <UploadEvidenceDialog 
+            controlId={controlId} 
+            onSuccess={() => fetchEvidenceByControl(controlId)}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         {evidence.length === 0 ? (
