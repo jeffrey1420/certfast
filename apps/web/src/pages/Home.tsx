@@ -189,9 +189,9 @@ export function Home() {
                 <h4 className="text-white font-semibold mb-4">Company</h4>
                 <ul className="space-y-2">
                   <li>
-                    <a href="#" className="hover:text-white transition-colors">
+                    <Link to="/about" className="hover:text-white transition-colors">
                       About
-                    </a>
+                    </Link>
                   </li>
                   <li>
                     <a href="#" className="hover:text-white transition-colors">
@@ -199,9 +199,9 @@ export function Home() {
                     </a>
                   </li>
                   <li>
-                    <a href="#" className="hover:text-white transition-colors">
+                    <Link to="/contact" className="hover:text-white transition-colors">
                       Contact
-                    </a>
+                    </Link>
                   </li>
                   <li>
                     <a href="#" className="hover:text-white transition-colors">
