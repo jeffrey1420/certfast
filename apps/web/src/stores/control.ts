@@ -2,6 +2,13 @@ import { create } from 'zustand'
 import api from '@/lib/api'
 import type { ControlDetailed } from '@/types'
 
+export interface UpdateControlData {
+  title?: string
+  description?: string
+  category?: string
+  status?: 'draft' | 'active' | 'archived' | 'deprecated'
+}
+
 interface ControlState {
   controls: ControlDetailed[]
   currentControl: ControlDetailed | null
@@ -11,6 +18,8 @@ interface ControlState {
   // Actions
   fetchControls: () => Promise<void>
   fetchControlById: (id: string) => Promise<void>
+  updateControl: (id: number, data: UpdateControlData) => Promise<ControlDetailed | null>
+  archiveControl: (id: number) => Promise<boolean>
   setCurrentControl: (control: ControlDetailed | null) => void
   clearError: () => void
 }
@@ -40,6 +49,40 @@ export const useControlStore = create<ControlState>((set) => ({
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch control'
       set({ error: message, isLoading: false })
+    }
+  },
+
+  updateControl: async (id: number, data: UpdateControlData) => {
+    set({ isLoading: true, error: null })
+    try {
+      const { data: control } = await api.patch<ControlDetailed>(`/controls/${id}`, data)
+      set((state) => ({
+        controls: state.controls.map((c) => (c.id === id ? control : c)),
+        currentControl: state.currentControl?.id === id ? control : state.currentControl,
+        isLoading: false,
+      }))
+      return control
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to update control'
+      set({ error: message, isLoading: false })
+      return null
+    }
+  },
+
+  archiveControl: async (id: number) => {
+    set({ isLoading: true, error: null })
+    try {
+      await api.delete(`/controls/${id}`)
+      set((state) => ({
+        controls: state.controls.filter((c) => c.id !== id),
+        currentControl: state.currentControl?.id === id ? null : state.currentControl,
+        isLoading: false,
+      }))
+      return true
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to archive control'
+      set({ error: message, isLoading: false })
+      return false
     }
   },
 

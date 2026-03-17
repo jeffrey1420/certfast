@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Shield, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -33,13 +33,28 @@ const categoryColors: Record<string, string> = {
 export function ControlDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { currentControl, isLoading, error, fetchControlById } = useControlStore()
+  const { currentControl, isLoading, error, fetchControlById, updateControl } = useControlStore()
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [updateError, setUpdateError] = useState<string | null>(null)
 
   useEffect(() => {
     if (id) {
       void fetchControlById(id)
     }
   }, [id, fetchControlById])
+
+  const handleMarkAsImplemented = async () => {
+    if (!currentControl) return
+    
+    setIsUpdating(true)
+    setUpdateError(null)
+    const result = await updateControl(currentControl.id, { status: 'active' })
+    setIsUpdating(false)
+    
+    if (!result) {
+      setUpdateError('Failed to update control. Please try again.')
+    }
+  }
 
   if (isLoading) {
     return (
@@ -88,6 +103,13 @@ export function ControlDetailPage() {
         Back to Controls
       </Button>
 
+      {/* Update Error */}
+      {updateError && (
+        <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+          <p>{updateError}</p>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="space-y-2">
@@ -114,7 +136,21 @@ export function ControlDetailPage() {
 
         <div className="flex items-center gap-2">
           <Button variant="outline">Add to Assessment</Button>
-          <Button>Mark as Implemented</Button>
+          <Button 
+            onClick={handleMarkAsImplemented}
+            disabled={isUpdating || currentControl.status === 'active'}
+          >
+            {isUpdating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Updating...
+              </>
+            ) : currentControl.status === 'active' ? (
+              'Implemented'
+            ) : (
+              'Mark as Implemented'
+            )}
+          </Button>
         </div>
       </div>
 
