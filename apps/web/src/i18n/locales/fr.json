@@ -1,0 +1,767 @@
+{
+  "language": {
+    "label": "Langue",
+    "fr": "Français",
+    "en": "Anglais"
+  },
+  "meta": {
+    "siteName": "CertFast"
+  },
+  "nav": {
+    "home": "Accueil",
+    "blog": "Blog",
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "product": "Produit",
+    "dashboard": "Tableau de bord",
+    "assessments": "Évaluations",
+    "controls": "Contrôles",
+    "policies": "Politiques",
+    "resources": "Ressources",
+    "company": "Entreprise",
+    "legal": "Légal",
+    "about": "À propos",
+    "contact": "Contact",
+    "security": "Sécurité",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "cookies": "Politique de cookies",
+    "documentation": "Documentation",
+    "helpCenter": "Centre d'aide",
+    "apiReference": "Référence API",
+    "careers": "Carrières",
+    "login": "Connexion",
+    "signup": "Commencer",
+    "all": "Tous"
+  },
+  "footer": {
+    "tagline": "L'automatisation compliance qui fonctionne vraiment.",
+    "rights": "© {{year}} CertFast. Tous droits réservés.",
+    "twitter": "Twitter",
+    "linkedin": "LinkedIn",
+    "github": "GitHub",
+    "madeInEurope": "Conçu avec ❤️ en Europe"
+  },
+  "landing": {
+    "hero": {
+      "badge": "Adopté par 500+ équipes compliance",
+      "title": "L'automatisation compliance qui",
+      "titleHighlight": "fonctionne vraiment",
+      "subtitle": "CertFast simplifie votre parcours SOC 2, ISO 27001 et RGPD. Automatisez la collecte des preuves, suivez vos contrôles et passez vos audits sereinement.",
+      "proof": [
+        "SOC 2 Type II en 3 mois",
+        "40+ heures gagnées par audit",
+        "Sécurité prête pour l'entreprise"
+      ],
+      "ctaPrimary": "Démarrer l'essai gratuit",
+      "ctaSecondary": "Voir la démo",
+      "note": "Aucune carte bancaire requise. Essai gratuit 14 jours.",
+      "stats": [
+        {
+          "label": "Contrôles",
+          "value": "94%"
+        },
+        {
+          "label": "Preuves",
+          "value": "87%"
+        },
+        {
+          "label": "Politiques",
+          "value": "100%"
+        },
+        {
+          "label": "Prêt pour l'audit",
+          "value": "92%"
+        }
+      ],
+      "recentActivity": "Activité récente",
+      "viewAll": "Voir tout",
+      "activity": [
+        "Preuve envoyée pour CC6.1",
+        "Politique approuvée : Contrôle d'accès",
+        "Contrôle testé : Implémentation MFA",
+        "Préparation d'audit terminée"
+      ]
+    },
+    "features": {
+      "eyebrow": "Fonctionnalités",
+      "title": "Tout ce qu'il faut pour votre compliance",
+      "subtitle": "Des outils puissants pour fluidifier tout votre parcours, du diagnostic initial à l'audit final.",
+      "items": [
+        {
+          "name": "Collecte de preuves automatisée",
+          "description": "Connectez votre infrastructure cloud et laissez CertFast collecter automatiquement les preuves. Gagnez 40+ heures par audit."
+        },
+        {
+          "name": "Gestion des contrôles",
+          "description": "Pilotez tous vos contrôles au même endroit. Mappez-les vers SOC 2, ISO 27001 et RGPD."
+        },
+        {
+          "name": "Templates de politiques",
+          "description": "Démarrez vite avec des modèles de politiques adaptés à votre secteur. Versioning et validation inclus."
+        },
+        {
+          "name": "Tableaux de bord temps réel",
+          "description": "Suivez votre posture compliance en direct. Identifiez les écarts et restez prêt pour l'audit."
+        },
+        {
+          "name": "Collaboration d'équipe",
+          "description": "Invitez l'équipe, attribuez des rôles et collaborez sur les tâches de conformité."
+        },
+        {
+          "name": "Préparation audit",
+          "description": "Générez des rapports prêts pour audit en un clic et centralisez vos preuves."
+        }
+      ],
+      "stats": [
+        {
+          "value": "500+",
+          "label": "Entreprises"
+        },
+        {
+          "value": "50K+",
+          "label": "Contrôles suivis"
+        },
+        {
+          "value": "99.9%",
+          "label": "Disponibilité"
+        },
+        {
+          "value": "4.9/5",
+          "label": "Note client"
+        }
+      ]
+    },
+    "pricing": {
+      "eyebrow": "Tarifs",
+      "title": "Des tarifs simples et transparents",
+      "subtitle": "Choisissez l'offre adaptée à vos besoins compliance. Toutes les offres incluent 14 jours d'essai.",
+      "monthly": "Mensuel",
+      "annually": "Annuel",
+      "save": "Économisez 20%",
+      "mostPopular": "Le plus populaire",
+      "perMonth": "/mois",
+      "billedAnnually": "Facturé annuellement",
+      "custom": "Sur mesure",
+      "included": "Inclus :",
+      "faq": "Des questions ?",
+      "faqLink": "Voir notre FAQ",
+      "tiers": {
+        "starter": {
+          "name": "Starter",
+          "description": "Parfait pour les startups en première certification.",
+          "cta": "Essai gratuit",
+          "features": [
+            "Jusqu'à 3 membres",
+            "1 framework compliance",
+            "Collecte de preuves basique",
+            "Bibliothèque de politiques",
+            "Support email",
+            "Intégrations standard"
+          ],
+          "notIncluded": [
+            "Contrôles personnalisés",
+            "Accès API",
+            "Success manager dédié"
+          ]
+        },
+        "professional": {
+          "name": "Professional",
+          "description": "Pour les équipes en croissance avec plusieurs frameworks.",
+          "cta": "Essai gratuit",
+          "features": [
+            "Jusqu'à 15 membres",
+            "Frameworks illimités",
+            "Automatisation avancée",
+            "Contrôles personnalisés",
+            "Support prioritaire",
+            "Toutes les intégrations",
+            "Accès API",
+            "Assistance audit"
+          ],
+          "notIncluded": [
+            "Success manager dédié"
+          ]
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "description": "Solutions sur mesure pour grandes organisations.",
+          "cta": "Contacter les ventes",
+          "features": [
+            "Membres illimités",
+            "Frameworks illimités",
+            "Automatisation personnalisée",
+            "SSO & SAML",
+            "Success manager dédié",
+            "Intégrations custom",
+            "SLA garanti",
+            "Option on-premise"
+          ],
+          "notIncluded": []
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à simplifier votre compliance ?",
+      "subtitle": "Rejoignez 500+ entreprises qui automatisent leur conformité avec CertFast.",
+      "bullets": [
+        "Essai 14 jours avec accès complet",
+        "Aucune carte bancaire",
+        "Résiliation à tout moment",
+        "Onboarding offert"
+      ],
+      "formTitle": "Démarrer votre essai gratuit",
+      "formSubtitle": "Accès complet aux fonctionnalités Professional pendant 14 jours.",
+      "workEmail": "Email pro",
+      "emailPlaceholder": "vous@entreprise.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Créer un mot de passe",
+      "button": "Commencer gratuitement",
+      "already": "Vous avez déjà un compte ?",
+      "signin": "Connexion"
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "subtitle": "Tout ce qu'il faut savoir sur CertFast.",
+      "items": [
+        {
+          "question": "Combien de temps prend vraiment le SOC 2 ?",
+          "answer": "Avec CertFast, la plupart des startups obtiennent le SOC 2 Type II en 90 jours en moyenne."
+        },
+        {
+          "question": "Ai-je toujours besoin d'un auditeur ?",
+          "answer": "Oui, un auditeur tiers reste nécessaire. CertFast prépare les preuves et documents pour réduire les coûts et délais."
+        },
+        {
+          "question": "Et si je ne suis pas technique ?",
+          "answer": "Notre roadmap guidée est conçue pour tous les niveaux. Notre équipe support vous accompagne à chaque étape."
+        },
+        {
+          "question": "Puis-je migrer depuis Vanta ?",
+          "answer": "Oui. Nous importons vos données compliance existantes et accompagnons la migration."
+        },
+        {
+          "question": "Quels frameworks sont supportés ?",
+          "answer": "SOC 2 Type I & II, ISO 27001 et RGPD."
+        }
+      ]
+    },
+    "howItWorks": {
+      "title": "Comment ça marche",
+      "subtitle": "Devenez conforme en trois étapes simples.",
+      "steps": [
+        {
+          "number": "01",
+          "title": "Connectez vos outils",
+          "description": "Reliez GitHub, AWS et vos outils RH en 5 minutes."
+        },
+        {
+          "number": "02",
+          "title": "Suivez votre roadmap",
+          "description": "Complétez les tâches pendant que CertFast suit votre progression."
+        },
+        {
+          "number": "03",
+          "title": "Obtenez votre certification",
+          "description": "Passez votre audit en 90 jours."
+        }
+      ]
+    },
+    "problemSolution": {
+      "title": "L'ancienne méthode vs la méthode CertFast",
+      "subtitle": "Arrêtez de perdre du temps et de l'argent.",
+      "oldWay": {
+        "title": "L'ancienne méthode",
+        "items": [
+          "12 mois pour le SOC 2",
+          "80K€+ de consultants",
+          "Collecte manuelle des preuves",
+          "Des tableurs partout"
+        ]
+      },
+      "newWay": {
+        "title": "La méthode CertFast",
+        "items": [
+          "90 jours garantis",
+          "2.4K€-12K€/an",
+          "Sync auto GitHub/AWS",
+          "Source unique de vérité"
+        ]
+      }
+    },
+    "socialProof": {
+      "trusted": "Adopté par 50+ startups européennes",
+      "quote": "Nous avons eu le SOC 2 en 87 jours avec CertFast.",
+      "author": "CTO, SaaS Série A",
+      "company": "Startup fintech européenne"
+    },
+    "finalCta": {
+      "title": "Rejoignez 50+ startups devenues conformes intelligemment",
+      "subtitle": "Commencez votre essai gratuit aujourd'hui.",
+      "button": "Démarrer l'essai gratuit 14 jours",
+      "note": "14 jours gratuits • Sans CB • Résiliation à tout moment"
+    }
+  },
+  "home": {
+    "seo": {
+      "title": "CertFast - Plateforme d'automatisation compliance | SOC 2, ISO 27001, RGPD",
+      "description": "CertFast simplifie votre conformité SOC 2, ISO 27001 et RGPD.",
+      "ogTitle": "CertFast - Plateforme d'automatisation compliance",
+      "ogDescription": "Simplifiez votre parcours compliance avec une collecte de preuves automatisée."
+    },
+    "structuredDataDescription": "Plateforme d'automatisation compliance pour SOC 2, ISO 27001 et RGPD."
+  },
+  "blog": {
+    "seo": {
+      "title": "Blog - CertFast | Insights compliance & bonnes pratiques",
+      "description": "Des insights experts sur la compliance, le SOC 2, l'ISO 27001 et la sécurité.",
+      "ogTitle": "Blog - CertFast",
+      "ogDescription": "Insights experts sur l'automatisation compliance."
+    },
+    "badge": "Insights compliance",
+    "title": "Blog CertFast",
+    "subtitle": "Des articles pratiques sur la compliance, les frameworks sécurité et les bonnes pratiques.",
+    "searchPlaceholder": "Rechercher des articles...",
+    "emptyTitle": "Aucun article trouvé",
+    "emptyDescription": "Essayez de modifier votre recherche ou vos filtres.",
+    "featuredArticles": "Articles à la une",
+    "latestArticles": "Derniers articles",
+    "newsletterTitle": "Restez conforme, restez informé",
+    "newsletterSubtitle": "Recevez nos derniers conseils compliance et sécurité.",
+    "newsletterPlaceholder": "Entrez votre email",
+    "subscribe": "S'abonner"
+  },
+  "blogCard": {
+    "featured": "À la une",
+    "readArticle": "Lire l'article"
+  },
+  "blogPost": {
+    "back": "Retour au blog",
+    "share": "Partager :",
+    "shareTwitter": "Partager sur Twitter",
+    "shareLinkedIn": "Partager sur LinkedIn",
+    "copyLink": "Copier le lien",
+    "copied": "Lien copié",
+    "related": "Articles liés",
+    "ctaTitle": "Prêt à simplifier votre compliance ?",
+    "ctaSubtitle": "Rejoignez des milliers d'entreprises qui font confiance à CertFast.",
+    "ctaPrimary": "Commencer gratuitement",
+    "ctaSecondary": "Voir la démo",
+    "articleNotFound": "# Article introuvable"
+  },
+  "about": {
+    "seo": {
+      "title": "À propos | CertFast",
+      "description": "Découvrez l'équipe derrière CertFast."
+    },
+    "heroTitle": "Conçu par des fondateurs,",
+    "heroHighlight": "pour des fondateurs",
+    "heroSubtitle": "Nous avons créé CertFast après avoir vécu le cauchemar de la compliance.",
+    "storyTitle": "Notre histoire",
+    "story": [
+      {
+        "title": "Le problème",
+        "text": "En 2024, notre équipe a perdu 6 mois et 80K€ sur le SOC 2."
+      },
+      {
+        "title": "La solution",
+        "text": "Nous avons construit la plateforme que nous aurions voulu avoir."
+      },
+      {
+        "title": "Notre mission",
+        "text": "Rendre la compliance accessible à chaque startup."
+      }
+    ],
+    "quote": "Nous avons construit CertFast pour éviter les crises de panique avant audit.",
+    "quoteAuthor": "Alexandre Bernard",
+    "quoteRole": "CEO & Co-founder",
+    "valuesTitle": "Nos valeurs",
+    "valuesSubtitle": "Ce qui nous motive au quotidien",
+    "values": [
+      {
+        "name": "Transparence",
+        "description": "Pas de prix opaques, pas de fonctionnalités cachées."
+      },
+      {
+        "name": "Privacy First",
+        "description": "Vos données restent en Europe."
+      },
+      {
+        "name": "Obsession client",
+        "description": "Nous restons proches de nos utilisateurs."
+      },
+      {
+        "name": "Amélioration continue",
+        "description": "Nous shippons tous les jours."
+      }
+    ],
+    "teamTitle": "L'équipe",
+    "teamSubtitle": "Fondée par des builders avec 10+ ans en SaaS et sécurité",
+    "teamLocation": "Basé à Caen, France 🇫🇷",
+    "team": [
+      {
+        "initials": "AB",
+        "role": "CEO & Co-founder"
+      },
+      {
+        "initials": "CD",
+        "role": "CTO & Co-founder"
+      },
+      {
+        "initials": "EF",
+        "role": "Head of Security"
+      },
+      {
+        "initials": "GH",
+        "role": "Lead Engineer"
+      }
+    ],
+    "timelineTitle": "Notre parcours",
+    "timelineSubtitle": "De l'idée à une plateforme utilisée par des centaines de startups",
+    "timeline": [
+      {
+        "year": "2024",
+        "title": "Le début",
+        "description": "Idée et premiers prototypes."
+      },
+      {
+        "year": "2025",
+        "title": "Lancement beta",
+        "description": "Beta privée avec 50 startups européennes."
+      },
+      {
+        "year": "2026",
+        "title": "Lancement public",
+        "description": "V1 publique et première levée de fonds."
+      }
+    ],
+    "ctaTitle": "Rejoignez l'équipe",
+    "ctaSubtitle": "Nous recrutons pour transformer la compliance.",
+    "ctaButton": "Voir les postes ouverts"
+  },
+  "contact": {
+    "seo": {
+      "title": "Contact | CertFast",
+      "description": "Contactez l'équipe sales, support ou sécurité de CertFast."
+    },
+    "heroTitle": "Entrons en",
+    "heroHighlight": "contact",
+    "heroSubtitle": "Questions ? Démo ? Nous sommes là.",
+    "formTitle": "Envoyez-nous un message",
+    "successTitle": "Message envoyé !",
+    "successDescription": "Nous revenons vers vous sous 24h ouvrées.",
+    "fields": {
+      "name": "Nom",
+      "email": "Email",
+      "company": "Entreprise",
+      "subject": "Sujet",
+      "message": "Message"
+    },
+    "placeholders": {
+      "name": "Votre nom",
+      "email": "vous@entreprise.com",
+      "company": "Votre entreprise",
+      "message": "Comment pouvons-nous vous aider ?"
+    },
+    "subjects": {
+      "sales": "Ventes",
+      "support": "Support",
+      "partnership": "Partenariat",
+      "other": "Autre"
+    },
+    "errors": {
+      "nameRequired": "Le nom est requis",
+      "emailRequired": "L'email est requis",
+      "emailInvalid": "L'email n'est pas valide",
+      "messageRequired": "Le message est requis"
+    },
+    "sending": "Envoi en cours...",
+    "send": "Envoyer le message",
+    "responseTime": "Réponse sous 24h ouvrées",
+    "channelsTitle": "Autres canaux",
+    "channels": [
+      {
+        "title": "Ventes",
+        "email": "sales@certfast.io",
+        "description": "Tarifs enterprise et démos"
+      },
+      {
+        "title": "Support",
+        "email": "support@certfast.io",
+        "description": "Questions techniques et bugs"
+      },
+      {
+        "title": "Sécurité",
+        "email": "security@certfast.io",
+        "description": "Signalement de vulnérabilités"
+      }
+    ],
+    "addressTitle": "Adresse",
+    "quickFaqTitle": "FAQ rapide",
+    "quickFaq": [
+      {
+        "question": "Temps de réponse moyen ?",
+        "answer": "< 4h"
+      },
+      {
+        "question": "Démo disponible ?",
+        "answer": "Oui"
+      },
+      {
+        "question": "Support en français ?",
+        "answer": "Oui"
+      }
+    ]
+  },
+  "security": {
+    "seo": {
+      "title": "Sécurité & Trust Center | CertFast",
+      "description": "Découvrez comment CertFast protège vos données compliance.",
+      "ogTitle": "Sécurité & Trust Center | CertFast",
+      "ogDescription": "Sécurité niveau entreprise avec infrastructure UE uniquement."
+    },
+    "badge": "Certifié SOC 2 Type II",
+    "title": "La sécurité chez CertFast",
+    "subtitle": "Vos données compliance méritent le plus haut niveau de protection.",
+    "pillarsTitle": "Piliers de sécurité",
+    "pillarsSubtitle": "Une approche multicouche pour protéger vos données sensibles",
+    "pillars": [
+      {
+        "title": "Chiffrement",
+        "items": [
+          "AES-256 au repos",
+          "TLS 1.3 en transit",
+          "Backups chiffrés"
+        ]
+      },
+      {
+        "title": "Infrastructure",
+        "items": [
+          "Hébergement UE uniquement",
+          "Datacenters ISO 27001",
+          "Réseau segmenté"
+        ]
+      },
+      {
+        "title": "Protection des données",
+        "items": [
+          "Aucun transfert hors UE",
+          "Rétention minimale",
+          "Anonymisation automatique"
+        ]
+      },
+      {
+        "title": "Contrôle d'accès",
+        "items": [
+          "MFA obligatoire",
+          "RBAC granulaire",
+          "Audit logs immuables"
+        ]
+      }
+    ],
+    "complianceTitle": "Certifié et audité",
+    "complianceSubtitle": "Nous maintenons des standards élevés pour protéger vos données.",
+    "complianceItems": [
+      {
+        "title": "Frameworks",
+        "value": "SOC 2, ISO 27001, roadmap RGPD"
+      },
+      {
+        "title": "Audits",
+        "value": "Internes trimestriels, externes annuels"
+      },
+      {
+        "title": "Certifications",
+        "value": "SOC 2 Type II en cours"
+      }
+    ],
+    "architectureTitle": "Points clés d'architecture",
+    "architectureSubtitle": "Conçu avec la sécurité et la privacy au cœur",
+    "architecture": [
+      {
+        "title": "Résidence des données UE",
+        "description": "Vos données restent dans l'Union européenne."
+      },
+      {
+        "title": "Architecture zero-trust",
+        "description": "Chaque requête est authentifiée et autorisée."
+      },
+      {
+        "title": "Backups quotidiens",
+        "description": "Backups chiffrés avec tests de restauration réguliers."
+      }
+    ],
+    "incidentTitle": "Gestion des incidents",
+    "incidentSubtitle": "Un processus clair et testé régulièrement.",
+    "incidentMetrics": [
+      {
+        "label": "Accusé de réception SLA",
+        "value": "4h"
+      },
+      {
+        "label": "Communication",
+        "value": "100%"
+      },
+      {
+        "label": "Résolution critique",
+        "value": "< 24h"
+      }
+    ],
+    "thirdPartyTitle": "Sécurité des tiers",
+    "thirdPartySubtitle": "Nous auditons en continu nos partenaires et fournisseurs.",
+    "thirdParty": [
+      {
+        "title": "Fournisseurs",
+        "description": "Hébergement, monitoring et email en Europe."
+      },
+      {
+        "title": "Due diligence",
+        "description": "Revue sécurité avant onboarding de tout nouveau fournisseur."
+      },
+      {
+        "title": "Revues annuelles",
+        "description": "Réévaluation des risques et mises à jour contractuelles."
+      }
+    ],
+    "reportTitle": "Signaler une vulnérabilité",
+    "reportSubtitle": "Si vous découvrez une faille, signalez-la de façon responsable.",
+    "pgp": "Clé PGP (bientôt)",
+    "bounty": "Bug bounty (bientôt)",
+    "hallOfFame": "Hall of Fame",
+    "hallDescription": "Nous remercions les chercheurs sécurité qui nous aident à améliorer la plateforme.",
+    "hallEmpty": "Aucune vulnérabilité signalée pour le moment.",
+    "finalTitle": "Envie d'en savoir plus ?",
+    "finalSubtitle": "Téléchargez notre whitepaper sécurité ou contactez notre équipe.",
+    "whitepaper": "Télécharger le whitepaper sécurité",
+    "contactTeam": "Contacter l'équipe sécurité"
+  },
+  "legal": {
+    "badge": "Légal",
+    "lastUpdated": "Dernière mise à jour : {{date}}",
+    "tabs": {
+      "privacy": "Politique de confidentialité",
+      "terms": "Conditions d'utilisation",
+      "cookies": "Politique de cookies"
+    }
+  },
+  "privacy": {
+    "seo": {
+      "title": "Politique de confidentialité | CertFast",
+      "description": "Découvrez comment CertFast collecte, utilise et protège vos données personnelles."
+    },
+    "title": "Politique de confidentialité",
+    "date": "17 mars 2026",
+    "sections": [
+      {
+        "title": "Introduction",
+        "content": "CertFast s'engage à protéger votre vie privée. Cette politique explique comment nous collectons, utilisons et protégeons vos données personnelles."
+      },
+      {
+        "title": "Données collectées",
+        "content": "Nous collectons les données de compte, les documents compliance, les logs d'usage et les informations de facturation nécessaires au service."
+      },
+      {
+        "title": "Utilisation des données",
+        "content": "Nous utilisons les données pour fournir le service, sécuriser les comptes, améliorer le produit et respecter nos obligations légales."
+      },
+      {
+        "title": "Base légale",
+        "content": "Nous traitons les données selon les bases légales du RGPD : contrat, intérêt légitime, consentement et obligation légale."
+      },
+      {
+        "title": "Conservation",
+        "content": "Nous conservons les données personnelles uniquement le temps nécessaire aux finalités contractuelles, légales et de sécurité."
+      },
+      {
+        "title": "Vos droits",
+        "content": "Vous pouvez demander l'accès, la rectification, l'effacement, la portabilité et la limitation. Contact : data@certfast.io."
+      },
+      {
+        "title": "Transferts internationaux",
+        "content": "Les données sont principalement traitées dans l'UE. En cas de transfert, nous appliquons des garanties contractuelles adaptées."
+      },
+      {
+        "title": "Contact",
+        "content": "Pour toute question privacy : data@certfast.io ou la CNIL."
+      }
+    ]
+  },
+  "terms": {
+    "seo": {
+      "title": "Conditions d'utilisation | CertFast",
+      "description": "Consultez les conditions qui encadrent l'utilisation de CertFast."
+    },
+    "title": "Conditions d'utilisation",
+    "date": "17 mars 2026",
+    "sections": [
+      {
+        "title": "1. Acceptation",
+        "content": "En utilisant CertFast, vous acceptez ces conditions et notre politique de confidentialité."
+      },
+      {
+        "title": "2. Description du service",
+        "content": "CertFast fournit des outils d'automatisation compliance pour SOC 2, ISO 27001 et RGPD."
+      },
+      {
+        "title": "3. Comptes et sécurité",
+        "content": "Vous êtes responsable des identifiants de votre compte et devez signaler tout accès non autorisé."
+      },
+      {
+        "title": "4. Facturation",
+        "content": "Les offres payantes sont facturées mensuellement ou annuellement."
+      },
+      {
+        "title": "5. Usage acceptable",
+        "content": "Vous ne devez pas détourner le service, tenter un accès non autorisé ou transmettre du code malveillant."
+      },
+      {
+        "title": "6. Propriété intellectuelle",
+        "content": "CertFast détient la plateforme et la marque. Vous conservez la propriété de votre contenu."
+      },
+      {
+        "title": "7. Limitation de responsabilité",
+        "content": "Dans les limites légales, CertFast n'est pas responsable des dommages indirects."
+      },
+      {
+        "title": "8. Droit applicable",
+        "content": "Ces conditions sont régies par le droit français, juridiction Paris."
+      },
+      {
+        "title": "9. Contact",
+        "content": "Pour toute question juridique : legal@certfast.io."
+      }
+    ]
+  },
+  "cookies": {
+    "seo": {
+      "title": "Politique de cookies | CertFast",
+      "description": "Découvrez comment CertFast utilise les cookies et technologies similaires."
+    },
+    "title": "Politique de cookies",
+    "date": "17 mars 2026",
+    "sections": [
+      {
+        "title": "Qu'est-ce qu'un cookie ?",
+        "content": "Les cookies sont de petits fichiers texte stockés sur votre appareil pour mémoriser vos préférences."
+      },
+      {
+        "title": "Comment nous utilisons les cookies",
+        "content": "Nous utilisons des cookies essentiels pour l'authentification et la sécurité, et des cookies analytiques optionnels."
+      },
+      {
+        "title": "Gestion des cookies",
+        "content": "Vous pouvez gérer et supprimer les cookies depuis les paramètres de votre navigateur."
+      },
+      {
+        "title": "Contact",
+        "content": "Pour toute question : data@certfast.io."
+      }
+    ]
+  },
+  "markdown": {
+    "code": "code"
+  },
+  "common": {
+    "backToBlog": "Retour au blog"
+  }
+}

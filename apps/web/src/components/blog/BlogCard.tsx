@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowRight, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface BlogCardProps {
   slug: string;
@@ -24,7 +25,10 @@ export function BlogCard({
   image,
   featured = false,
 }: BlogCardProps) {
-  const formattedDate = new Date(date).toLocaleDateString('en-US', {
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith('fr') ? 'fr-FR' : 'en-US';
+
+  const formattedDate = new Date(date).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -49,7 +53,7 @@ export function BlogCard({
           <div className="p-8 md:w-1/2 flex flex-col justify-center">
             <div className="flex items-center gap-2 mb-4">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-certfast-100 text-certfast-700">
-                Featured
+                {t('blogCard.featured')}
               </span>
               {tags.slice(0, 2).map((tag) => (
                 <span
@@ -84,7 +88,7 @@ export function BlogCard({
               to={`/blog/${slug}`}
               className="inline-flex items-center gap-2 text-certfast-600 font-medium hover:text-certfast-700 transition-colors"
             >
-              Read article
+              {t('blogCard.readArticle')}
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>

@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface MarkdownRendererProps {
   content: string;
@@ -11,6 +12,7 @@ interface MarkdownRendererProps {
 }
 
 export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export function MarkdownRenderer({ content, className = '' }: MarkdownRendererPr
             return (
               <div className="my-6 rounded-lg overflow-hidden">
                 <div className="bg-gray-800 px-4 py-2 text-xs text-gray-400 flex justify-between items-center">
-                  <span>{language || 'code'}</span>
+                  <span>{language || t('markdown.code')}</span>
                 </div>
                 <SyntaxHighlighter
                   language={language || 'text'}

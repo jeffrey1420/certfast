@@ -11,29 +11,29 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-COPY apps/web/package*.json ./apps/web/
 
 # Install dependencies
 RUN npm ci
 
 # Copy source code
-COPY apps/web ./apps/web
+COPY . .
 
 # Set environment variables for build
 ENV NODE_ENV=production
 ENV VITE_API_URL=${VITE_API_URL:-https://api.certfast.io}
 
 # Build the application
-RUN npm run build --workspace=certfast-web
+RUN npm run build
 
 # Stage 2: Production - Nginx
 FROM nginx:alpine
 
 # Copy built assets from builder
-COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration
-COPY infrastructure/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx configuration (will be at /infrastructure/nginx/nginx.conf from root context)
+# Since context is repo root, we need the full path
+RUN echo 'server { listen 80; server_name localhost; root /usr/share/nginx/html; index index.html; location / { try_files $uri $uri/ /index.html; } }' > /etc/nginx/conf.d/default.conf
 
 # Expose port
 EXPOSE 80
