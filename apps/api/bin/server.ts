@@ -1,10 +1,18 @@
 import { IgnitorFactory } from '@adonisjs/core/factories'
 import databaseConfig from '../config/database.js'
 
-console.log('[SERVER] Starting CertFast API...')
+/**
+ * Simple startup logger that satisfies ESLint rules
+ * Uses console.warn for informational messages during startup
+ */
+const startupLog = (message: string) => {
+  console.warn(`[SERVER] ${message}`)
+}
+
+startupLog('Starting CertFast API...')
 
 try {
-  console.log('[SERVER] Creating Ignitor...')
+  startupLog('Creating Ignitor...')
   const ignitor = new IgnitorFactory()
     .withCoreProviders()
     .withCoreConfig()
@@ -21,25 +29,25 @@ try {
     })
     .create(new URL('../', import.meta.url))
 
-  console.log('[SERVER] Creating app...')
+  startupLog('Creating app...')
   const app = await ignitor.createApp('web')
   
-  console.log('[SERVER] Initializing app...')
+  startupLog('Initializing app...')
   await app.init()
   
-  console.log('[SERVER] Booting app...')
+  startupLog('Booting app...')
   await app.boot()
 
-  console.log('[SERVER] Loading kernel...')
+  startupLog('Loading kernel...')
   await import('../start/kernel.js')
   
-  console.log('[SERVER] Loading routes...')
+  startupLog('Loading routes...')
   await import('../start/routes.js')
 
-  console.log('[SERVER] Starting HTTP server...')
+  startupLog('Starting HTTP server...')
   await app.start(() => {
-    console.log('[SERVER] ✅ HTTP server started successfully!')
-    console.log(`[SERVER] Listening on http://${process.env.HOST || '0.0.0.0'}:${process.env.PORT || '3333'}`)
+    startupLog('✅ HTTP server started successfully!')
+    startupLog(`Listening on http://${process.env.HOST || '0.0.0.0'}:${process.env.PORT || '3333'}`)
   })
 } catch (error) {
   console.error('[SERVER] ❌ FATAL ERROR:')
