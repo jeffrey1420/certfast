@@ -27,11 +27,17 @@ export default class AssessmentsController {
     const { organizationId, title, type, description, dueDate } = ctx.request.body()
 
     if (!organizationId || !title || !type) {
-      return ctx.response.status(422).json({ error: 'Validation failed' })
+      return ctx.response.status(422).json({ 
+        error: 'Validation failed',
+        message: 'organizationId, title and type are required'
+      })
     }
 
     if (!VALID_TYPES.has(type)) {
-      return ctx.response.status(422).json({ error: 'Validation failed' })
+      return ctx.response.status(422).json({ 
+        error: 'Validation failed',
+        message: 'Invalid type value'
+      })
     }
 
     const org = await Organization.find(Number(organizationId))
@@ -84,7 +90,10 @@ export default class AssessmentsController {
     const { title, description, dueDate, status } = ctx.request.body()
 
     if (status !== undefined && !VALID_STATUSES.has(status)) {
-      return ctx.response.status(422).json({ error: 'Validation failed' })
+      return ctx.response.status(422).json({ 
+        error: 'Validation failed',
+        message: 'Invalid status value'
+      })
     }
 
     if (title !== undefined) assessment.title = title

@@ -94,7 +94,10 @@ export default class ControlsController {
     const { title, description, category, status, code } = ctx.request.body()
 
     if (status !== undefined && !VALID_STATUSES.has(status)) {
-      return ctx.response.status(422).json({ error: 'Invalid status' })
+      return ctx.response.status(422).json({ 
+        error: 'Validation failed',
+        message: 'Invalid status value'
+      })
     }
 
     if (code !== undefined && code !== control.code) {
