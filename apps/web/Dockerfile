@@ -9,7 +9,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy root package files (for monorepo)
+# Copy package files
 COPY package*.json ./
 COPY apps/web/package*.json ./apps/web/
 
@@ -18,7 +18,6 @@ RUN npm ci
 
 # Copy source code
 COPY apps/web ./apps/web
-COPY packages ./packages
 
 # Set environment variables for build
 ENV NODE_ENV=production
@@ -35,10 +34,6 @@ COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 
 # Copy nginx configuration
 COPY infrastructure/nginx/nginx.conf /etc/nginx/conf.d/default.conf
-
-# Security: Run as non-root (optional, uncomment if needed)
-# RUN addgroup -g 1001 -S nginx && adduser -S nginx -u 1001
-# USER nginx
 
 # Expose port
 EXPOSE 80

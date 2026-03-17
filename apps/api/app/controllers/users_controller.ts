@@ -22,7 +22,7 @@ function serializeUser(user: User) {
 export default class UsersController {
   async me(ctx: HttpContext) {
     const { response } = ctx
-    const authUserId = (ctx as any).authUserId as number | undefined
+    const authUserId = ctx.authUserId
     if (!authUserId) {
       return response.status(401).json({ error: 'Unauthorized' })
     }
@@ -37,7 +37,7 @@ export default class UsersController {
 
   async updateMe(ctx: HttpContext) {
     const { request, response } = ctx
-    const authUserId = (ctx as any).authUserId as number | undefined
+    const authUserId = ctx.authUserId
     if (!authUserId) {
       return response.status(401).json({ error: 'Unauthorized' })
     }

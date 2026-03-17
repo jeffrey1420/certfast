@@ -22,7 +22,9 @@ test.group('Auth System', (group) => {
 
     const user = await User.findBy('email', 'test@example.com')
     assert.isNotNull(user)
-    assert.isTrue(await user!.verifyPassword('password123'))
+    if (user) {
+      assert.isTrue(await user.verifyPassword('password123'))
+    }
   })
 
   test('POST /auth/register - validates required fields', async ({ client }) => {

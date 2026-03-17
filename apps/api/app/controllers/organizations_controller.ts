@@ -92,7 +92,7 @@ export default class OrganizationsController {
   }
 
   async update(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const user = await User.find(authUserId)
     const orgId = Number(ctx.params.id)
 
@@ -130,7 +130,7 @@ export default class OrganizationsController {
   }
 
   async destroy(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const user = await User.find(authUserId)
     const orgId = Number(ctx.params.id)
 

@@ -6,7 +6,7 @@ const VALID_STATUSES = new Set(['draft', 'published', 'archived', 'deprecated'])
 
 export default class PoliciesController {
   async index(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const organizationId = ctx.request.input('organizationId')
 
     const query = Policy.query().whereHas('organization', (orgQuery) => {
@@ -22,7 +22,7 @@ export default class PoliciesController {
   }
 
   async store(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const { organizationId, title, content, version } = ctx.request.body()
 
     if (!organizationId || !title || !content) {
@@ -49,7 +49,7 @@ export default class PoliciesController {
   }
 
   async show(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const policy = await Policy.find(Number(ctx.params.id))
 
     if (!policy) {
@@ -65,7 +65,7 @@ export default class PoliciesController {
   }
 
   async update(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const policy = await Policy.find(Number(ctx.params.id))
 
     if (!policy) {
@@ -94,7 +94,7 @@ export default class PoliciesController {
   }
 
   async destroy(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const policy = await Policy.find(Number(ctx.params.id))
 
     if (!policy) {
