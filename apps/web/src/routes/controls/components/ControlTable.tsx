@@ -17,7 +17,7 @@ interface ControlTableProps {
   totalPages: number
   totalItems: number
   onPageChange: (page: number) => void
-  onView: (id: string) => void
+  onView: (id: number) => void
 }
 
 const categoryColors: Record<string, string> = {
@@ -36,10 +36,11 @@ const categoryColors: Record<string, string> = {
   'Compliance': 'bg-slate-100 text-slate-800',
 }
 
-const maturityConfig = {
-  basic: { label: 'Basic', variant: 'secondary' as const },
-  intermediate: { label: 'Intermediate', variant: 'default' as const },
-  advanced: { label: 'Advanced', variant: 'outline' as const },
+const statusConfig = {
+  draft: { label: 'Draft', variant: 'secondary' as const },
+  active: { label: 'Active', variant: 'default' as const },
+  archived: { label: 'Archived', variant: 'outline' as const },
+  deprecated: { label: 'Deprecated', variant: 'destructive' as const },
 }
 
 export function ControlTable({
@@ -59,7 +60,7 @@ export function ControlTable({
               <TableHead>Code</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Maturity</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -86,8 +87,8 @@ export function ControlTable({
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={maturityConfig[control.maturityLevel].variant}>
-                      {maturityConfig[control.maturityLevel].label}
+                    <Badge variant={statusConfig[control.status].variant}>
+                      {statusConfig[control.status].label}
                     </Badge>
                   </TableCell>
                   <TableCell>

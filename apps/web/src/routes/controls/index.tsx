@@ -15,7 +15,7 @@ export function ControlsPage() {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [filters, setFilters] = useState<ControlFilterState>({
     category: 'all',
-    maturityLevel: 'all',
+    status: 'all',
     search: '',
   })
   const [currentPage, setCurrentPage] = useState(1)
@@ -27,13 +27,13 @@ export function ControlsPage() {
   // Filter controls based on current filters
   const filteredControls = controls.filter((control) => {
     const matchesCategory = filters.category === 'all' || control.category === filters.category
-    const matchesMaturity = filters.maturityLevel === 'all' || control.maturityLevel === filters.maturityLevel
+    const matchesStatus = filters.status === 'all' || control.status === filters.status
     const matchesSearch =
       filters.search === '' ||
       control.title.toLowerCase().includes(filters.search.toLowerCase()) ||
       control.code.toLowerCase().includes(filters.search.toLowerCase()) ||
-      control.description.toLowerCase().includes(filters.search.toLowerCase())
-    return matchesCategory && matchesMaturity && matchesSearch
+      (control.description && control.description.toLowerCase().includes(filters.search.toLowerCase()))
+    return matchesCategory && matchesStatus && matchesSearch
   })
 
   // Pagination
