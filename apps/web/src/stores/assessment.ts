@@ -96,7 +96,7 @@ export const useAssessmentStore = create<AssessmentState>((set) => ({
   updateAssessment: async (id: string, updates: UpdateAssessmentDto) => {
     set({ isLoading: true, error: null })
     try {
-      const { data } = await api.patch<AssessmentBackend>(`/assessments/${id}`, updates)
+      const { data } = await api.put<AssessmentBackend>(`/assessments/${id}`, updates)
       set((state) => ({
         assessments: state.assessments.map((a) => (a.id === Number(id) ? data : a)),
         currentAssessment: state.currentAssessment?.id === Number(id) ? data : state.currentAssessment,

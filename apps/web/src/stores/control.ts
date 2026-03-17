@@ -72,7 +72,7 @@ export const useControlStore = create<ControlState>((set) => ({
   updateControl: async (id: number, data: UpdateControlData) => {
     set({ isLoading: true, error: null })
     try {
-      const { data: control } = await api.patch<ControlDetailed>(`/controls/${id}`, data)
+      const { data: control } = await api.put<ControlDetailed>(`/controls/${id}`, data)
       set((state) => ({
         controls: state.controls.map((c) => (c.id === id ? control : c)),
         currentControl: state.currentControl?.id === id ? control : state.currentControl,

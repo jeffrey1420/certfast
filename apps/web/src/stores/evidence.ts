@@ -65,7 +65,7 @@ export const useEvidenceStore = create<EvidenceState>((set) => ({
   updateEvidence: async (id: number, data: UpdateEvidenceData) => {
     set({ isLoading: true, error: null })
     try {
-      const { data: evidence } = await api.patch<Evidence>(`/evidence/${id}`, data)
+      const { data: evidence } = await api.put<Evidence>(`/evidence/${id}`, data)
       set((state) => ({
         evidence: state.evidence.map((e) => (e.id === id ? evidence : e)),
         currentEvidence: state.currentEvidence?.id === id ? evidence : state.currentEvidence,

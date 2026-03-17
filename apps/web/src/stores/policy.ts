@@ -79,7 +79,7 @@ export const usePolicyStore = create<PolicyState>((set) => ({
   updatePolicy: async (id: number, data: UpdatePolicyData) => {
     set({ isLoading: true, error: null })
     try {
-      const { data: policy } = await api.patch<Policy>(`/policies/${id}`, data)
+      const { data: policy } = await api.put<Policy>(`/policies/${id}`, data)
       set((state) => ({
         policies: state.policies.map((p) => (Number(p.id) === id ? policy : p)),
         currentPolicy: state.currentPolicy && Number(state.currentPolicy.id) === id ? policy : state.currentPolicy,
