@@ -1,25 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Calendar, User, Shield, Clock, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Calendar, User, Shield, Clock, CheckCircle2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { ControlList, type Control } from './components/ControlList'
 import { EvidenceUpload, type EvidenceFile } from './components/EvidenceUpload'
+import { useAssessmentStore } from '@/stores'
 
-// Mock assessment data
-const mockAssessment = {
-  id: '1',
-  name: 'ISO 27001 Compliance Review',
-  framework: 'ISO 27001',
-  status: 'in_progress' as const,
-  progress: 75,
-  dueDate: '2026-04-15',
-  owner: 'John Smith',
-  description: 'Comprehensive compliance assessment for ISO 27001:2022 certification covering information security management systems.',
-  createdAt: '2026-02-01',
-  updatedAt: '2026-03-15',
+// Helper function to format assessment type for display
+const formatAssessmentType = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    'soc2_type1': 'SOC 2 Type I',
+    'soc2_type2': 'SOC 2 Type II',
+    'iso27001': 'ISO 27001',
+    'gdpr': 'GDPR',
+    'hipaa': 'HIPAA',
+    'custom': 'Custom Framework'
+  }
+  return typeMap[type] || type
 }
 
 // Mock controls data
@@ -142,20 +142,26 @@ const mockEvidenceFiles: EvidenceFile[] = [
 ]
 
 const statusConfig = {
-  pending: { label: 'Pending', variant: 'secondary' as const },
-  in_progress: { label: 'In Progress', variant: 'default' as const },
+  draft: { label: 'Draft', variant: 'secondary' as const },
+  active: { label: 'Active', variant: 'default' as const },
+  in_review: { label: 'In Review', variant: 'default' as const },
   completed: { label: 'Completed', variant: 'outline' as const },
-  overdue: { label: 'Overdue', variant: 'destructive' as const },
+  archived: { label: 'Archived', variant: 'destructive' as const },
 }
 
 export function AssessmentDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { currentAssessment, isLoading, error, fetchAssessmentById } = useAssessmentStore()
   const [controls, setControls] = useState<Control[]>(mockControls)
   const [evidenceFiles, setEvidenceFiles] = useState<EvidenceFile[]>(mockEvidenceFiles)
 
-  // TODO: Use id to fetch real assessment data once API integration is complete
-  void id
+  // Fetch assessment data on mount
+  useEffect(() => {
+    if (id) {
+      void fetchAssessmentById(id)
+    }
+  }, [id, fetchAssessmentById])
 
   // Calculate stats
   const completedControls = controls.filter((c) => c.status === 'completed').length
@@ -205,6 +211,51 @@ export function AssessmentDetailPage() {
     })
   }
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="p-6">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/assessments')} className="-ml-2 mb-4">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Assessments
+        </Button>
+        <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+          <p>Error loading assessment: {error}</p>
+          <Button onClick={() => id && fetchAssessmentById(id)} className="mt-2">
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Not found state
+  if (!currentAssessment) {
+    return (
+      <div className="p-6">
+        <Button variant="ghost" size="sm" onClick={() => navigate('/assessments')} className="-ml-2 mb-4">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Assessments
+        </Button>
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Assessment not found</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Calculate mock progress (until we have real control data from API)
+  const mockProgress = 75
+
   return (
     <div className="space-y-6 p-6">
       {/* Back Button */}
@@ -217,25 +268,27 @@ export function AssessmentDetailPage() {
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight">{mockAssessment.name}</h1>
-            <Badge variant={statusConfig[mockAssessment.status].variant}>
-              {statusConfig[mockAssessment.status].label}
+            <h1 className="text-2xl font-bold tracking-tight">{currentAssessment.title}</h1>
+            <Badge variant={statusConfig[currentAssessment.status].variant}>
+              {statusConfig[currentAssessment.status].label}
             </Badge>
           </div>
-          <p className="text-muted-foreground max-w-2xl">{mockAssessment.description}</p>
+          <p className="text-muted-foreground max-w-2xl">{currentAssessment.description || 'No description provided'}</p>
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <Shield className="h-4 w-4" />
-              {mockAssessment.framework}
+              {formatAssessmentType(currentAssessment.type)}
             </div>
             <div className="flex items-center gap-1">
               <User className="h-4 w-4" />
-              {mockAssessment.owner}
+              Organization #{currentAssessment.organizationId}
             </div>
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              Due {formatDate(mockAssessment.dueDate)}
-            </div>
+            {currentAssessment.dueDate && (
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                Due {formatDate(currentAssessment.dueDate)}
+              </div>
+            )}
           </div>
         </div>
 
@@ -253,8 +306,8 @@ export function AssessmentDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">{mockAssessment.progress}%</span>
-              <Progress value={mockAssessment.progress} className="h-2 flex-1" />
+              <span className="text-2xl font-bold">{mockProgress}%</span>
+              <Progress value={mockProgress} className="h-2 flex-1" />
             </div>
           </CardContent>
         </Card>
@@ -335,24 +388,32 @@ export function AssessmentDetailPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Framework</span>
-                <span className="font-medium">{mockAssessment.framework}</span>
+                <span className="text-muted-foreground">Type</span>
+                <span className="font-medium">{formatAssessmentType(currentAssessment.type)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Owner</span>
-                <span className="font-medium">{mockAssessment.owner}</span>
+                <span className="text-muted-foreground">Status</span>
+                <span className="font-medium capitalize">{currentAssessment.status.replace('_', ' ')}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Due Date</span>
-                <span className="font-medium">{formatDate(mockAssessment.dueDate)}</span>
-              </div>
+              {currentAssessment.dueDate && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Due Date</span>
+                  <span className="font-medium">{formatDate(currentAssessment.dueDate)}</span>
+                </div>
+              )}
+              {currentAssessment.startedAt && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Started</span>
+                  <span className="font-medium">{formatDate(currentAssessment.startedAt)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Created</span>
-                <span className="font-medium">{formatDate(mockAssessment.createdAt)}</span>
+                <span className="font-medium">{formatDate(currentAssessment.createdAt)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Last Updated</span>
-                <span className="font-medium">{formatDate(mockAssessment.updatedAt)}</span>
+                <span className="font-medium">{formatDate(currentAssessment.updatedAt)}</span>
               </div>
             </CardContent>
           </Card>
