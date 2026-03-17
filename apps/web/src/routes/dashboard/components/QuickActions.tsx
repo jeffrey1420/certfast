@@ -91,4 +91,3 @@ export function QuickActions({
 }
 
 export type { QuickAction }
-export { defaultActions }
