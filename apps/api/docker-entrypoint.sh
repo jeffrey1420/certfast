@@ -3,28 +3,11 @@ set -e
 
 echo "🚀 CertFast API - Starting..."
 
-# Wait for PostgreSQL to be ready
+# Wait for PostgreSQL to be ready using pg_isready
 echo "⏳ Waiting for PostgreSQL..."
-max_attempts=30
-attempt=0
 
-until node -e "
-const { Pool } = require('pg');
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  database: process.env.DB_DATABASE,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD
-});
-pool.query('SELECT 1').then(() => { process.exit(0); }).catch(() => { process.exit(1); });
-" 2>/dev/null; do
-  attempt=$((attempt + 1))
-  if [ $attempt -ge $max_attempts ]; then
-    echo "❌ PostgreSQL connection timeout"
-    exit 1
-  fi
-  echo "   Attempt $attempt/$max_attempts..."
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" > /dev/null 2>&1; do
+  echo "   PostgreSQL is unavailable - sleeping"
   sleep 2
 done
 
