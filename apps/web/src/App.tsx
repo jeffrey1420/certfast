@@ -21,6 +21,8 @@ import { CaseStudy } from '@/pages/CaseStudy';
 import { About } from '@/pages/About';
 import { Contact } from '@/pages/Contact';
 import { Security } from '@/pages/Security';
+import { Privacy } from '@/pages/Privacy';
+import { Terms } from '@/pages/Terms';
 
 function App() {
   return (
@@ -36,6 +38,8 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/security" element={<Security />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
