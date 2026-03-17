@@ -154,8 +154,8 @@ export function AssessmentDetailPage() {
   const [controls, setControls] = useState<Control[]>(mockControls)
   const [evidenceFiles, setEvidenceFiles] = useState<EvidenceFile[]>(mockEvidenceFiles)
 
-  // Use id to fetch assessment data in real implementation
-  console.log('Assessment ID:', id)
+  // TODO: Use id to fetch real assessment data once API integration is complete
+  void id
 
   // Calculate stats
   const completedControls = controls.filter((c) => c.status === 'completed').length

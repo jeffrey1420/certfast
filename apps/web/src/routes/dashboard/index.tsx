@@ -109,8 +109,6 @@ export function DashboardPage() {
       case 'settings':
         navigate('/settings')
         break
-      default:
-        console.log('Action clicked:', actionId)
     }
   }
 
