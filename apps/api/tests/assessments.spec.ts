@@ -39,7 +39,7 @@ test.group('Assessments', (group) => {
       .json({
         organizationId: org.id,
         title: 'SOC 2 Security Assessment',
-        type: 'soc2',
+        type: 'soc2_type1',
         dueDate: '2025-12-31',
       })
 
@@ -47,9 +47,8 @@ test.group('Assessments', (group) => {
     response.assertBodyContains({
       organizationId: org.id,
       title: 'SOC 2 Security Assessment',
-      type: 'soc2',
+      type: 'soc2_type1',
       status: 'draft',
-      progress: 0,
     })
   })
 
@@ -59,7 +58,7 @@ test.group('Assessments', (group) => {
     await Assessment.create({
       organizationId: org.id,
       title: 'Assessment 1',
-      type: 'soc2',
+      type: 'soc2_type1',
       status: 'active',
     })
 
@@ -86,7 +85,6 @@ test.group('Assessments', (group) => {
       title: 'Detailed Assessment',
       type: 'gdpr',
       status: 'in_review',
-      progress: 65,
     })
 
     const response = await client
@@ -99,7 +97,6 @@ test.group('Assessments', (group) => {
       title: 'Detailed Assessment',
       type: 'gdpr',
       status: 'in_review',
-      progress: 65,
     })
   })
 
@@ -109,9 +106,8 @@ test.group('Assessments', (group) => {
     const assessment = await Assessment.create({
       organizationId: org.id,
       title: 'Original Title',
-      type: 'soc2',
+      type: 'soc2_type1',
       status: 'draft',
-      progress: 10,
     })
 
     const response = await client
@@ -120,14 +116,12 @@ test.group('Assessments', (group) => {
       .json({
         title: 'Updated Title',
         status: 'active',
-        progress: 25,
       })
 
     response.assertStatus(200)
     response.assertBodyContains({
       title: 'Updated Title',
       status: 'active',
-      progress: 25,
     })
   })
 
@@ -137,7 +131,7 @@ test.group('Assessments', (group) => {
     const assessment = await Assessment.create({
       organizationId: org.id,
       title: 'To Archive',
-      type: 'soc2',
+      type: 'soc2_type1',
       status: 'active',
     })
 
