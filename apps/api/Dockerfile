@@ -1,7 +1,6 @@
 # ============================================================
 # API PRODUCTION DOCKERFILE
 # CertFast Backend - AdonisJS
-# Simplified for debugging
 # ============================================================
 
 FROM node:22-alpine
@@ -14,7 +13,7 @@ RUN apk add --no-cache curl
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies (production needs build tools sometimes)
+# Install dependencies
 RUN npm ci
 
 # Copy source code
@@ -23,8 +22,8 @@ COPY . .
 # Build TypeScript
 RUN npm run build
 
-# Verify build output exists
-RUN ls -la bin/ && ls -la config/ && ls -la start/
+# Verify build output
+RUN ls -la build/ && ls -la build/bin/ && ls -la build/config/
 
 # Create uploads directory
 RUN mkdir -p tmp/uploads
@@ -37,5 +36,5 @@ ENV HOST=0.0.0.0
 # Expose port
 EXPOSE 3333
 
-# Start with explicit logging
-CMD ["sh", "-c", "echo 'Starting API...' && ls -la bin/ && node bin/server.js"]
+# Start the compiled application (from build/ directory)
+CMD ["node", "build/bin/server.js"]
