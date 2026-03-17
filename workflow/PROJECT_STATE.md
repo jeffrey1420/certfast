@@ -1,6 +1,6 @@
 # PROJECT_STATE.md
 
-Last updated: 2026-03-16
+Last updated: 2026-03-17
 
 ## Canonical source of truth
 
@@ -28,6 +28,11 @@ The following files are now legacy status boards and are informational only:
 - Auth tokens persisted in Postgres (`user_tokens` table).
 - Auth middleware validates token against database.
 - Register/login return `{ token, user }`.
+- **Full CRUD endpoints implemented for:**
+  - Controls (`/api/v1/controls`) - create, list, get, update, archive
+  - Evidence (`/api/v1/evidence`) - create, list, get, update, delete (linked to controls)
+  - Policies (`/api/v1/policies`) - full CRUD operations
+  - Dashboard activity feed (`/api/v1/dashboard/activity`) - returns recent assessment updates
 
 ### Frontend
 - Auth pages call real API via Axios client.
@@ -39,9 +44,21 @@ The following files are now legacy status boards and are informational only:
 - `apps/api/tests/helpers.ts` provides `resetDatabase()`.
 - API spec files use `group.each.setup(resetDatabase)`.
 - Migration test paths aligned with actual migration locations.
+- **Comprehensive integration tests exist for:**
+  - Auth (register, login, logout, token validation)
+  - Assessments (full CRUD)
+  - Controls (full CRUD with organization ownership checks)
+  - Evidence (full CRUD with control relationships)
+  - Policies (full CRUD)
+  - Dashboard (activity feed)
+  - Organizations and Users
+- **Test status:** 73 tests written, currently failing due to PostgreSQL test database not running (see infrastructure blocker below).
 
 ## Remaining blockers
 
-- No backend endpoints yet for controls/evidence CRUD and dashboard-specific activity feed.
+### Infrastructure
+- **PostgreSQL test database not running:** Tests require `postgres-test` on port 5433 (defined in docker-compose.yml). Current environment has no Docker and no PostgreSQL installation, causing all 73 integration tests to fail with connection errors. This blocks automated testing and CI/CD pipeline.
+
+### Frontend
 - Frontend assessment creation flow is still minimal and should be expanded once org selection UX is finalized.
-- CI pipeline for containerized test database is not yet wired.
+- Controls and Evidence UI components exist but integration with backend CRUD endpoints needs verification and polish.
