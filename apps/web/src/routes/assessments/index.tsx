@@ -1,97 +1,74 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AssessmentTable, type Assessment } from './components/AssessmentTable'
 import { AssessmentFilters, type FilterState } from './components/AssessmentFilters'
 import { CreateButton } from './components/CreateButton'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-// Mock data for assessments
-const mockAssessments: Assessment[] = [
-  {
-    id: '1',
-    name: 'ISO 27001 Compliance Review',
-    framework: 'ISO 27001',
-    status: 'in_progress',
-    progress: 75,
-    dueDate: '2026-04-15',
-    owner: 'John Smith',
-  },
-  {
-    id: '2',
-    name: 'SOC 2 Type I Audit',
-    framework: 'SOC 2',
-    status: 'pending',
-    progress: 25,
-    dueDate: '2026-05-01',
-    owner: 'Sarah Chen',
-  },
-  {
-    id: '3',
-    name: 'GDPR Compliance Assessment',
-    framework: 'GDPR',
-    status: 'completed',
-    progress: 100,
-    dueDate: '2026-03-10',
-    owner: 'Mike Johnson',
-  },
-  {
-    id: '4',
-    name: 'HIPAA Security Evaluation',
-    framework: 'HIPAA',
-    status: 'in_progress',
-    progress: 60,
-    dueDate: '2026-04-30',
-    owner: 'Emily Davis',
-  },
-  {
-    id: '5',
-    name: 'PCI DSS v4.0 Assessment',
-    framework: 'PCI DSS',
-    status: 'overdue',
-    progress: 40,
-    dueDate: '2026-03-01',
-    owner: 'David Wilson',
-  },
-  {
-    id: '6',
-    name: 'NIST CSF Gap Analysis',
-    framework: 'NIST CSF',
-    status: 'in_progress',
-    progress: 50,
-    dueDate: '2026-05-15',
-    owner: 'Lisa Anderson',
-  },
-  {
-    id: '7',
-    name: 'CIS Controls Review',
-    framework: 'CIS Controls',
-    status: 'pending',
-    progress: 10,
-    dueDate: '2026-06-01',
-    owner: 'Tom Brown',
-  },
-  {
-    id: '8',
-    name: 'CCPA Compliance Check',
-    framework: 'CCPA',
-    status: 'completed',
-    progress: 100,
-    dueDate: '2026-02-28',
-    owner: 'Anna Lee',
-  },
-]
+import { useAssessmentStore, type AssessmentBackend } from '@/stores/assessment'
+import { Loader2 } from 'lucide-react'
 
 const ITEMS_PER_PAGE = 5
 
+// Map backend assessment type to frontend display format
+const typeToFrameworkMap: Record<string, string> = {
+  soc2_type1: 'SOC 2 Type I',
+  soc2_type2: 'SOC 2 Type II',
+  iso27001: 'ISO 27001',
+  gdpr: 'GDPR',
+  hipaa: 'HIPAA',
+  custom: 'Custom',
+}
+
+// Map backend status to frontend status
+const statusMap: Record<string, Assessment['status']> = {
+  draft: 'pending',
+  active: 'in_progress',
+  in_review: 'in_progress',
+  completed: 'completed',
+  archived: 'completed',
+}
+
+function mapBackendToFrontend(backend: AssessmentBackend): Assessment {
+  // Calculate a rough progress based on status
+  let progress = 0
+  if (backend.status === 'active') progress = 50
+  else if (backend.status === 'in_review') progress = 75
+  else if (backend.status === 'completed') progress = 100
+
+  // Check if overdue
+  let status = statusMap[backend.status] || 'pending'
+  if (backend.dueDate && new Date(backend.dueDate) < new Date() && status !== 'completed') {
+    status = 'overdue'
+  }
+
+  return {
+    id: backend.id.toString(),
+    name: backend.title,
+    framework: typeToFrameworkMap[backend.type] || backend.type,
+    status,
+    progress,
+    dueDate: backend.dueDate || new Date().toISOString().split('T')[0],
+    owner: 'Unknown', // TODO: Add owner information once available
+  }
+}
+
 export function AssessmentsPage() {
   const navigate = useNavigate()
-  const [assessments] = useState<Assessment[]>(mockAssessments)
+  const { assessments: backendAssessments, isLoading, error, fetchAssessments } = useAssessmentStore()
   const [filters, setFilters] = useState<FilterState>({
     status: 'all',
     framework: 'all',
     search: '',
   })
   const [currentPage, setCurrentPage] = useState(1)
+
+  // Fetch assessments on mount
+  useEffect(() => {
+    void fetchAssessments()
+  }, [fetchAssessments])
+
+  // Map backend assessments to frontend format
+  const assessments = backendAssessments.map(mapBackendToFrontend)
 
   // Filter assessments based on current filters
   const filteredAssessments = assessments.filter((assessment) => {
@@ -128,6 +105,14 @@ export function AssessmentsPage() {
     setCurrentPage(page)
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6 p-6">
       {/* Page Header */}
@@ -141,6 +126,19 @@ export function AssessmentsPage() {
         <CreateButton onClick={handleCreateAssessment} />
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+          <p>Error loading assessments: {error}</p>
+          <button
+            onClick={() => fetchAssessments()}
+            className="mt-2 text-sm underline hover:no-underline"
+          >
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Filters */}
       <AssessmentFilters filters={filters} onFiltersChange={handleFiltersChange} />
 
@@ -150,14 +148,24 @@ export function AssessmentsPage() {
           <CardTitle>All Assessments</CardTitle>
         </CardHeader>
         <CardContent>
-          <AssessmentTable
-            assessments={paginatedAssessments}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={filteredAssessments.length}
-            onPageChange={handlePageChange}
-            onView={handleViewAssessment}
-          />
+          {filteredAssessments.length === 0 && !isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">
+                {assessments.length === 0
+                  ? 'No assessments yet. Create your first assessment to get started.'
+                  : 'No assessments match your current filters.'}
+              </p>
+            </div>
+          ) : (
+            <AssessmentTable
+              assessments={paginatedAssessments}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={filteredAssessments.length}
+              onPageChange={handlePageChange}
+              onView={handleViewAssessment}
+            />
+          )}
         </CardContent>
       </Card>
     </div>
