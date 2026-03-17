@@ -43,7 +43,6 @@ COPY --from=builder /app/bin ./bin
 COPY --from=builder /app/database ./database
 COPY --from=builder /app/start ./start
 COPY --from=builder /app/config ./config
-COPY --from=builder /app/resources ./resources
 
 # Create uploads directory
 RUN mkdir -p tmp/uploads
