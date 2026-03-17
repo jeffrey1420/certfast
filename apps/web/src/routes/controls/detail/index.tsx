@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useControlStore } from '@/stores'
 import { Loader2 } from 'lucide-react'
+import { EvidenceSection } from './EvidenceSection'
 
 const statusConfig = {
   draft: { label: 'Draft', variant: 'secondary' as const, description: 'This control is in draft status and not yet active' },
@@ -190,6 +191,9 @@ export function ControlDetailPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Evidence Section */}
+          <EvidenceSection controlId={currentControl.id} />
         </div>
 
         {/* Right Column - Metadata */}
