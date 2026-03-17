@@ -36,7 +36,8 @@ COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder
-COPY --from=builder /app/build ./build
+# Copy build contents to /app (not /app/build) because bin/server.js uses relative imports like ../config/
+COPY --from=builder /app/build ./
 COPY --from=builder /app/bin ./bin
 
 # Copy essential config files
