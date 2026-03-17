@@ -6,6 +6,7 @@ import { ForgotPasswordPage } from '@/routes/auth/forgot-password';
 import { ResetPasswordPage } from '@/routes/auth/reset-password';
 import { DashboardPage } from '@/routes/dashboard';
 import { AssessmentsPage } from '@/routes/assessments';
+import { CreateAssessmentPage } from '@/routes/assessments/new';
 import { AssessmentDetailPage } from '@/routes/assessments/detail';
 import { ControlsPage } from '@/routes/controls';
 import { ControlDetailPage } from '@/routes/controls/detail';
@@ -29,6 +30,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/assessments" element={<AssessmentsPage />} />
+          <Route path="/assessments/new" element={<CreateAssessmentPage />} />
           <Route path="/assessments/:id" element={<AssessmentDetailPage />} />
           <Route path="/controls" element={<ControlsPage />} />
           <Route path="/controls/:id" element={<ControlDetailPage />} />
