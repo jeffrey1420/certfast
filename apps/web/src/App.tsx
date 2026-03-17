@@ -1,3 +1,4 @@
+import './i18n';
 import { Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { LoginPage } from '@/routes/auth/login';
@@ -23,6 +24,7 @@ import { Contact } from '@/pages/Contact';
 import { Security } from '@/pages/Security';
 import { Privacy } from '@/pages/Privacy';
 import { Terms } from '@/pages/Terms';
+import { Cookies } from '@/pages/Cookies';
 
 function App() {
   return (
@@ -40,6 +42,7 @@ function App() {
           <Route path="/security" element={<Security />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/cookies" element={<Cookies />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

@@ -11,20 +11,20 @@ interface LegalSection {
   content: string;
 }
 
-export function Terms() {
+export function Cookies() {
   const { t, i18n } = useTranslation();
-  const sections = t('terms.sections', { returnObjects: true }) as LegalSection[];
+  const sections = t('cookies.sections', { returnObjects: true }) as LegalSection[];
   const currentLanguage = normalizeLanguage(i18n.language);
 
   return (
     <>
       <Helmet>
         <html lang={currentLanguage} />
-        <title>{t('terms.seo.title')}</title>
-        <meta name="description" content={t('terms.seo.description')} />
-        <link rel="canonical" href="https://certfast.io/terms" />
-        <link rel="alternate" hrefLang="fr" href="https://certfast.io/terms?lang=fr" />
-        <link rel="alternate" hrefLang="en" href="https://certfast.io/terms?lang=en" />
+        <title>{t('cookies.seo.title')}</title>
+        <meta name="description" content={t('cookies.seo.description')} />
+        <link rel="canonical" href="https://certfast.io/cookies" />
+        <link rel="alternate" hrefLang="fr" href="https://certfast.io/cookies?lang=fr" />
+        <link rel="alternate" hrefLang="en" href="https://certfast.io/cookies?lang=en" />
       </Helmet>
 
       <div className="min-h-screen bg-gray-50">
@@ -40,8 +40,8 @@ export function Terms() {
                 {t('legal.badge')}
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('terms.title')}</h1>
-            <p className="text-gray-600">{t('legal.lastUpdated', { date: t('terms.date') })}</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t('cookies.title')}</h1>
+            <p className="text-gray-600">{t('legal.lastUpdated', { date: t('cookies.date') })}</p>
           </div>
         </header>
 
