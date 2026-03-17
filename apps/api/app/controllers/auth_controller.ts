@@ -8,7 +8,7 @@ import {
 } from '#services/token_store'
 
 async function getAuthenticatedUser(ctx: HttpContext) {
-  const userIdFromMiddleware = (ctx as any).authUserId as number | undefined
+  const userIdFromMiddleware = ctx.authUserId ?? undefined
   if (userIdFromMiddleware) {
     return User.find(userIdFromMiddleware)
   }

@@ -7,7 +7,7 @@ const VALID_STATUSES = new Set(['draft', 'active', 'in_review', 'completed', 'ar
 
 export default class AssessmentsController {
   async index(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const organizationId = ctx.request.input('organizationId')
 
     const query = Assessment.query().whereHas('organization', (orgQuery) => {
@@ -23,7 +23,7 @@ export default class AssessmentsController {
   }
 
   async store(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const { organizationId, title, type, description, dueDate } = ctx.request.body()
 
     if (!organizationId || !title || !type) {
@@ -53,7 +53,7 @@ export default class AssessmentsController {
   }
 
   async show(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const assessment = await Assessment.find(Number(ctx.params.id))
 
     if (!assessment) {
@@ -69,7 +69,7 @@ export default class AssessmentsController {
   }
 
   async update(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const assessment = await Assessment.find(Number(ctx.params.id))
 
     if (!assessment) {
@@ -98,7 +98,7 @@ export default class AssessmentsController {
   }
 
   async destroy(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const assessment = await Assessment.find(Number(ctx.params.id))
 
     if (!assessment) {

@@ -15,6 +15,7 @@ import { PolicyDetailPage } from '@/routes/policies/detail';
 import { Home } from '@/pages/Home';
 import { Blog } from '@/pages/Blog';
 import { BlogPost } from '@/pages/BlogPost';
+import { Security } from '@/pages/Security';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/security" element={<Security />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

@@ -6,7 +6,7 @@ const VALID_STATUSES = new Set(['draft', 'active', 'archived', 'deprecated'])
 
 export default class ControlsController {
   async index(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const organizationId = ctx.request.input('organizationId')
 
     const query = Control.query().whereHas('organization', (orgQuery) => {
@@ -22,7 +22,7 @@ export default class ControlsController {
   }
 
   async store(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const { organizationId, title, description, category, code, status } = ctx.request.body()
 
     if (!organizationId || !title || !category || !code) {
@@ -63,7 +63,7 @@ export default class ControlsController {
   }
 
   async show(ctx: HttpContext) {
-    const authUserId = (ctx as any).authUserId as number
+    const authUserId = ctx.authUserId
     const control = await Control.find(Number(ctx.params.id))
 
     if (!control) {
