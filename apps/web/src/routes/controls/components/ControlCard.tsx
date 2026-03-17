@@ -66,8 +66,8 @@ export function ControlCard({ control, onView }: ControlCardProps) {
           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${categoryColors[control.category] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
             {control.category}
           </span>
-          <Badge variant={maturityConfig[control.maturityLevel].variant}>
-            {maturityConfig[control.maturityLevel].label}
+          <Badge variant={statusConfig[control.status].variant}>
+            {statusConfig[control.status].label}
           </Badge>
         </div>
       </CardContent>

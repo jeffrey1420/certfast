@@ -1,16 +1,17 @@
 import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Shield, BookOpen, Target, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Shield, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useControlStore } from '@/stores'
 import { Loader2 } from 'lucide-react'
 
-const maturityConfig = {
-  basic: { label: 'Basic', variant: 'secondary' as const, description: 'Fundamental security practices suitable for initial implementation' },
-  intermediate: { label: 'Intermediate', variant: 'default' as const, description: 'Enhanced controls for organizations with established security programs' },
-  advanced: { label: 'Advanced', variant: 'outline' as const, description: 'Sophisticated controls for mature security environments' },
+const statusConfig = {
+  draft: { label: 'Draft', variant: 'secondary' as const, description: 'This control is in draft status and not yet active' },
+  active: { label: 'Active', variant: 'default' as const, description: 'This control is currently active and should be implemented' },
+  archived: { label: 'Archived', variant: 'outline' as const, description: 'This control has been archived and is no longer in use' },
+  deprecated: { label: 'Deprecated', variant: 'destructive' as const, description: 'This control is deprecated and will be removed' },
 }
 
 const categoryColors: Record<string, string> = {
@@ -97,8 +98,8 @@ export function ControlDetailPage() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-sm text-muted-foreground">{currentControl.code}</span>
-                <Badge variant={maturityConfig[currentControl.maturityLevel].variant}>
-                  {maturityConfig[currentControl.maturityLevel].label}
+                <Badge variant={statusConfig[currentControl.status].variant}>
+                  {statusConfig[currentControl.status].label}
                 </Badge>
               </div>
               <h1 className="text-2xl font-bold tracking-tight">{currentControl.title}</h1>
@@ -108,11 +109,6 @@ export function ControlDetailPage() {
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${categoryColors[currentControl.category] || 'bg-gray-100 text-gray-800'}`}>
               {currentControl.category}
             </span>
-            {currentControl.subCategory && (
-              <span className="text-sm text-muted-foreground">
-                {currentControl.subCategory}
-              </span>
-            )}
           </div>
         </div>
 
@@ -127,49 +123,33 @@ export function ControlDetailPage() {
         {/* Left Column - Details */}
         <div className="lg:col-span-2 space-y-6">
           {/* Description Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Description
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground leading-relaxed">
-                {currentControl.description}
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Implementation Guidance */}
-          {currentControl.implementationGuidance && (
+          {currentControl.description && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Implementation Guidance
+                  <BookOpen className="h-5 w-5" />
+                  Description
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground leading-relaxed">
-                  {currentControl.implementationGuidance}
+                  {currentControl.description}
                 </p>
               </CardContent>
             </Card>
           )}
 
-          {/* Testing Procedure */}
-          {currentControl.testingProcedure && (
+          {!currentControl.description && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5" />
-                  Testing Procedure
+                  <BookOpen className="h-5 w-5" />
+                  Description
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground leading-relaxed">
-                  {currentControl.testingProcedure}
+                <p className="text-muted-foreground text-sm italic">
+                  No description available for this control.
                 </p>
               </CardContent>
             </Card>
@@ -178,43 +158,20 @@ export function ControlDetailPage() {
 
         {/* Right Column - Metadata */}
         <div className="space-y-6">
-          {/* Maturity Level Info */}
+          {/* Status Info */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Maturity Level</CardTitle>
+              <CardTitle className="text-sm">Status</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Badge variant={maturityConfig[currentControl.maturityLevel].variant} className="text-sm">
-                {maturityConfig[currentControl.maturityLevel].label}
+              <Badge variant={statusConfig[currentControl.status].variant} className="text-sm">
+                {statusConfig[currentControl.status].label}
               </Badge>
               <p className="text-sm text-muted-foreground">
-                {maturityConfig[currentControl.maturityLevel].description}
+                {statusConfig[currentControl.status].description}
               </p>
             </CardContent>
           </Card>
-
-          {/* Framework Info */}
-          {currentControl.framework && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Framework</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Name</span>
-                  <span className="font-medium">{currentControl.framework.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Version</span>
-                  <span className="font-medium">{currentControl.framework.version}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Category</span>
-                  <span className="font-medium">{currentControl.framework.category}</span>
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Control Details */}
           <Card>

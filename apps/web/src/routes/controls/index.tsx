@@ -43,7 +43,7 @@ export function ControlsPage() {
     currentPage * ITEMS_PER_PAGE
   )
 
-  const handleViewControl = (id: string) => {
+  const handleViewControl = (id: number) => {
     navigate(`/controls/${id}`)
   }
 
