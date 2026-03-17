@@ -110,7 +110,9 @@ export default class AssessmentsController {
       return ctx.response.status(404).json({ error: 'Assessment not found' })
     }
 
-    await assessment.delete()
-    return ctx.response.status(200).json({ message: 'Assessment deleted successfully' })
+    // Archive instead of hard delete for audit trail
+    assessment.status = 'archived'
+    await assessment.save()
+    return ctx.response.status(200).json({ message: 'Assessment archived successfully' })
   }
 }

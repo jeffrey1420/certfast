@@ -106,7 +106,9 @@ export default class PoliciesController {
       return ctx.response.status(404).json({ error: 'Policy not found' })
     }
 
-    await policy.delete()
-    return ctx.response.status(200).json({ message: 'Policy deleted successfully' })
+    // Archive instead of hard delete for audit trail
+    policy.status = 'archived'
+    await policy.save()
+    return ctx.response.status(200).json({ message: 'Policy archived successfully' })
   }
 }
