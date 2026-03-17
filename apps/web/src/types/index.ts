@@ -72,14 +72,15 @@ export interface AssessmentSummary {
 
 // Control types
 export interface Control {
-  id: string
+  id: number
+  organizationId: number
   code: string
   title: string
-  description: string
+  description: string | null
   category: string
-  frameworkId: string
-  parentId?: string
-  children?: Control[]
+  status: 'draft' | 'active' | 'archived' | 'deprecated'
+  createdAt: string
+  updatedAt: string
 }
 
 export interface AssessmentControl {
@@ -187,17 +188,13 @@ export interface ActivityItem {
 
 // Control types (extended)
 export interface ControlDetailed {
-  id: string
+  id: number
+  organizationId: number
   code: string
   title: string
-  description: string
+  description: string | null
   category: string
-  subCategory?: string
-  frameworkId: string
-  framework?: Framework
-  maturityLevel: 'basic' | 'intermediate' | 'advanced'
-  implementationGuidance?: string
-  testingProcedure?: string
+  status: 'draft' | 'active' | 'archived' | 'deprecated'
   createdAt: string
   updatedAt: string
 }

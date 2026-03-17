@@ -11,7 +11,7 @@ import { Search } from 'lucide-react'
 
 export interface ControlFilterState {
   category: string
-  maturityLevel: string
+  status: string
   search: string
 }
 
@@ -37,11 +37,12 @@ const categoryOptions = [
   { value: 'Compliance', label: 'Compliance' },
 ]
 
-const maturityOptions = [
-  { value: 'all', label: 'All Levels' },
-  { value: 'basic', label: 'Basic' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
+const statusOptions = [
+  { value: 'all', label: 'All Statuses' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'active', label: 'Active' },
+  { value: 'archived', label: 'Archived' },
+  { value: 'deprecated', label: 'Deprecated' },
 ]
 
 export function ControlFilters({ filters, onFiltersChange }: ControlFiltersProps) {
@@ -49,8 +50,8 @@ export function ControlFilters({ filters, onFiltersChange }: ControlFiltersProps
     onFiltersChange({ ...filters, category: value })
   }
 
-  const handleMaturityChange = (value: string) => {
-    onFiltersChange({ ...filters, maturityLevel: value })
+  const handleStatusChange = (value: string) => {
+    onFiltersChange({ ...filters, status: value })
   }
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -86,14 +87,14 @@ export function ControlFilters({ filters, onFiltersChange }: ControlFiltersProps
         </Select>
       </div>
 
-      {/* Maturity Filter */}
+      {/* Status Filter */}
       <div className="w-full sm:w-[180px]">
-        <Select value={filters.maturityLevel} onValueChange={handleMaturityChange}>
+        <Select value={filters.status} onValueChange={handleStatusChange}>
           <SelectTrigger>
-            <SelectValue placeholder="Filter by maturity" />
+            <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
           <SelectContent>
-            {maturityOptions.map((option) => (
+            {statusOptions.map((option) => (
               <SelectItem key={option.value} value={option.value}>
                 {option.label}
               </SelectItem>
