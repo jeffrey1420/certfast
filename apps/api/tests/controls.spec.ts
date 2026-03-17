@@ -66,7 +66,7 @@ test.group('Controls', (group) => {
         // Missing title, category, code
       })
 
-    response.assertStatus(400)
+    response.assertStatus(422)
     response.assertBodyContains({ error: 'Validation failed' })
   })
 
@@ -84,7 +84,7 @@ test.group('Controls', (group) => {
         status: 'invalid_status',
       })
 
-    response.assertStatus(400)
+    response.assertStatus(422)
     response.assertBodyContains({ error: 'Validation failed' })
   })
 
@@ -113,8 +113,8 @@ test.group('Controls', (group) => {
         code: 'SEC-DUPLICATE',
       })
 
-    response.assertStatus(400)
-    response.assertBodyContains({ error: 'Validation failed' })
+    response.assertStatus(422)
+    response.assertBodyContains({ error: 'Control code already exists' })
   })
 
   test('GET /controls - lists organization controls', async ({ client, assert }) => {
@@ -209,15 +209,15 @@ test.group('Controls', (group) => {
     response.assertBodyContains({ error: 'Control not found' })
   })
 
-  test('GET /controls/:id - returns 400 for invalid id', async ({ client }) => {
+  test('GET /controls/:id - returns 404 for invalid id', async ({ client }) => {
     const { token } = await setupAuth(client)
 
     const response = await client
       .get('/api/v1/controls/invalid')
       .header('Authorization', `Bearer ${token}`)
 
-    response.assertStatus(400)
-    response.assertBodyContains({ error: 'Invalid control ID' })
+    response.assertStatus(404)
+    response.assertBodyContains({ error: 'Control not found' })
   })
 
   test('PUT /controls/:id - updates control', async ({ client }) => {
@@ -266,8 +266,8 @@ test.group('Controls', (group) => {
         status: 'invalid_status',
       })
 
-    response.assertStatus(400)
-    response.assertBodyContains({ error: 'Validation failed' })
+    response.assertStatus(422)
+    response.assertBodyContains({ error: 'Invalid status' })
   })
 
   test('DELETE /controls/:id - archives control', async ({ client, assert }) => {

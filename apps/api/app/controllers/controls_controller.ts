@@ -23,12 +23,20 @@ export default class ControlsController {
 
   async store(ctx: HttpContext) {
     const authUserId = (ctx as any).authUserId as number
-    const { organizationId, title, description, category, code } = ctx.request.body()
+    const { organizationId, title, description, category, code, status } = ctx.request.body()
 
     if (!organizationId || !title || !category || !code) {
       return ctx.response.status(422).json({ 
         error: 'Validation failed',
         message: 'organizationId, title, category and code are required'
+      })
+    }
+
+    // Validate status if provided
+    if (status !== undefined && !VALID_STATUSES.has(status)) {
+      return ctx.response.status(422).json({ 
+        error: 'Validation failed',
+        message: 'Invalid status value'
       })
     }
 
@@ -48,7 +56,7 @@ export default class ControlsController {
       description: description ?? null,
       category,
       code,
-      status: 'draft',
+      status: status ?? 'draft',
     })
 
     return ctx.response.status(201).json(control)
@@ -120,7 +128,9 @@ export default class ControlsController {
       return ctx.response.status(404).json({ error: 'Control not found' })
     }
 
-    await control.delete()
-    return ctx.response.status(200).json({ message: 'Control deleted successfully' })
+    // Archive instead of hard delete for audit trail
+    control.status = 'archived'
+    await control.save()
+    return ctx.response.status(200).json({ message: 'Control archived successfully' })
   }
 }
