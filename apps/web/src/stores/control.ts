@@ -9,14 +9,37 @@ export interface UpdateControlData {
   status?: 'draft' | 'active' | 'archived' | 'deprecated'
 }
 
+// Assessment-specific control with pivot data
+export interface AssessmentControl {
+  id: number
+  organizationId: number
+  code: string
+  title: string
+  description: string | null
+  category: string
+  status: 'draft' | 'active' | 'archived' | 'deprecated'
+  createdAt: string
+  updatedAt: string
+  // Pivot data from assessment_controls table
+  pivotStatus: 'not_started' | 'in_progress' | 'implemented' | 'partially_implemented' | 'not_applicable'
+  pivotNotes: string | null
+  pivotAssignedTo: number | null
+  pivotDueDate: string | null
+  pivotCompletedAt: string | null
+  pivotCreatedAt: string
+  pivotUpdatedAt: string
+}
+
 interface ControlState {
   controls: ControlDetailed[]
+  assessmentControls: AssessmentControl[]
   currentControl: ControlDetailed | null
   isLoading: boolean
   error: string | null
   
   // Actions
   fetchControls: () => Promise<void>
+  fetchControlsByAssessment: (assessmentId: string) => Promise<void>
   fetchControlById: (id: string) => Promise<void>
   createControl: (data: CreateControlData) => Promise<ControlDetailed | null>
   updateControl: (id: number, data: UpdateControlData) => Promise<ControlDetailed | null>
@@ -27,6 +50,7 @@ interface ControlState {
 
 export const useControlStore = create<ControlState>((set) => ({
   controls: [],
+  assessmentControls: [],
   currentControl: null,
   isLoading: false,
   error: null,
@@ -38,6 +62,17 @@ export const useControlStore = create<ControlState>((set) => ({
       set({ controls: data, isLoading: false })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch controls'
+      set({ error: message, isLoading: false })
+    }
+  },
+
+  fetchControlsByAssessment: async (assessmentId: string) => {
+    set({ isLoading: true, error: null })
+    try {
+      const { data } = await api.get<AssessmentControl[]>(`/assessments/${assessmentId}/controls`)
+      set({ assessmentControls: data, isLoading: false })
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch assessment controls'
       set({ error: message, isLoading: false })
     }
   },

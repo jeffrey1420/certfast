@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Calendar, User, Shield, Clock, CheckCircle2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -7,7 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { ControlList, type Control } from './components/ControlList'
 import { EvidenceUpload, type EvidenceFile } from './components/EvidenceUpload'
-import { useAssessmentStore } from '@/stores'
+import { useAssessmentStore, useControlStore, useEvidenceStore } from '@/stores'
+import type { AssessmentControl } from '@/stores'
+import type { Evidence } from '@/types'
 
 // Helper function to format assessment type for display
 const formatAssessmentType = (type: string): string => {
@@ -22,124 +24,74 @@ const formatAssessmentType = (type: string): string => {
   return typeMap[type] || type
 }
 
-// Mock controls data
-const mockControls: Control[] = [
-  {
-    id: 'ctrl-1',
-    name: 'A.5.1 - Information Security Policies',
-    description: 'Management direction for information security including policy development and review processes.',
-    status: 'completed',
-    priority: 'high',
-    evidenceRequired: true,
-    evidenceCount: 3,
-    checklistItems: [
-      { id: 'chk-1-1', text: 'Information security policy document created', checked: true },
-      { id: 'chk-1-2', text: 'Policy approved by management', checked: true },
-      { id: 'chk-1-3', text: 'Policy communicated to all employees', checked: true },
-      { id: 'chk-1-4', text: 'Review schedule established', checked: true },
-    ],
-  },
-  {
-    id: 'ctrl-2',
-    name: 'A.5.2 - Information Security Roles',
-    description: 'Definition and allocation of information security responsibilities within the organization.',
-    status: 'completed',
-    priority: 'high',
-    evidenceRequired: true,
-    evidenceCount: 2,
-    checklistItems: [
-      { id: 'chk-2-1', text: 'Security roles defined in job descriptions', checked: true },
-      { id: 'chk-2-2', text: 'Security officer appointed', checked: true },
-      { id: 'chk-2-3', text: 'Responsibility matrix documented', checked: true },
-    ],
-  },
-  {
-    id: 'ctrl-3',
-    name: 'A.6.1 - Screening',
-    description: 'Background verification checks on candidates for employment and contractors.',
-    status: 'in_progress',
-    priority: 'medium',
-    evidenceRequired: true,
-    evidenceCount: 1,
-    checklistItems: [
-      { id: 'chk-3-1', text: 'Screening policy documented', checked: true },
-      { id: 'chk-3-2', text: 'Background check procedures defined', checked: true },
-      { id: 'chk-3-3', text: 'Vendor contracts include screening requirements', checked: false },
-      { id: 'chk-3-4', text: 'Screening records maintained securely', checked: false },
-    ],
-  },
-  {
-    id: 'ctrl-4',
-    name: 'A.7.1 - Physical Entry Controls',
-    description: 'Secure areas protected by appropriate entry controls to ensure only authorized access.',
-    status: 'in_progress',
-    priority: 'high',
-    evidenceRequired: true,
-    evidenceCount: 0,
-    checklistItems: [
-      { id: 'chk-4-1', text: 'Physical security perimeter defined', checked: true },
-      { id: 'chk-4-2', text: 'Access control system implemented', checked: true },
-      { id: 'chk-4-3', text: 'Visitor access procedures documented', checked: false },
-      { id: 'chk-4-4', text: 'Access logs reviewed regularly', checked: false },
-      { id: 'chk-4-5', text: 'Emergency exit procedures tested', checked: false },
-    ],
-  },
-  {
-    id: 'ctrl-5',
-    name: 'A.8.1 - User Endpoint Devices',
-    description: 'Protection of information stored on user endpoint devices.',
-    status: 'not_started',
-    priority: 'medium',
-    evidenceRequired: true,
-    evidenceCount: 0,
-    checklistItems: [
-      { id: 'chk-5-1', text: 'Device registration policy', checked: false },
-      { id: 'chk-5-2', text: 'Encryption requirements defined', checked: false },
-      { id: 'chk-5-3', text: 'Remote wipe capability enabled', checked: false },
-      { id: 'chk-5-4', text: 'Device inventory maintained', checked: false },
-    ],
-  },
-  {
-    id: 'ctrl-6',
-    name: 'A.9.1 - Access Control Policy',
-    description: 'Business requirements for access control documented and reviewed.',
-    status: 'completed',
-    priority: 'high',
-    evidenceRequired: true,
-    evidenceCount: 4,
-    checklistItems: [
-      { id: 'chk-6-1', text: 'Access control policy documented', checked: true },
-      { id: 'chk-6-2', text: 'Least privilege principle defined', checked: true },
-      { id: 'chk-6-3', text: 'Access review schedule established', checked: true },
-      { id: 'chk-6-4', text: 'Policy communicated to users', checked: true },
-    ],
-  },
-]
+// Map backend assessment control to frontend Control interface
+const mapAssessmentControlToControl = (ac: AssessmentControl): Control => {
+  // Map pivot status to control status
+  const statusMap: Record<string, Control['status']> = {
+    'not_started': 'not_started',
+    'in_progress': 'in_progress',
+    'implemented': 'completed',
+    'partially_implemented': 'in_progress',
+    'not_applicable': 'completed',
+  }
 
-// Mock evidence files
-const mockEvidenceFiles: EvidenceFile[] = [
-  {
-    id: 'ev-1',
-    name: 'Security_Policy_2026.pdf',
-    size: 2457600,
-    type: 'application/pdf',
-    uploadedAt: '2 days ago',
-  },
-  {
-    id: 'ev-2',
-    name: 'Role_Definitions.docx',
-    size: 512000,
-    type: 'application/document',
-    uploadedAt: '3 days ago',
-  },
-  {
-    id: 'ev-3',
-    name: 'Access_Control_Audit.xlsx',
-    size: 102400,
-    type: 'application/excel',
-    uploadedAt: '1 week ago',
-  },
-]
+  // Derive priority from category (simplified mapping)
+  const priorityMap: Record<string, Control['priority']> = {
+    'Security Management': 'high',
+    'Access Control': 'high',
+    'Cryptography': 'high',
+    'Operations Security': 'medium',
+    'Communications Security': 'medium',
+    'System Acquisition': 'medium',
+    'Supplier Relationships': 'low',
+    'Incident Management': 'high',
+    'Business Continuity': 'medium',
+    'Compliance': 'medium',
+  }
+
+  // Create checklist items based on control status
+  // This is a temporary mapping until backend provides real checklist items
+  const checklistItems: Control['checklistItems'] = []
+  if (ac.pivotStatus === 'implemented' || ac.pivotStatus === 'partially_implemented') {
+    checklistItems.push(
+      { id: `${ac.id}-1`, text: 'Control documented', checked: true },
+      { id: `${ac.id}-2`, text: 'Evidence collected', checked: ac.pivotStatus === 'implemented' }
+    )
+  } else if (ac.pivotStatus === 'in_progress') {
+    checklistItems.push(
+      { id: `${ac.id}-1`, text: 'Control documented', checked: true },
+      { id: `${ac.id}-2`, text: 'Evidence collection in progress', checked: false }
+    )
+  } else {
+    checklistItems.push(
+      { id: `${ac.id}-1`, text: 'Control documentation pending', checked: false },
+      { id: `${ac.id}-2`, text: 'Evidence collection pending', checked: false }
+    )
+  }
+
+  return {
+    id: ac.id.toString(),
+    name: `${ac.code} - ${ac.title}`,
+    description: ac.description || '',
+    status: statusMap[ac.pivotStatus] || 'not_started',
+    priority: priorityMap[ac.category] || 'medium',
+    evidenceRequired: true,
+    evidenceCount: 0, // Will be populated from evidence store
+    checklistItems,
+  }
+}
+
+// Map evidence to EvidenceFile interface
+const mapEvidenceToEvidenceFile = (ev: Evidence): EvidenceFile => ({
+  id: ev.id.toString(),
+  name: ev.fileName,
+  size: ev.fileSize || 0,
+  type: ev.fileType,
+  uploadedAt: new Date(ev.createdAt).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  }),
+})
 
 const statusConfig = {
   draft: { label: 'Draft', variant: 'secondary' as const },
@@ -152,16 +104,37 @@ const statusConfig = {
 export function AssessmentDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { currentAssessment, isLoading, error, fetchAssessmentById } = useAssessmentStore()
-  const [controls, setControls] = useState<Control[]>(mockControls)
-  const [evidenceFiles, setEvidenceFiles] = useState<EvidenceFile[]>(mockEvidenceFiles)
+  const { currentAssessment, isLoading: isLoadingAssessment, error: assessmentError, fetchAssessmentById } = useAssessmentStore()
+  const { assessmentControls, isLoading: isLoadingControls, fetchControlsByAssessment } = useControlStore()
+  const { evidence, isLoading: isLoadingEvidence, fetchEvidenceByControl } = useEvidenceStore()
 
-  // Fetch assessment data on mount
+  // Fetch assessment data and controls on mount
   useEffect(() => {
     if (id) {
       void fetchAssessmentById(id)
+      void fetchControlsByAssessment(id)
     }
-  }, [id, fetchAssessmentById])
+  }, [id, fetchAssessmentById, fetchControlsByAssessment])
+
+  // Fetch evidence when controls change
+  useEffect(() => {
+    if (assessmentControls.length > 0) {
+      // Fetch evidence for each control
+      assessmentControls.forEach((control) => {
+        void fetchEvidenceByControl(control.id)
+      })
+    }
+  }, [assessmentControls, fetchEvidenceByControl])
+
+  // Map assessment controls to Control interface
+  const controls = useMemo(() => {
+    return assessmentControls.map(mapAssessmentControlToControl)
+  }, [assessmentControls])
+
+  // Map evidence to EvidenceFile interface
+  const evidenceFiles = useMemo(() => {
+    return evidence.map(mapEvidenceToEvidenceFile)
+  }, [evidence])
 
   // Calculate stats
   const completedControls = controls.filter((c) => c.status === 'completed').length
@@ -172,34 +145,26 @@ export function AssessmentDetailPage() {
     0
   )
 
+  // Calculate progress based on controls
+  const progress = totalControls > 0
+    ? Math.round((completedControls / totalControls) * 100)
+    : 0
+
   const handleToggleChecklistItem = (controlId: string, itemId: string) => {
-    setControls((prev) =>
-      prev.map((control) =>
-        control.id === controlId
-          ? {
-              ...control,
-              checklistItems: control.checklistItems.map((item) =>
-                item.id === itemId ? { ...item, checked: !item.checked } : item
-              ),
-            }
-          : control
-      )
-    )
+    // TODO: Implement checklist item toggle via API
+    // This requires backend support for checklist items
+    console.log('Toggle checklist item:', controlId, itemId)
   }
 
   const handleUpload = (files: File[]) => {
-    const newFiles: EvidenceFile[] = files.map((file, index) => ({
-      id: `ev-new-${Date.now()}-${index}`,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      uploadedAt: 'just now',
-    }))
-    setEvidenceFiles((prev) => [...newFiles, ...prev])
+    // TODO: Implement evidence upload via API
+    // This requires backend file upload support
+    console.log('Upload files:', files)
   }
 
   const handleRemove = (fileId: string) => {
-    setEvidenceFiles((prev) => prev.filter((f) => f.id !== fileId))
+    // TODO: Implement evidence deletion via API
+    console.log('Remove file:', fileId)
   }
 
   const formatDate = (dateStr: string) => {
@@ -211,8 +176,13 @@ export function AssessmentDetailPage() {
     })
   }
 
+  // Calculate days remaining
+  const daysRemaining = currentAssessment?.dueDate
+    ? Math.max(0, Math.ceil((new Date(currentAssessment.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : null
+
   // Loading state
-  if (isLoading) {
+  if (isLoadingAssessment) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -221,7 +191,7 @@ export function AssessmentDetailPage() {
   }
 
   // Error state
-  if (error) {
+  if (assessmentError) {
     return (
       <div className="p-6">
         <Button variant="ghost" size="sm" onClick={() => navigate('/assessments')} className="-ml-2 mb-4">
@@ -229,7 +199,7 @@ export function AssessmentDetailPage() {
           Back to Assessments
         </Button>
         <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
-          <p>Error loading assessment: {error}</p>
+          <p>Error loading assessment: {assessmentError}</p>
           <Button onClick={() => id && fetchAssessmentById(id)} className="mt-2">
             Retry
           </Button>
@@ -252,9 +222,6 @@ export function AssessmentDetailPage() {
       </div>
     )
   }
-
-  // Calculate mock progress (until we have real control data from API)
-  const mockProgress = 75
 
   return (
     <div className="space-y-6 p-6">
@@ -306,8 +273,8 @@ export function AssessmentDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">{mockProgress}%</span>
-              <Progress value={mockProgress} className="h-2 flex-1" />
+              <span className="text-2xl font-bold">{progress}%</span>
+              <Progress value={progress} className="h-2 flex-1" />
             </div>
           </CardContent>
         </Card>
@@ -343,11 +310,21 @@ export function AssessmentDetailPage() {
           <CardContent>
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-orange-500" />
-              <span className="text-2xl font-bold">30 days</span>
+              <span className="text-2xl font-bold">
+                {daysRemaining !== null ? `${daysRemaining} days` : 'N/A'}
+              </span>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Controls loading state */}
+      {isLoadingControls && (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="ml-2 text-muted-foreground">Loading controls...</span>
+        </div>
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -358,10 +335,17 @@ export function AssessmentDetailPage() {
               <CardTitle>Security Controls ({totalControls})</CardTitle>
             </CardHeader>
             <CardContent>
-              <ControlList
-                controls={controls}
-                onToggleChecklistItem={handleToggleChecklistItem}
-              />
+              {controls.length === 0 && !isLoadingControls ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No controls linked to this assessment.</p>
+                  <Button className="mt-4">Add Controls</Button>
+                </div>
+              ) : (
+                <ControlList
+                  controls={controls}
+                  onToggleChecklistItem={handleToggleChecklistItem}
+                />
+              )}
             </CardContent>
           </Card>
         </div>
@@ -370,14 +354,20 @@ export function AssessmentDetailPage() {
         <div className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Evidence & Attachments</CardTitle>
+              <CardTitle>Evidence & Attachments ({evidenceFiles.length})</CardTitle>
             </CardHeader>
             <CardContent>
-              <EvidenceUpload
-                files={evidenceFiles}
-                onUpload={handleUpload}
-                onRemove={handleRemove}
-              />
+              {isLoadingEvidence && evidenceFiles.length === 0 ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                </div>
+              ) : (
+                <EvidenceUpload
+                  files={evidenceFiles}
+                  onUpload={handleUpload}
+                  onRemove={handleRemove}
+                />
+              )}
             </CardContent>
           </Card>
 
