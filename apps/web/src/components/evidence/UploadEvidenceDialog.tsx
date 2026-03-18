@@ -23,6 +23,48 @@ import {
 import { useEvidenceStore, useControlStore } from '@/stores'
 import type { CreateEvidenceData } from '@/types'
 
+/**
+ * Map file extension to MIME type for compliance evidence uploads.
+ * Falls back to application/octet-stream for unknown types.
+ */
+function getMimeTypeFromExtension(ext: string): string {
+  const mimeTypes: Record<string, string> = {
+    // Documents
+    'pdf': 'application/pdf',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'xls': 'application/vnd.ms-excel',
+    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'ppt': 'application/vnd.ms-powerpoint',
+    'pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    'txt': 'text/plain',
+    'csv': 'text/csv',
+    'rtf': 'application/rtf',
+    'odt': 'application/vnd.oasis.opendocument.text',
+    'ods': 'application/vnd.oasis.opendocument.spreadsheet',
+    // Images
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'gif': 'image/gif',
+    'bmp': 'image/bmp',
+    'svg': 'image/svg+xml',
+    'webp': 'image/webp',
+    // Archives
+    'zip': 'application/zip',
+    'rar': 'application/vnd.rar',
+    '7z': 'application/x-7z-compressed',
+    'tar': 'application/x-tar',
+    'gz': 'application/gzip',
+    // Code/Markup
+    'json': 'application/json',
+    'xml': 'application/xml',
+    'html': 'text/html',
+    'md': 'text/markdown',
+  }
+  return mimeTypes[ext.toLowerCase()] || 'application/octet-stream'
+}
+
 interface UploadEvidenceDialogProps {
   controlId?: number
   onSuccess?: () => void
@@ -42,6 +84,7 @@ export function UploadEvidenceDialog({
   
   const [fileUrl, setFileUrl] = useState('')
   const [fileName, setFileName] = useState('')
+  const [fileMimeType, setFileMimeType] = useState<string>('')
   const [description, setDescription] = useState('')
   const [selectedControlId, setSelectedControlId] = useState<number | ''>(initialControlId || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -62,6 +105,7 @@ export function UploadEvidenceDialog({
     if (file) {
       setFileName(file.name)
       setFileUrl(`/uploads/${file.name}`)
+      setFileMimeType(file.type)
       setError(null)
     }
   }
@@ -81,8 +125,9 @@ export function UploadEvidenceDialog({
     setIsSubmitting(true)
     setError(null)
 
+    // Determine MIME type: use browser-detected type, fallback to extension mapping
     const ext = fileName.split('.').pop()?.toLowerCase() || ''
-    const fileType = ext ? `.${ext}` : 'unknown'
+    const fileType = fileMimeType || getMimeTypeFromExtension(ext)
 
     const evidenceData: CreateEvidenceData = {
       controlId: controlIdToUse,
@@ -98,6 +143,7 @@ export function UploadEvidenceDialog({
     if (result) {
       setFileUrl('')
       setFileName('')
+      setFileMimeType('')
       setDescription('')
       setSelectedControlId(initialControlId || '')
       setOpen(false)
@@ -112,6 +158,7 @@ export function UploadEvidenceDialog({
     if (!newOpen) {
       setFileUrl('')
       setFileName('')
+      setFileMimeType('')
       setDescription('')
       setSelectedControlId(initialControlId || '')
       setError(null)
