@@ -239,7 +239,7 @@ export interface Policy {
   code: string
   description: string
   content?: string
-  status: 'draft' | 'published' | 'archived'
+  status: 'draft' | 'published' | 'archived' | 'deprecated'
   version: string
   ownerId?: string
   owner?: User

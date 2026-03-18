@@ -11,6 +11,7 @@ const statusConfig = {
   draft: { label: 'Draft', variant: 'secondary' as const, color: 'text-yellow-600', bgColor: 'bg-yellow-50' },
   published: { label: 'Published', variant: 'default' as const, color: 'text-green-600', bgColor: 'bg-green-50' },
   archived: { label: 'Archived', variant: 'outline' as const, color: 'text-gray-600', bgColor: 'bg-gray-50' },
+  deprecated: { label: 'Deprecated', variant: 'destructive' as const, color: 'text-red-600', bgColor: 'bg-red-50' },
 }
 
 const categoryColors: Record<string, string> = {
