@@ -1,3 +1,1 @@
-// Re-export all hooks
-export * from './useDebounce'
-export * from './useDisclosure'
+export { useDebounce } from './useDebounce'

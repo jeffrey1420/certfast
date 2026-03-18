@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react'
+import { useState, useEffect, type ChangeEvent } from 'react'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Search } from 'lucide-react'
+import { useDebounce } from '@/hooks'
 
 export interface ControlFilterState {
   category: string
@@ -46,6 +47,23 @@ const statusOptions = [
 ]
 
 export function ControlFilters({ filters, onFiltersChange }: ControlFiltersProps) {
+  // Local state for search input (updates immediately)
+  const [searchInput, setSearchInput] = useState(filters.search)
+  // Debounced value for filtering (updates after delay)
+  const debouncedSearch = useDebounce(searchInput, 300)
+
+  // Sync local search input when external filters change
+  useEffect(() => {
+    setSearchInput(filters.search)
+  }, [filters.search])
+
+  // Update parent with debounced search value
+  useEffect(() => {
+    if (debouncedSearch !== filters.search) {
+      onFiltersChange({ ...filters, search: debouncedSearch })
+    }
+  }, [debouncedSearch, filters, onFiltersChange])
+
   const handleCategoryChange = (value: string) => {
     onFiltersChange({ ...filters, category: value })
   }
@@ -55,7 +73,7 @@ export function ControlFilters({ filters, onFiltersChange }: ControlFiltersProps
   }
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onFiltersChange({ ...filters, search: e.target.value })
+    setSearchInput(e.target.value)
   }
 
   return (
@@ -65,7 +83,7 @@ export function ControlFilters({ filters, onFiltersChange }: ControlFiltersProps
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Search controls..."
-          value={filters.search}
+          value={searchInput}
           onChange={handleSearchChange}
           className="pl-9"
         />
