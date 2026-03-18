@@ -110,12 +110,12 @@ test.group('Database Migrations', () => {
       '../database/migrations/002_create_organizations_table.ts',
       '../database/migrations/003_create_organization_members_table.ts',
       '../database/migrations/004_create_assessments.ts',
-      '../database/migrations/005_create_controls.ts',
       '../database/migrations/006_create_evidence.ts',
       '../database/migrations/007_create_user_tokens_table.ts',
       '../database/migrations/008_create_controls_table.ts',
       '../database/migrations/009_create_policies_table.ts',
       '../database/migrations/010_fix_control_code_uniqueness.ts',
+      '../database/migrations/011_create_assessment_controls_table.ts',
     ]
 
     for (const file of migrationFiles) {

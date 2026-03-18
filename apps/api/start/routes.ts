@@ -35,6 +35,13 @@ router
     router.put('/assessments/:id', '#controllers/assessments_controller.update')
     router.delete('/assessments/:id', '#controllers/assessments_controller.destroy')
 
+    // Assessment-Controls relationship endpoints
+    router.get('/assessments/:assessmentId/controls', '#controllers/assessment_controls_controller.index')
+    router.post('/assessments/:assessmentId/controls', '#controllers/assessment_controls_controller.store')
+    router.get('/assessments/:assessmentId/controls/:controlId', '#controllers/assessment_controls_controller.show')
+    router.put('/assessments/:assessmentId/controls/:controlId', '#controllers/assessment_controls_controller.update')
+    router.delete('/assessments/:assessmentId/controls/:controlId', '#controllers/assessment_controls_controller.destroy')
+
     router.get('/controls', '#controllers/controls_controller.index')
     router.post('/controls', '#controllers/controls_controller.store')
     router.get('/controls/:id', '#controllers/controls_controller.show')
