@@ -16,6 +16,7 @@ const ControlsPage = lazy(() => import('@/routes/controls').then(m => ({ default
 const ControlDetailPage = lazy(() => import('@/routes/controls/detail').then(m => ({ default: m.ControlDetailPage })));
 const PoliciesPage = lazy(() => import('@/routes/policies').then(m => ({ default: m.PoliciesPage })));
 const PolicyDetailPage = lazy(() => import('@/routes/policies/detail').then(m => ({ default: m.PolicyDetailPage })));
+const EvidencePage = lazy(() => import('@/routes/evidence').then(m => ({ default: m.EvidencePage })));
 const Home = lazy(() => import('@/pages/Home').then(m => ({ default: m.Home })));
 const Blog = lazy(() => import('@/pages/Blog').then(m => ({ default: m.Blog })));
 const BlogPost = lazy(() => import('@/pages/BlogPost').then(m => ({ default: m.BlogPost })));
@@ -66,6 +67,7 @@ function App() {
             <Route path="/controls/:id" element={<ControlDetailPage />} />
             <Route path="/policies" element={<PoliciesPage />} />
             <Route path="/policies/:id" element={<PolicyDetailPage />} />
+            <Route path="/evidence" element={<EvidencePage />} />
             <Route path="*" element={<div className="p-8">404 - Not Found</div>} />
           </Routes>
         </Suspense>

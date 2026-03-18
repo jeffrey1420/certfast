@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Upload, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,29 +13,53 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { useEvidenceStore } from '@/stores'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useEvidenceStore, useControlStore } from '@/stores'
 import type { CreateEvidenceData } from '@/types'
 
 interface UploadEvidenceDialogProps {
-  controlId: number
+  controlId?: number
   onSuccess?: () => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
-export function UploadEvidenceDialog({ controlId, onSuccess }: UploadEvidenceDialogProps) {
-  const [open, setOpen] = useState(false)
+export function UploadEvidenceDialog({ 
+  controlId: initialControlId, 
+  onSuccess,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange 
+}: UploadEvidenceDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setOpen = controlledOnOpenChange !== undefined ? controlledOnOpenChange : setInternalOpen
+  
   const [fileUrl, setFileUrl] = useState('')
   const [fileName, setFileName] = useState('')
   const [description, setDescription] = useState('')
+  const [selectedControlId, setSelectedControlId] = useState<number | ''>(initialControlId || '')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
   const { createEvidence } = useEvidenceStore()
+  const { controls, fetchControls } = useControlStore()
+
+  // Fetch controls when dialog opens if no controlId is provided
+  useEffect(() => {
+    if (open && !initialControlId) {
+      void fetchControls()
+    }
+  }, [open, initialControlId, fetchControls])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // For now, we'll use a placeholder URL since we don't have file storage
-      // In production, this would upload to S3/storage and get back a URL
       setFileName(file.name)
       setFileUrl(`/uploads/${file.name}`)
       setError(null)
@@ -43,21 +67,25 @@ export function UploadEvidenceDialog({ controlId, onSuccess }: UploadEvidenceDia
   }
 
   const handleSubmit = async () => {
-    // Validation
     if (!fileName.trim()) {
       setError('Please select a file')
+      return
+    }
+
+    const controlIdToUse = initialControlId || (selectedControlId as number)
+    if (!controlIdToUse) {
+      setError('Please select a control')
       return
     }
 
     setIsSubmitting(true)
     setError(null)
 
-    // Derive file type from extension
     const ext = fileName.split('.').pop()?.toLowerCase() || ''
     const fileType = ext ? `.${ext}` : 'unknown'
 
     const evidenceData: CreateEvidenceData = {
-      controlId,
+      controlId: controlIdToUse,
       fileUrl: fileUrl || `/uploads/${fileName}`,
       fileName: fileName.trim(),
       fileType,
@@ -68,10 +96,10 @@ export function UploadEvidenceDialog({ controlId, onSuccess }: UploadEvidenceDia
     setIsSubmitting(false)
 
     if (result) {
-      // Success - reset form and close dialog
       setFileUrl('')
       setFileName('')
       setDescription('')
+      setSelectedControlId(initialControlId || '')
       setOpen(false)
       onSuccess?.()
     } else {
@@ -82,14 +110,151 @@ export function UploadEvidenceDialog({ controlId, onSuccess }: UploadEvidenceDia
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen)
     if (!newOpen) {
-      // Reset form when closing
       setFileUrl('')
       setFileName('')
       setDescription('')
+      setSelectedControlId(initialControlId || '')
       setError(null)
     }
   }
 
+  const dialogContent = (
+    <>
+      <DialogHeader>
+        <DialogTitle>Upload Evidence</DialogTitle>
+        <DialogDescription>
+          Add evidence files to support compliance controls. Accepted formats include documents, images, and certificates.
+        </DialogDescription>
+      </DialogHeader>
+      
+      <div className="space-y-4 py-4">
+        {/* Control Selector (only when no initialControlId) */}
+        {!initialControlId && (
+          <div className="space-y-2">
+            <Label htmlFor="control">Control *</Label>
+            <Select
+              value={selectedControlId.toString()}
+              onValueChange={(value) => setSelectedControlId(Number(value))}
+              disabled={isSubmitting}
+            >
+              <SelectTrigger id="control">
+                <SelectValue placeholder="Select a control" />
+              </SelectTrigger>
+              <SelectContent>
+                {controls.map((control) => (
+                  <SelectItem key={control.id} value={control.id.toString()}>
+                    {control.code} - {control.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
+        {/* File Input */}
+        <div className="space-y-2">
+          <Label htmlFor="file">File *</Label>
+          <Input
+            id="file"
+            type="file"
+            onChange={handleFileChange}
+            disabled={isSubmitting}
+            className="cursor-pointer"
+          />
+          {fileName && (
+            <p className="text-xs text-muted-foreground">
+              Selected: {fileName}
+            </p>
+          )}
+        </div>
+
+        {/* Optional: Manual URL input (for testing/demo) */}
+        <div className="space-y-2">
+          <Label htmlFor="fileUrl">File URL (optional)</Label>
+          <Input
+            id="fileUrl"
+            type="text"
+            placeholder="https://example.com/file.pdf"
+            value={fileUrl}
+            onChange={(e) => setFileUrl(e.target.value)}
+            disabled={isSubmitting}
+          />
+          <p className="text-xs text-muted-foreground">
+            Override the file URL if uploading to external storage
+          </p>
+        </div>
+
+        {/* File Name Override */}
+        <div className="space-y-2">
+          <Label htmlFor="fileName">Display Name *</Label>
+          <Input
+            id="fileName"
+            type="text"
+            placeholder="compliance-certificate.pdf"
+            value={fileName}
+            onChange={(e) => setFileName(e.target.value)}
+            disabled={isSubmitting}
+          />
+        </div>
+
+        {/* Description */}
+        <div className="space-y-2">
+          <Label htmlFor="description">Description (optional)</Label>
+          <Textarea
+            id="description"
+            placeholder="Brief description of this evidence..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            disabled={isSubmitting}
+            rows={3}
+          />
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
+            {error}
+          </div>
+        )}
+      </div>
+
+      <DialogFooter>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setOpen(false)}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting || !fileName.trim() || (!initialControlId && !selectedControlId)}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Uploading...
+            </>
+          ) : (
+            'Upload'
+          )}
+        </Button>
+      </DialogFooter>
+    </>
+  )
+
+  // If using controlled open, just return the DialogContent wrapper
+  if (controlledOpen !== undefined) {
+    return (
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="sm:max-w-[500px]">{dialogContent}</DialogContent>
+      </Dialog>
+    )
+  }
+
+  // Otherwise, return with DialogTrigger
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -98,107 +263,7 @@ export function UploadEvidenceDialog({ controlId, onSuccess }: UploadEvidenceDia
           Upload Evidence
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Upload Evidence</DialogTitle>
-          <DialogDescription>
-            Add evidence files to support this control. Accepted formats include documents, images, and certificates.
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          {/* File Input */}
-          <div className="space-y-2">
-            <Label htmlFor="file">File *</Label>
-            <Input
-              id="file"
-              type="file"
-              onChange={handleFileChange}
-              disabled={isSubmitting}
-              className="cursor-pointer"
-            />
-            {fileName && (
-              <p className="text-xs text-muted-foreground">
-                Selected: {fileName}
-              </p>
-            )}
-          </div>
-
-          {/* Optional: Manual URL input (for testing/demo) */}
-          <div className="space-y-2">
-            <Label htmlFor="fileUrl">File URL (optional)</Label>
-            <Input
-              id="fileUrl"
-              type="text"
-              placeholder="https://example.com/file.pdf"
-              value={fileUrl}
-              onChange={(e) => setFileUrl(e.target.value)}
-              disabled={isSubmitting}
-            />
-            <p className="text-xs text-muted-foreground">
-              Override the file URL if uploading to external storage
-            </p>
-          </div>
-
-          {/* File Name Override */}
-          <div className="space-y-2">
-            <Label htmlFor="fileName">Display Name *</Label>
-            <Input
-              id="fileName"
-              type="text"
-              placeholder="compliance-certificate.pdf"
-              value={fileName}
-              onChange={(e) => setFileName(e.target.value)}
-              disabled={isSubmitting}
-            />
-          </div>
-
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (optional)</Label>
-            <Textarea
-              id="description"
-              placeholder="Brief description of this evidence..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={isSubmitting}
-              rows={3}
-            />
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
-              {error}
-            </div>
-          )}
-        </div>
-
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setOpen(false)}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting || !fileName.trim()}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              'Upload'
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      <DialogContent className="sm:max-w-[500px]">{dialogContent}</DialogContent>
     </Dialog>
   )
 }
