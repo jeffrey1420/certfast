@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAssessmentStore } from '@/stores/assessment'
 import { useOrganizationStore } from '@/stores/organization'
+import api from '@/lib/api'
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Loader2, Plus, CheckCircle, AlertCircle, Folder } from 'lucide-react'
+import { Loader2, Plus, CheckCircle, AlertCircle, Folder, XCircle } from 'lucide-react'
 
 interface AddToAssessmentDialogProps {
   controlId: number
@@ -36,6 +37,23 @@ const statusVariants: Record<string, 'default' | 'secondary' | 'outline' | 'dest
   archived: 'destructive',
 }
 
+interface LinkControlResponse {
+  id: number
+  organizationId: number
+  code: string
+  title: string
+  description: string | null
+  category: string
+  status: string
+  pivotStatus: string
+  pivotNotes: string | null
+  pivotAssignedTo: number | null
+  pivotDueDate: string | null
+  pivotCompletedAt: string | null
+  pivotCreatedAt: string
+  pivotUpdatedAt: string
+}
+
 export function AddToAssessmentDialog({
   controlId,
   controlCode,
@@ -45,6 +63,7 @@ export function AddToAssessmentDialog({
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<number | null>(null)
   const [isLinking, setIsLinking] = useState(false)
   const [linkSuccess, setLinkSuccess] = useState(false)
+  const [linkError, setLinkError] = useState<string | null>(null)
 
   const { assessments, isLoading, error, fetchAssessments } = useAssessmentStore()
   const { currentOrganization } = useOrganizationStore()
@@ -54,6 +73,7 @@ export function AddToAssessmentDialog({
       void fetchAssessments(currentOrganization?.id ? Number(currentOrganization.id) : undefined)
       setSelectedAssessmentId(null)
       setLinkSuccess(false)
+      setLinkError(null)
     }
   }, [open, fetchAssessments, currentOrganization?.id])
 
@@ -61,23 +81,33 @@ export function AddToAssessmentDialog({
     if (!selectedAssessmentId) return
 
     setIsLinking(true)
+    setLinkError(null)
 
-    // TODO: Backend API for linking controls to assessments is not yet implemented.
-    // This will be a POST /api/v1/assessments/:id/controls endpoint.
-    // For now, we show a "coming soon" state to users.
-    
-    // Simulate API delay for UX feedback
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    
-    setIsLinking(false)
-    setLinkSuccess(true)
-    
-    // Close dialog after showing success state
-    setTimeout(() => {
-      setOpen(false)
-      setLinkSuccess(false)
-      setSelectedAssessmentId(null)
-    }, 1500)
+    try {
+      const { data } = await api.post<LinkControlResponse>(
+        `/assessments/${selectedAssessmentId}/controls`,
+        {
+          controlId,
+          status: 'not_started',
+        }
+      )
+
+      if (data) {
+        setIsLinking(false)
+        setLinkSuccess(true)
+
+        // Close dialog after showing success state
+        setTimeout(() => {
+          setOpen(false)
+          setLinkSuccess(false)
+          setSelectedAssessmentId(null)
+        }, 1500)
+      }
+    } catch (error) {
+      setIsLinking(false)
+      const message = error instanceof Error ? error.message : 'Failed to link control to assessment'
+      setLinkError(message)
+    }
   }
 
   const availableAssessments = assessments.filter(
@@ -181,19 +211,17 @@ export function AddToAssessmentDialog({
             <CheckCircle className="h-10 w-10 mx-auto mb-2" />
             <p className="font-medium">Control linked successfully!</p>
             <p className="text-sm text-green-600 mt-1">
-              This feature will be fully available soon.
+              The control is now part of this assessment.
             </p>
           </div>
         )}
 
-        {/* Coming Soon Notice */}
-        {!linkSuccess && (
-          <div className="bg-amber-50 text-amber-800 p-3 rounded-lg text-xs flex items-start gap-2">
-            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-            <p>
-              <span className="font-medium">Coming soon:</span> Control-assessment linking backend
-              API is in development. This dialog demonstrates the intended UX.
-            </p>
+        {linkError && !linkSuccess && (
+          <div className="bg-destructive/10 text-destructive p-4 rounded-lg text-sm">
+            <div className="flex items-center gap-2">
+              <XCircle className="h-4 w-4" />
+              <p>{linkError}</p>
+            </div>
           </div>
         )}
 
