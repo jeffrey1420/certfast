@@ -106,7 +106,7 @@ export function AssessmentDetailPage() {
   const navigate = useNavigate()
   const { currentAssessment, isLoading: isLoadingAssessment, error: assessmentError, fetchAssessmentById } = useAssessmentStore()
   const { assessmentControls, isLoading: isLoadingControls, fetchControlsByAssessment } = useControlStore()
-  const { evidence, isLoading: isLoadingEvidence, fetchEvidenceByControl } = useEvidenceStore()
+  const { evidence, isLoading: isLoadingEvidence, fetchEvidenceByControl, deleteEvidence } = useEvidenceStore()
 
   // Fetch assessment data and controls on mount
   useEffect(() => {
@@ -162,9 +162,12 @@ export function AssessmentDetailPage() {
     console.log('Upload files:', files)
   }
 
-  const handleRemove = (fileId: string) => {
-    // TODO: Implement evidence deletion via API
-    console.log('Remove file:', fileId)
+  const handleRemove = async (fileId: string) => {
+    const success = await deleteEvidence(Number(fileId))
+    if (!success) {
+      // Error is already handled in the store, but we could add toast notification here
+      console.error('Failed to delete evidence:', fileId)
+    }
   }
 
   const formatDate = (dateStr: string) => {
