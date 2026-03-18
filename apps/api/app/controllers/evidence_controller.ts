@@ -11,26 +11,47 @@ export default class EvidenceController {
     const authUserId = ctx.authUserId
     const controlId = ctx.request.input('controlId')
 
-    if (!controlId) {
-      return ctx.response.status(422).json({
-        error: 'Validation failed',
-        message: 'controlId is required'
-      })
+    // If controlId is provided (and not 0), filter by that control
+    // Otherwise fetch all evidence across user's organizations
+    if (controlId && controlId !== '0' && controlId !== 0) {
+      // Verify user has access to this control's organization
+      const control = await Control.find(Number(controlId))
+      if (!control) {
+        return ctx.response.status(404).json({ error: 'Control not found' })
+      }
+
+      const org = await Organization.find(control.organizationId)
+      if (!org || org.ownerId !== authUserId) {
+        return ctx.response.status(404).json({ error: 'Control not found' })
+      }
+
+      const evidence = await Evidence.query()
+        .where('controlId', Number(controlId))
+        .orderBy('createdAt', 'desc')
+
+      return ctx.response.status(200).json(evidence)
     }
 
-    // Verify user has access to this control's organization
-    const control = await Control.find(Number(controlId))
-    if (!control) {
-      return ctx.response.status(404).json({ error: 'Control not found' })
+    // Fetch all evidence across user's organizations
+    // First get all organizations owned by the user
+    const userOrgs = await Organization.query().where('ownerId', authUserId)
+    const orgIds = userOrgs.map((org) => org.id)
+
+    if (orgIds.length === 0) {
+      return ctx.response.status(200).json([])
     }
 
-    const org = await Organization.find(control.organizationId)
-    if (!org || org.ownerId !== authUserId) {
-      return ctx.response.status(404).json({ error: 'Control not found' })
+    // Get all controls belonging to user's organizations
+    const controls = await Control.query().whereIn('organizationId', orgIds)
+    const controlIds = controls.map((c) => c.id)
+
+    if (controlIds.length === 0) {
+      return ctx.response.status(200).json([])
     }
 
+    // Fetch all evidence for these controls
     const evidence = await Evidence.query()
-      .where('controlId', Number(controlId))
+      .whereIn('controlId', controlIds)
       .orderBy('createdAt', 'desc')
 
     return ctx.response.status(200).json(evidence)

@@ -9,7 +9,7 @@ interface EvidenceState {
   error: string | null
   
   // Actions
-  fetchEvidenceByControl: (controlId: number) => Promise<void>
+  fetchEvidenceByControl: (controlId?: number) => Promise<void>
   fetchEvidenceById: (id: number) => Promise<void>
   createEvidence: (data: CreateEvidenceData) => Promise<Evidence | null>
   updateEvidence: (id: number, data: UpdateEvidenceData) => Promise<Evidence | null>
@@ -24,10 +24,13 @@ export const useEvidenceStore = create<EvidenceState>((set) => ({
   isLoading: false,
   error: null,
 
-  fetchEvidenceByControl: async (controlId: number) => {
+  fetchEvidenceByControl: async (controlId?: number) => {
     set({ isLoading: true, error: null })
     try {
-      const { data } = await api.get<Evidence[]>(`/evidence?controlId=${controlId}`)
+      const url = controlId && controlId !== 0 
+        ? `/evidence?controlId=${controlId}` 
+        : '/evidence'
+      const { data } = await api.get<Evidence[]>(url)
       set({ evidence: data, isLoading: false })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to fetch evidence'

@@ -24,8 +24,8 @@ export function EvidencePage() {
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
 
   useEffect(() => {
-    // Fetch all evidence - we use controlId 0 to fetch all
-    void fetchEvidenceByControl(0)
+    // Fetch all evidence
+    void fetchEvidenceByControl()
   }, [fetchEvidenceByControl])
 
   // Filter evidence based on current filters
@@ -75,7 +75,7 @@ export function EvidencePage() {
       <div className="p-6">
         <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
           <p>Error loading evidence: {error}</p>
-          <Button onClick={() => fetchEvidenceByControl(0)} className="mt-2">
+          <Button onClick={() => fetchEvidenceByControl()} className="mt-2">
             Retry
           </Button>
         </div>
