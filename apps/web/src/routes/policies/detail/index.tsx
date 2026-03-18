@@ -272,12 +272,12 @@ export function PolicyDetailPage() {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                     <span className="text-sm font-medium">
-                      {currentPolicy.owner.firstName[0]}{currentPolicy.owner.lastName[0]}
+                      {currentPolicy.owner.fullName?.[0] ?? currentPolicy.owner.email[0]}
                     </span>
                   </div>
                   <div>
                     <p className="font-medium">
-                      {currentPolicy.owner.firstName} {currentPolicy.owner.lastName}
+                      {currentPolicy.owner.fullName ?? currentPolicy.owner.email}
                     </p>
                     <p className="text-sm text-muted-foreground">{currentPolicy.owner.email}</p>
                   </div>

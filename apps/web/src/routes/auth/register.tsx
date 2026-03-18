@@ -61,7 +61,7 @@ export function RegisterPage() {
       }
 
       const result = await response.json()
-      setAuth(result.data.user, result.data.token)
+      setAuth(result.user, result.token)
       toast.success('Account created successfully!')
       navigate('/dashboard')
     } catch (err) {

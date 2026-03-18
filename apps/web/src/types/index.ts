@@ -2,12 +2,12 @@
 
 // User types
 export interface User {
-  id: string
+  id: number
   email: string
-  firstName: string
-  lastName: string
-  role: 'admin' | 'manager' | 'auditor' | 'member'
-  avatar?: string
+  fullName: string | null
+  role: 'admin' | 'user' | 'auditor'
+  avatarUrl?: string | null
+  isActive?: boolean
   createdAt: string
   updatedAt: string
 }

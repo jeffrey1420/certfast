@@ -70,7 +70,7 @@ export function AssessmentsPage() {
   }, [fetchAssessments])
 
   // Get owner name from current user
-  const ownerName = user ? `${user.firstName} ${user.lastName}` : 'Unknown'
+  const ownerName = user?.fullName ?? 'Unknown'
 
   // Map backend assessments to frontend format
   const assessments = backendAssessments.map((assessment) => 
