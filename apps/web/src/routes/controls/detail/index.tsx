@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useControlStore } from '@/stores'
 import { Loader2 } from 'lucide-react'
 import { EvidenceSection } from './EvidenceSection'
+import { AddToAssessmentDialog } from '@/components/assessment'
 
 const statusConfig = {
   draft: { label: 'Draft', variant: 'secondary' as const, description: 'This control is in draft status and not yet active' },
@@ -136,8 +137,14 @@ export function ControlDetailPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline">Add to Assessment</Button>
-          <Button 
+          {currentControl && (
+            <AddToAssessmentDialog
+              controlId={currentControl.id}
+              controlCode={currentControl.code}
+              controlTitle={currentControl.title}
+            />
+          )}
+          <Button
             onClick={handleMarkAsImplemented}
             disabled={isUpdating || currentControl.status === 'active'}
           >
