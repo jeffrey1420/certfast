@@ -13,19 +13,14 @@ import {
 } from 'lucide-react'
 import api from '@/lib/api'
 
-// Mock metrics remain until backend metrics endpoint is ready
-const mockMetrics = {
-  complianceScore: 85,
-  totalAssessments: 12,
-  evidenceCount: 47,
-  daysToCompliance: 45,
-}
-
 interface DashboardMetrics {
   complianceScore: number
   totalAssessments: number
   evidenceCount: number
   daysToCompliance: number
+  controlsMet: number
+  controlsInProgress: number
+  controlsPending: number
 }
 
 interface DashboardActivityResponse {
@@ -64,17 +59,40 @@ function formatRelativeTime(occurredAt: string): string {
 
 export function DashboardPage() {
   const navigate = useNavigate()
-  const [metrics] = useState<DashboardMetrics>(mockMetrics)
+  const [metrics, setMetrics] = useState<DashboardMetrics>({
+    complianceScore: 0,
+    totalAssessments: 0,
+    evidenceCount: 0,
+    daysToCompliance: 45,
+    controlsMet: 0,
+    controlsInProgress: 0,
+    controlsPending: 0,
+  })
   const [activities, setActivities] = useState<Activity[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingMetrics, setIsLoadingMetrics] = useState(false)
+  const [isLoadingActivity, setIsLoadingActivity] = useState(false)
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      setIsLoadingMetrics(true)
+      try {
+        const { data } = await api.get<DashboardMetrics>('/dashboard/metrics')
+        setMetrics(data)
+      } catch (error) {
+        console.error('Failed to fetch dashboard metrics:', error)
+      } finally {
+        setIsLoadingMetrics(false)
+      }
+    }
+
+    void fetchMetrics()
+  }, [])
 
   useEffect(() => {
     const fetchActivity = async () => {
-      setIsLoading(true)
-
+      setIsLoadingActivity(true)
       try {
         const { data } = await api.get<DashboardActivityResponse[]>('/dashboard/activity')
-
         setActivities(
           data.map((item) => ({
             id: item.id,
@@ -88,7 +106,7 @@ export function DashboardPage() {
         console.error('Failed to fetch dashboard activity:', error)
         setActivities([])
       } finally {
-        setIsLoading(false)
+        setIsLoadingActivity(false)
       }
     }
 
@@ -128,28 +146,28 @@ export function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Compliance Score"
-          value={`${metrics.complianceScore}%`}
+          value={isLoadingMetrics ? '-' : `${metrics.complianceScore}%`}
           description="Overall framework compliance"
           icon={Shield}
           trend={{ value: 12, label: 'from last month' }}
         />
         <MetricCard
           title="Total Assessments"
-          value={metrics.totalAssessments}
+          value={isLoadingMetrics ? '-' : metrics.totalAssessments}
           description="Active compliance assessments"
           icon={FileCheck}
           trend={{ value: 3, label: 'new this month' }}
         />
         <MetricCard
           title="Evidence Items"
-          value={metrics.evidenceCount}
+          value={isLoadingMetrics ? '-' : metrics.evidenceCount}
           description="Uploaded compliance documents"
           icon={FolderOpen}
           trend={{ value: 8, label: 'from last week' }}
         />
         <MetricCard
           title="Days to Compliance"
-          value={metrics.daysToCompliance}
+          value={isLoadingMetrics ? '-' : metrics.daysToCompliance}
           description="Estimated completion time"
           icon={Calendar}
         />
@@ -179,15 +197,21 @@ export function DashboardPage() {
 
             <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t">
               <div className="text-center">
-                <p className="text-2xl font-bold">8</p>
+                <p className="text-2xl font-bold">
+                  {isLoadingMetrics ? '-' : metrics.controlsMet}
+                </p>
                 <p className="text-xs text-muted-foreground">Controls Met</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold">3</p>
+                <p className="text-2xl font-bold">
+                  {isLoadingMetrics ? '-' : metrics.controlsInProgress}
+                </p>
                 <p className="text-xs text-muted-foreground">In Progress</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold">1</p>
+                <p className="text-2xl font-bold">
+                  {isLoadingMetrics ? '-' : metrics.controlsPending}
+                </p>
                 <p className="text-xs text-muted-foreground">Pending</p>
               </div>
             </div>
@@ -195,15 +219,13 @@ export function DashboardPage() {
         </div>
 
         <div>
-          <QuickActions
-            onActionClick={handleQuickAction}
-          />
+          <QuickActions onActionClick={handleQuickAction} />
         </div>
       </div>
 
       {/* Activity Feed */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <ActivityList activities={isLoading ? [] : activities} />
+        <ActivityList activities={isLoadingActivity ? [] : activities} />
 
         <div className="bg-card border rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Upcoming Deadlines</h2>

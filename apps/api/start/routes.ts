@@ -54,6 +54,7 @@ router
     router.delete('/evidence/:id', '#controllers/evidence_controller.destroy')
 
     router.get('/dashboard/activity', '#controllers/dashboard_controller.activity')
+    router.get('/dashboard/metrics', '#controllers/dashboard_controller.metrics')
   })
   .use(middleware.auth())
   .prefix('/api/v1')
