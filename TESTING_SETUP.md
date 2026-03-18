@@ -23,6 +23,13 @@
 - Node.js 18+
 - npm or pnpm
 
+### 0. Setup Environment (One-time)
+
+```bash
+# From project root - generates secure APP_KEY and JWT_SECRET
+./scripts/generate-env.sh
+```
+
 ### 1. Start Test Database
 
 ```bash
@@ -209,13 +216,8 @@ echo ""
 
 # Check .env file
 if [ ! -f "apps/api/.env" ]; then
-    echo "⚠️  No .env file found. Creating from .env.example..."
-    cp apps/api/.env.example apps/api/.env
-    echo "✅ Created apps/api/.env"
-    echo ""
-    echo "⚠️  IMPORTANT: Update the following in apps/api/.env:"
-    echo "   - APP_KEY (generate with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\")"
-    echo "   - JWT_SECRET (same command)"
+    echo "⚠️  No .env file found. Running environment setup..."
+    ./scripts/generate-env.sh
 fi
 
 echo ""
