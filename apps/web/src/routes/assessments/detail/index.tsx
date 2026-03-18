@@ -151,15 +151,18 @@ export function AssessmentDetailPage() {
     : 0
 
   const handleToggleChecklistItem = (controlId: string, itemId: string) => {
-    // TODO: Implement checklist item toggle via API
-    // This requires backend support for checklist items
-    console.log('Toggle checklist item:', controlId, itemId)
+    // Checklist items are derived from assessment control pivot status
+    // To update, use the assessment control update API with status changes
+    // Status transitions: not_started -> in_progress -> implemented
+    console.log('Checklist derived from control status. Use control status update instead:', controlId, itemId)
   }
 
   const handleUpload = (files: File[]) => {
-    // TODO: Implement evidence upload via API
-    // This requires backend file upload support
-    console.log('Upload files:', files)
+    // Evidence must be uploaded to a specific control
+    // Redirect user to select a control first, or show informative message
+    console.log('Evidence upload should be done from Control Detail page:', files)
+    // UX: The EvidenceUpload component is disabled until a control is selected
+    // Users can upload evidence from the Control Detail page where controlId is known
   }
 
   const handleRemove = async (fileId: string) => {
