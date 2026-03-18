@@ -42,7 +42,7 @@ interface FormErrors {
 export function CreateAssessmentPage() {
   const navigate = useNavigate()
   const { createAssessment, isLoading: isCreating } = useAssessmentStore()
-  const { organizations, currentOrganization } = useOrganizationStore()
+  const { organizations, currentOrganization, fetchOrganizations, isLoading: isLoadingOrgs } = useOrganizationStore()
 
   const [formData, setFormData] = useState<FormData>({
     organizationId: currentOrganization?.id || '',
@@ -55,12 +55,21 @@ export function CreateAssessmentPage() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
 
-  // Update organizationId when currentOrganization changes
+  // Fetch organizations on mount
   useEffect(() => {
-    if (currentOrganization?.id && !formData.organizationId) {
-      setFormData((prev) => ({ ...prev, organizationId: currentOrganization.id }))
+    void fetchOrganizations()
+  }, [fetchOrganizations])
+
+  // Update organizationId when currentOrganization changes or organizations load
+  useEffect(() => {
+    if (!formData.organizationId) {
+      if (currentOrganization?.id) {
+        setFormData((prev) => ({ ...prev, organizationId: currentOrganization.id }))
+      } else if (organizations.length > 0) {
+        setFormData((prev) => ({ ...prev, organizationId: organizations[0].id }))
+      }
     }
-  }, [currentOrganization, formData.organizationId])
+  }, [currentOrganization, organizations, formData.organizationId])
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
@@ -142,9 +151,17 @@ export function CreateAssessmentPage() {
                 onValueChange={(value) =>
                   setFormData((prev) => ({ ...prev, organizationId: value }))
                 }
+                disabled={isLoadingOrgs}
               >
                 <SelectTrigger id="organizationId">
-                  <SelectValue placeholder="Select an organization" />
+                  {isLoadingOrgs ? (
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading organizations...
+                    </span>
+                  ) : (
+                    <SelectValue placeholder="Select an organization" />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   {organizations.length === 0 ? (
