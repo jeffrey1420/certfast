@@ -87,6 +87,23 @@ test.group('Database Migrations', () => {
     assert.isTrue(hasExpiresAtColumn)
   })
 
+  test('policies table exists with expected columns', async ({ assert }) => {
+    const hasTable = await schema().hasTable('policies')
+    assert.isTrue(hasTable)
+
+    const hasOrgIdColumn = await schema().hasColumn('policies', 'organization_id')
+    const hasTitleColumn = await schema().hasColumn('policies', 'title')
+    const hasContentColumn = await schema().hasColumn('policies', 'content')
+    const hasStatusColumn = await schema().hasColumn('policies', 'status')
+    const hasVersionColumn = await schema().hasColumn('policies', 'version')
+
+    assert.isTrue(hasOrgIdColumn)
+    assert.isTrue(hasTitleColumn)
+    assert.isTrue(hasContentColumn)
+    assert.isTrue(hasStatusColumn)
+    assert.isTrue(hasVersionColumn)
+  })
+
   test('migration files can be imported successfully', async ({ assert }) => {
     const migrationFiles = [
       '../database/migrations/001_create_users_table.ts',
@@ -96,6 +113,9 @@ test.group('Database Migrations', () => {
       '../database/migrations/005_create_controls.ts',
       '../database/migrations/006_create_evidence.ts',
       '../database/migrations/007_create_user_tokens_table.ts',
+      '../database/migrations/008_create_controls_table.ts',
+      '../database/migrations/009_create_policies_table.ts',
+      '../database/migrations/010_fix_control_code_uniqueness.ts',
     ]
 
     for (const file of migrationFiles) {
