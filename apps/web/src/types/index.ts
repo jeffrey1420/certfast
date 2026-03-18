@@ -44,19 +44,18 @@ export interface Framework {
   controlsCount: number
 }
 
-// Assessment types
+// Assessment types - aligned with backend AssessmentBackend
 export interface Assessment {
-  id: string
-  name: string
-  description?: string
-  frameworkId: string
-  framework: Framework
-  status: 'draft' | 'in_progress' | 'under_review' | 'completed' | 'archived'
-  progress: number
-  startDate?: string
-  targetDate?: string
-  completedDate?: string
-  createdBy: User
+  id: number
+  organizationId: number
+  title: string
+  type: 'soc2_type1' | 'soc2_type2' | 'iso27001' | 'gdpr' | 'hipaa' | 'custom'
+  status: 'draft' | 'active' | 'in_review' | 'completed' | 'archived'
+  description: string | null
+  dueDate: string | null
+  startedAt: string | null
+  completedAt: string | null
+  metadata: Record<string, unknown> | null
   createdAt: string
   updatedAt: string
 }
