@@ -6,6 +6,35 @@ import User from '#models/user';
 
 const VALID_STATUSES = new Set(['not_started', 'in_progress', 'implemented', 'partially_implemented', 'not_applicable']);
 
+// Transform snake_case pivot columns to camelCase for frontend compatibility
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function transformPivotToCamelCase(control: any): any {
+  if (!control) return control;
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const transformed: any = { ...control };
+  
+  // Map snake_case to camelCase
+  const mappings: Record<string, string> = {
+    pivot_status: 'pivotStatus',
+    pivot_notes: 'pivotNotes',
+    pivot_assigned_to: 'pivotAssignedTo',
+    pivot_due_date: 'pivotDueDate',
+    pivot_completed_at: 'pivotCompletedAt',
+    pivot_created_at: 'pivotCreatedAt',
+    pivot_updated_at: 'pivotUpdatedAt',
+  };
+  
+  for (const [snake, camel] of Object.entries(mappings)) {
+    if (snake in transformed) {
+      transformed[camel] = transformed[snake];
+      delete transformed[snake];
+    }
+  }
+  
+  return transformed;
+}
+
 export default class AssessmentControlsController {
   /**
    * List all controls linked to an assessment
@@ -34,7 +63,9 @@ export default class AssessmentControlsController {
       .select('assessment_controls.created_at as pivot_created_at')
       .select('assessment_controls.updated_at as pivot_updated_at');
 
-    return ctx.response.status(200).json(controls);
+    // Transform to camelCase for frontend compatibility
+    const transformedControls = controls.map(transformPivotToCamelCase);
+    return ctx.response.status(200).json(transformedControls);
   }
 
   /**
@@ -125,7 +156,7 @@ export default class AssessmentControlsController {
       .select('assessment_controls.completed_at as pivot_completed_at')
       .first();
 
-    return ctx.response.status(201).json(linkedControl);
+    return ctx.response.status(201).json(transformPivotToCamelCase(linkedControl));
   }
 
   /**
@@ -160,7 +191,7 @@ export default class AssessmentControlsController {
       return ctx.response.status(404).json({ error: 'Control not linked to this assessment' });
     }
 
-    return ctx.response.status(200).json(linkedControl);
+    return ctx.response.status(200).json(transformPivotToCamelCase(linkedControl));
   }
 
   /**
@@ -238,7 +269,7 @@ export default class AssessmentControlsController {
       .select('assessment_controls.completed_at as pivot_completed_at')
       .first();
 
-    return ctx.response.status(200).json(updatedControl);
+    return ctx.response.status(200).json(transformPivotToCamelCase(updatedControl));
   }
 
   /**
