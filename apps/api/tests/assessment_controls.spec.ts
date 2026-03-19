@@ -71,7 +71,7 @@ test.group('Assessment Controls', (group) => {
 
     response.assertStatus(200)
     assert.lengthOf(response.body(), 2)
-    assert.exists(response.body()[0].pivot_status)
+    assert.exists(response.body()[0].pivotStatus)
   })
 
   test('GET /assessments/:id/controls - returns 404 for non-existent assessment', async ({ client }) => {
@@ -103,8 +103,8 @@ test.group('Assessment Controls', (group) => {
     response.assertBodyContains({
       id: control.id,
       title: 'Test Control',
-      pivot_status: 'in_progress',
-      pivot_notes: 'Initial assessment',
+      pivotStatus: 'in_progress',
+      pivotNotes: 'Initial assessment',
     })
   })
 
@@ -201,8 +201,8 @@ test.group('Assessment Controls', (group) => {
     response.assertStatus(200)
     response.assertBodyContains({
       id: control.id,
-      pivot_status: 'implemented',
-      pivot_notes: 'Done',
+      pivotStatus: 'implemented',
+      pivotNotes: 'Done',
     })
   })
 
@@ -238,10 +238,10 @@ test.group('Assessment Controls', (group) => {
 
     response.assertStatus(200)
     response.assertBodyContains({
-      pivot_status: 'implemented',
-      pivot_notes: 'Completed review',
+      pivotStatus: 'implemented',
+      pivotNotes: 'Completed review',
     })
-    assert.exists(response.body().pivot_completed_at)
+    assert.exists(response.body().pivotCompletedAt)
   })
 
   test('PUT /assessments/:id/controls/:controlId - clears completed_at when status reverts', async ({ client, assert }) => {
@@ -259,8 +259,8 @@ test.group('Assessment Controls', (group) => {
       .json({ status: 'in_progress' })
 
     response.assertStatus(200)
-    response.assertBodyContains({ pivot_status: 'in_progress' })
-    assert.isNull(response.body().pivot_completed_at)
+    response.assertBodyContains({ pivotStatus: 'in_progress' })
+    assert.isNull(response.body().pivotCompletedAt)
   })
 
   test('PUT /assessments/:id/controls/:controlId - validates assigned user exists', async ({ client }) => {
@@ -350,8 +350,8 @@ test.group('Assessment Controls', (group) => {
 
     response.assertStatus(201)
     response.assertBodyContains({
-      pivot_assigned_to: user.id,
-      pivot_status: 'in_progress',
+      pivotAssignedTo: user.id,
+      pivotStatus: 'in_progress',
     })
   })
 })
