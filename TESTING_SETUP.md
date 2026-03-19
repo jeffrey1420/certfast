@@ -1,6 +1,6 @@
 # Testing Setup Guide
 
-**Last Updated**: 2026-03-17  
+**Last Updated**: 2026-03-19  
 **Status**: 🔴 Blocked - Docker not available in current environment
 
 ---
@@ -30,10 +30,21 @@
 ./scripts/generate-env.sh
 ```
 
-### 1. Start Test Database
+### 1. Verify Environment
+
+Before running tests, validate your environment:
+
+```bash
+./scripts/validate-test-env.sh
+```
+
+### 2. Start Test Database
 
 ```bash
 # From project root
+./scripts/setup-test-db.sh
+
+# Or manually:
 docker compose up -d postgres-test
 
 # Verify it's running
@@ -44,7 +55,7 @@ docker compose logs postgres-test
 docker exec -it certfast-postgres-test pg_isready -U certfast -d certfast_test
 ```
 
-### 2. Run Tests
+### 3. Run Tests
 
 ```bash
 cd apps/api
@@ -53,7 +64,7 @@ cd apps/api
 npm test
 
 # Run specific test file
-npm test -- tests/functional/auth.spec.ts
+npm test -- tests/auth.spec.ts
 
 # Run tests with coverage
 npm test -- --coverage
@@ -121,6 +132,7 @@ export async function resetDatabase() {
   await db.truncate('assessments')
   await db.truncate('users')
   await db.truncate('organizations')
+  await db.truncate('organization_members')
 }
 ```
 
@@ -130,15 +142,18 @@ Each test group calls `resetDatabase()` before running to ensure isolation.
 
 ```
 apps/api/tests/
-├── helpers.ts           # Test utilities (resetDatabase, etc.)
-└── functional/          # Integration tests
-    ├── auth.spec.ts     # Auth endpoints (register, login, logout)
-    ├── assessments.spec.ts
-    ├── controls.spec.ts
-    ├── evidence.spec.ts
-    ├── policies.spec.ts
-    ├── dashboard.spec.ts
-    └── ...
+├── helpers.ts                  # Test utilities (resetDatabase, etc.)
+├── bootstrap.ts                # Test bootstrap configuration
+├── health.spec.ts              # Health check endpoint tests
+├── migrations.spec.ts          # Database migration tests
+├── auth.spec.ts                # Auth endpoints (register, login, logout)
+├── assessments.spec.ts         # Assessment CRUD tests
+├── assessment_controls.spec.ts # Assessment-Controls relationship tests
+├── controls.spec.ts            # Controls CRUD tests
+├── dashboard.spec.ts           # Dashboard API tests
+├── evidence.spec.ts            # Evidence CRUD tests
+├── policies.spec.ts            # Policies CRUD tests
+└── users_orgs.spec.ts          # Users and Organizations tests
 ```
 
 ### Test Count by Module
@@ -147,22 +162,27 @@ apps/api/tests/
 |--------|-------|--------|
 | Auth | ~15 | ⏸️ Blocked |
 | Assessments | ~12 | ⏸️ Blocked |
+| Assessment Controls | ~8 | ⏸️ Blocked |
 | Controls | ~15 | ⏸️ Blocked |
 | Evidence | ~10 | ⏸️ Blocked |
 | Policies | ~10 | ⏸️ Blocked |
 | Dashboard | ~5 | ⏸️ Blocked |
-| Organizations | ~6 | ⏸️ Blocked |
-| **TOTAL** | **73** | ⏸️ Blocked on DB |
+| Health | ~3 | ⏸️ Blocked |
+| Migrations | ~5 | ⏸️ Blocked |
+| Users & Orgs | ~6 | ⏸️ Blocked |
+| **TOTAL** | **~89** | ⏸️ Blocked on DB |
 
 ---
 
-## Installation Script (For Future Use)
+## Installation Script
 
-The setup script is available at:
-
-**`scripts/setup-test-db.sh`** - This script exists in the repository and is ready to use.
+The setup script is available at **`scripts/setup-test-db.sh`**.
 
 Run it directly:
+
+```bash
+./scripts/setup-test-db.sh
+```
 
 ---
 
@@ -301,12 +321,12 @@ jobs:
 ## Next Steps
 
 1. **Immediate** (when Docker available):
-   - Run `scripts/setup-test-db.sh`
-   - Execute `cd apps/api && npm test`
+   - Run `./scripts/validate-test-env.sh` to verify setup
+   - Run `./scripts/setup-test-db.sh` to start test database
+   - Execute `cd apps/api && npm test` to run tests
    - Fix any failing tests
 
 2. **Short-term** (within 1 week):
-   - Add test script to `apps/api/package.json` scripts
    - Document test writing guidelines
    - Set up CI/CD with automated test runs
 
@@ -322,6 +342,8 @@ jobs:
 - **Docker Compose Config**: `/docker-compose.yml`
 - **Test Helpers**: `/apps/api/tests/helpers.ts`
 - **Environment Example**: `/apps/api/.env.example`
+- **Setup Script**: `/scripts/setup-test-db.sh`
+- **Validation Script**: `/scripts/validate-test-env.sh`
 - **Project State**: `/workflow/PROJECT_STATE.md`
 - **TDD Strategy**: `/TDD_STRATEGY.md`
 - **Testing Guide**: `/TESTING_GUIDE.md`
