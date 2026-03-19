@@ -6,6 +6,7 @@ import { useControlStore } from '@/stores'
 import { Button } from '@/components/ui/button'
 import { LayoutGrid, List, Loader2 } from 'lucide-react'
 import { ControlCard } from './components/ControlCard'
+import { CreateControlDialog } from '@/components/controls'
 
 const ITEMS_PER_PAGE = 10
 
@@ -88,6 +89,7 @@ export function ControlsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <CreateControlDialog onSuccess={() => fetchControls()} />
           <Button
             variant={viewMode === 'table' ? 'default' : 'outline'}
             size="icon"
