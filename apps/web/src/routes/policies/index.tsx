@@ -42,7 +42,7 @@ export function PoliciesPage() {
     currentPage * ITEMS_PER_PAGE
   )
 
-  const handleViewPolicy = (id: string) => {
+  const handleViewPolicy = (id: number) => {
     navigate(`/policies/${id}`)
   }
 

@@ -81,8 +81,8 @@ export const usePolicyStore = create<PolicyState>((set) => ({
     try {
       const { data: policy } = await api.put<Policy>(`/policies/${id}`, data)
       set((state) => ({
-        policies: state.policies.map((p) => (Number(p.id) === id ? policy : p)),
-        currentPolicy: state.currentPolicy && Number(state.currentPolicy.id) === id ? policy : state.currentPolicy,
+        policies: state.policies.map((p) => (p.id === id ? policy : p)),
+        currentPolicy: state.currentPolicy?.id === id ? policy : state.currentPolicy,
         isLoading: false,
       }))
       return policy
@@ -98,8 +98,8 @@ export const usePolicyStore = create<PolicyState>((set) => ({
     try {
       await api.delete(`/policies/${id}`)
       set((state) => ({
-        policies: state.policies.filter((p) => Number(p.id) !== id),
-        currentPolicy: state.currentPolicy && Number(state.currentPolicy.id) === id ? null : state.currentPolicy,
+        policies: state.policies.filter((p) => p.id !== id),
+        currentPolicy: state.currentPolicy?.id === id ? null : state.currentPolicy,
         isLoading: false,
       }))
       return true

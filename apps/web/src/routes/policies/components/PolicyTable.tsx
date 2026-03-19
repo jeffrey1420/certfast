@@ -17,7 +17,7 @@ interface PolicyTableProps {
   totalPages: number
   totalItems: number
   onPageChange: (page: number) => void
-  onView: (id: string) => void
+  onView: (id: number) => void
 }
 
 const statusConfig = {

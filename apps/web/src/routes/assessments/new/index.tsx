@@ -45,7 +45,7 @@ export function CreateAssessmentPage() {
   const { organizations, currentOrganization, fetchOrganizations, isLoading: isLoadingOrgs } = useOrganizationStore()
 
   const [formData, setFormData] = useState<FormData>({
-    organizationId: currentOrganization?.id || '',
+    organizationId: currentOrganization?.id ? String(currentOrganization.id) : '',
     title: '',
     type: '',
     description: '',
@@ -64,9 +64,9 @@ export function CreateAssessmentPage() {
   useEffect(() => {
     if (!formData.organizationId) {
       if (currentOrganization?.id) {
-        setFormData((prev) => ({ ...prev, organizationId: currentOrganization.id }))
+        setFormData((prev) => ({ ...prev, organizationId: String(currentOrganization.id) }))
       } else if (organizations.length > 0) {
-        setFormData((prev) => ({ ...prev, organizationId: organizations[0].id }))
+        setFormData((prev) => ({ ...prev, organizationId: String(organizations[0].id) }))
       }
     }
   }, [currentOrganization, organizations, formData.organizationId])
@@ -170,7 +170,7 @@ export function CreateAssessmentPage() {
                     </div>
                   ) : (
                     organizations.map((org) => (
-                      <SelectItem key={org.id} value={org.id}>
+                      <SelectItem key={org.id} value={String(org.id)}>
                         {org.name}
                       </SelectItem>
                     ))

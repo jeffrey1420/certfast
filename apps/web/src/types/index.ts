@@ -19,7 +19,7 @@ export interface AuthResponse {
 
 // Organization types
 export interface Organization {
-  id: string
+  id: number
   name: string
   slug: string
   logo?: string
@@ -61,7 +61,7 @@ export interface Assessment {
 }
 
 export interface AssessmentSummary {
-  id: string
+  id: number
   name: string
   status: Assessment['status']
   progress: number
@@ -211,7 +211,7 @@ export interface DashboardStats {
 }
 
 export interface ActivityItem {
-  id: string
+  id: number
   type: 'assessment_created' | 'evidence_uploaded' | 'status_changed' | 'user_joined'
   description: string
   user: User
@@ -233,14 +233,14 @@ export interface ControlDetailed {
 
 // Policy types
 export interface Policy {
-  id: string
+  id: number
   title: string
   code: string
   description: string
   content?: string
   status: 'draft' | 'published' | 'archived' | 'deprecated'
   version: string
-  ownerId?: string
+  ownerId?: number
   owner?: User
   category: string
   effectiveDate?: string

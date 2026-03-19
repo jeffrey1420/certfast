@@ -6,7 +6,7 @@ import type { Policy } from '@/types'
 
 interface PolicyCardProps {
   policy: Policy
-  onView: (id: string) => void
+  onView: (id: number) => void
 }
 
 const statusConfig = {
