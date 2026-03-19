@@ -4,7 +4,8 @@ import { PolicyTable, PolicyFilters, type PolicyFilterState, PolicyCard } from '
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { usePolicyStore } from '@/stores'
 import { Button } from '@/components/ui/button'
-import { LayoutGrid, List, Loader2, Plus } from 'lucide-react'
+import { LayoutGrid, List, Loader2 } from 'lucide-react'
+import { CreatePolicyDialog } from '@/components/policies'
 
 const ITEMS_PER_PAGE = 10
 
@@ -101,10 +102,7 @@ export function PoliciesPage() {
           >
             <LayoutGrid className="h-4 w-4" />
           </Button>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            New Policy
-          </Button>
+          <CreatePolicyDialog onSuccess={() => fetchPolicies()} />
         </div>
       </div>
 
