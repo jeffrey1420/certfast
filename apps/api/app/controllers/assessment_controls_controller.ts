@@ -104,9 +104,9 @@ export default class AssessmentControlsController {
           completed_at: status === 'implemented' ? new Date() : null,
         },
       });
-    } catch (error: any) {
-      // Handle duplicate entry
-      if (error.code === '23505') {
+    } catch (error) {
+      // Handle duplicate entry (PostgreSQL unique violation code)
+      if (error && typeof error === 'object' && 'code' in error && error.code === '23505') {
         return ctx.response.status(422).json({
           error: 'Validation failed',
           message: 'Control is already linked to this assessment',
