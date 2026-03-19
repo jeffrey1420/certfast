@@ -12,7 +12,7 @@ export interface EvidenceFile {
 
 interface EvidenceUploadProps {
   files: EvidenceFile[]
-  onUpload: (files: File[]) => void
+  onUpload: () => void
   onRemove: (fileId: string) => void
 }
 
@@ -47,18 +47,13 @@ export function EvidenceUpload({ files, onUpload, onRemove }: EvidenceUploadProp
     e.preventDefault()
     setIsDragging(false)
     
-    const droppedFiles = Array.from(e.dataTransfer.files)
-    if (droppedFiles.length > 0) {
-      onUpload(droppedFiles)
-    }
+    // Open the upload dialog - actual file handling is done in the dialog
+    onUpload()
   }, [onUpload])
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files ? Array.from(e.target.files) : []
-    if (selectedFiles.length > 0) {
-      onUpload(selectedFiles)
-    }
-    e.target.value = '' // Reset input
+  const handleClick = () => {
+    // Open the upload dialog
+    onUpload()
   }
 
   return (
@@ -68,6 +63,7 @@ export function EvidenceUpload({ files, onUpload, onRemove }: EvidenceUploadProp
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
+        onClick={handleClick}
         className={`
           border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
           ${isDragging 
@@ -81,24 +77,14 @@ export function EvidenceUpload({ files, onUpload, onRemove }: EvidenceUploadProp
             <Upload className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <p className="font-medium">Drag & drop files here</p>
+            <p className="font-medium">Click to upload evidence</p>
             <p className="text-sm text-muted-foreground mt-1">
-              or click to browse from your computer
+              or drag and drop files here
             </p>
           </div>
-          <input
-            type="file"
-            multiple
-            onChange={handleFileSelect}
-            className="hidden"
-            id="file-upload"
-            accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.xls,.xlsx,.txt"
-          />
-          <label htmlFor="file-upload">
-            <Button variant="outline" size="sm" className="mt-2" asChild>
-              <span>Select Files</span>
-            </Button>
-          </label>
+          <Button variant="outline" size="sm" className="mt-2" asChild>
+            <span>Select Files</span>
+          </Button>
         </div>
       </div>
 
@@ -127,7 +113,10 @@ export function EvidenceUpload({ files, onUpload, onRemove }: EvidenceUploadProp
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8"
-                    onClick={() => onRemove(file.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRemove(file.id)
+                    }}
                   >
                     <X className="h-4 w-4" />
                   </Button>

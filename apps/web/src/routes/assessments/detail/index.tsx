@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Calendar, User, Shield, Clock, CheckCircle2, Loader2 } from 'lucide-react'
+import { ArrowLeft, Calendar, User, Shield, Clock, CheckCircle2, Loader2, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,6 +8,7 @@ import { Progress } from '@/components/ui/progress'
 import { ControlList, type Control } from './components/ControlList'
 import { EvidenceUpload, type EvidenceFile } from './components/EvidenceUpload'
 import { useAssessmentStore, useControlStore, useEvidenceStore } from '@/stores'
+import { UploadEvidenceDialog } from '@/components/evidence/UploadEvidenceDialog'
 import type { AssessmentControl } from '@/stores'
 import type { Evidence } from '@/types'
 
@@ -107,6 +108,9 @@ export function AssessmentDetailPage() {
   const { currentAssessment, isLoading: isLoadingAssessment, error: assessmentError, fetchAssessmentById } = useAssessmentStore()
   const { assessmentControls, isLoading: isLoadingControls, fetchControlsByAssessment } = useControlStore()
   const { evidence, isLoading: isLoadingEvidence, fetchEvidenceByControl, deleteEvidence } = useEvidenceStore()
+  
+  // State for upload dialog
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false)
 
   // Fetch assessment data and controls on mount
   useEffect(() => {
@@ -157,12 +161,16 @@ export function AssessmentDetailPage() {
     console.log('Checklist derived from control status. Use control status update instead:', controlId, itemId)
   }
 
-  const handleUpload = (files: File[]) => {
-    // Evidence must be uploaded to a specific control
-    // Redirect user to select a control first, or show informative message
-    console.log('Evidence upload should be done from Control Detail page:', files)
-    // UX: The EvidenceUpload component is disabled until a control is selected
-    // Users can upload evidence from the Control Detail page where controlId is known
+  const handleUpload = () => {
+    // Open the upload dialog - user will select a control to upload evidence to
+    setIsUploadDialogOpen(true)
+  }
+
+  const handleUploadSuccess = () => {
+    // Refresh evidence for all controls after successful upload
+    assessmentControls.forEach((control) => {
+      void fetchEvidenceByControl(control.id)
+    })
   }
 
   const handleRemove = async (fileId: string) => {
@@ -359,8 +367,12 @@ export function AssessmentDetailPage() {
         {/* Evidence Upload - Takes 1 column */}
         <div className="space-y-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Evidence & Attachments ({evidenceFiles.length})</CardTitle>
+              <Button size="sm" onClick={handleUpload}>
+                <Upload className="h-4 w-4 mr-2" />
+                Upload
+              </Button>
             </CardHeader>
             <CardContent>
               {isLoadingEvidence && evidenceFiles.length === 0 ? (
@@ -415,6 +427,13 @@ export function AssessmentDetailPage() {
           </Card>
         </div>
       </div>
+
+      {/* Upload Evidence Dialog */}
+      <UploadEvidenceDialog
+        open={isUploadDialogOpen}
+        onOpenChange={setIsUploadDialogOpen}
+        onSuccess={handleUploadSuccess}
+      />
     </div>
   )
 }
