@@ -91,19 +91,17 @@ export interface CreateControlData {
   status?: 'draft' | 'active' | 'archived' | 'deprecated'
 }
 
-export interface AssessmentControl {
-  id: string
-  assessmentId: string
-  controlId: string
-  control: Control
-  status: 'not_started' | 'in_progress' | 'implemented' | 'partially_implemented' | 'not_applicable'
-  notes?: string
-  evidenceCount: number
-  assignedTo?: User
-  dueDate?: string
-  completedAt?: string
-  createdAt: string
-  updatedAt: string
+// AssessmentControl from backend API (transformed from pivot table)
+// The backend returns Control model with pivot fields as camelCase properties
+export interface AssessmentControl extends Control {
+  // Pivot fields from assessment_controls table (returned as camelCase by API)
+  pivotStatus: 'not_started' | 'in_progress' | 'implemented' | 'partially_implemented' | 'not_applicable'
+  pivotNotes: string | null
+  pivotAssignedTo: number | null
+  pivotDueDate: string | null
+  pivotCompletedAt: string | null
+  pivotCreatedAt: string
+  pivotUpdatedAt: string
 }
 
 // Evidence types
@@ -195,9 +193,10 @@ export interface CreateAssessmentFormData {
 }
 
 export interface UpdateControlStatusFormData {
-  status: AssessmentControl['status']
+  status: 'not_started' | 'in_progress' | 'implemented' | 'partially_implemented' | 'not_applicable'
   notes?: string
   dueDate?: string
+  assignedTo?: number
 }
 
 // Dashboard types
