@@ -158,80 +158,11 @@ apps/api/tests/
 
 ## Installation Script (For Future Use)
 
-Create this file when Docker is available:
+The setup script is available at:
 
-**`scripts/setup-test-db.sh`**:
+**`scripts/setup-test-db.sh`** - This script exists in the repository and is ready to use.
 
-```bash
-#!/bin/bash
-
-set -e
-
-echo "🚀 CertFast Test Database Setup"
-echo "================================"
-echo ""
-
-# Check Docker
-if ! command -v docker &> /dev/null; then
-    echo "❌ Docker not found. Please install Docker first:"
-    echo "   https://docs.docker.com/engine/install/"
-    exit 1
-fi
-
-# Check Docker Compose
-if ! docker compose version &> /dev/null; then
-    echo "❌ Docker Compose not found. Please install Docker Compose:"
-    echo "   https://docs.docker.com/compose/install/"
-    exit 1
-fi
-
-echo "✅ Docker found: $(docker --version)"
-echo "✅ Docker Compose found: $(docker compose version)"
-echo ""
-
-# Start test DB
-echo "🐘 Starting PostgreSQL test database..."
-docker compose up -d postgres-test
-
-# Wait for health check
-echo "⏳ Waiting for database to be ready..."
-timeout 30 bash -c 'until docker compose ps postgres-test | grep -q "healthy"; do sleep 1; done' || {
-    echo "❌ Database failed to become healthy"
-    docker compose logs postgres-test
-    exit 1
-}
-
-echo "✅ PostgreSQL test database is ready on port 5433"
-echo ""
-
-# Verify connection
-echo "🔍 Testing database connection..."
-docker exec certfast-postgres-test psql -U certfast -d certfast_test -c "SELECT version();" > /dev/null 2>&1 || {
-    echo "❌ Failed to connect to database"
-    exit 1
-}
-
-echo "✅ Database connection verified"
-echo ""
-
-# Check .env file
-if [ ! -f "apps/api/.env" ]; then
-    echo "⚠️  No .env file found. Running environment setup..."
-    ./scripts/generate-env.sh
-fi
-
-echo ""
-echo "🎉 Setup complete! You can now run tests:"
-echo ""
-echo "   cd apps/api"
-echo "   npm test"
-echo ""
-```
-
-Make it executable:
-```bash
-chmod +x scripts/setup-test-db.sh
-```
+Run it directly:
 
 ---
 
